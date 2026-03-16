@@ -1,17 +1,17 @@
-// ── Liveness vocabulary ──────────────────────────────────────────────
-// Every relation that participates in the world state carries a
-// `liveness: String` column instead of the old `live: Bool`.
+#── Liveness vocabulary ──────────────────────────────────────────────
+#Every relation that participates in the world state carries a
+#`liveness: String` column instead of the old `live: Bool`.
 //
-// Live portion (included in world hash):
-//   doctrine       — foundational invariant, highest authority
-//   trusted_fact   — verified through observation or trusted source
-//   observation    — learned from codebase, session, or reasoning
-//   rumor          — unverified claim, queryable but not authoritative
-//   web_gossip     — external web source, lowest trust
+#Live portion (included in world hash):
+#  doctrine       — foundational invariant, highest authority
+#  trusted_fact   — verified through observation or trusted source
+#  observation    — learned from codebase, session, or reasoning
+#  rumor          — unverified claim, queryable but not authoritative
+#  web_gossip     — external web source, lowest trust
 //
-// Dead portion (excluded from world hash, retained for lineage):
-//   superseded     — replaced by a newer thought via supersession
-//   disproven      — actively contradicted by evidence
+#Dead portion (excluded from world hash, retained for lineage):
+#  superseded     — replaced by a newer thought via supersession
+#  disproven      — actively contradicted by evidence
 
 :create liveness_vocab {
   name: String =>
@@ -20,7 +20,7 @@
   description: String
 }
 
-// ── Knowledge layer ─────────────────────────────────────────────────
+#── Knowledge layer ─────────────────────────────────────────────────
 
 :create thought {
   id: String =>
@@ -53,7 +53,7 @@
   ts: String
 }
 
-// ── Agent layer ─────────────────────────────────────────────────────
+#── Agent layer ─────────────────────────────────────────────────────
 
 :create agent {
   id: String =>
@@ -73,7 +73,7 @@
   liveness: String
 }
 
-// ── World layer ─────────────────────────────────────────────────────
+#── World layer ─────────────────────────────────────────────────────
 
 :create repo {
   name: String =>
@@ -100,11 +100,11 @@
   liveness: String
 }
 
-// ── Version control layer ───────────────────────────────────────────
-// These relations are meta-level: they track the state of all other
-// relations. They are always "doctrine" liveness — you don't
-// version-control the version-control (the genesis fixed point
-// notwithstanding).
+#── Version control layer ───────────────────────────────────────────
+#These relations are meta-level: they track the state of all other
+#relations. They are always "doctrine" liveness — you don't
+#version-control the version-control (the genesis fixed point
+#notwithstanding).
 
 :create world_commit {
   id: String =>
@@ -153,9 +153,9 @@
   ref_value: String
 }
 
-// ── Archive layer ───────────────────────────────────────────────────
-// Cap'n Proto reader version registry. Headers stored once per schema
-// version; data blocks are headerless, indexed by content hash.
+#── Archive layer ───────────────────────────────────────────────────
+#Cap'n Proto reader version registry. Headers stored once per schema
+#version; data blocks are headerless, indexed by content hash.
 
 :create archive_reader_version {
   version_id: String =>

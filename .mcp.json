@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "samskara": {
+      "command": "/home/li/git/samskara/target/debug/samskara",
+      "args": ["--memory"],
+      "env": {
+        "RUST_LOG": "info"
+      }
+    }
+  }
+}

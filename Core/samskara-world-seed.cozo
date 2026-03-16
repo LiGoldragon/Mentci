@@ -1,4 +1,4 @@
-// ── Liveness vocabulary seed ─────────────────────────────────────────
+#── Liveness vocabulary seed ─────────────────────────────────────────
 
 ?[name, rank, in_live_portion, description] <- [
   ["doctrine",       0, true,  "Foundational invariant — highest authority, cannot be superseded without principle revision"],
@@ -11,14 +11,14 @@
 ]
 :put liveness_vocab { name => rank, in_live_portion, description }
 
-// ── Agent seed ──────────────────────────────────────────────────────
+#── Agent seed ──────────────────────────────────────────────────────
 
 ?[id, name, role, email, liveness] <- [
   ["claude-code-1", "Claude Code", "first-agent", "noreply@anthropic.com", "trusted_fact"]
 ]
 :put agent { id => name, role, email, liveness }
 
-// ── Repo seed ───────────────────────────────────────────────────────
+#── Repo seed ───────────────────────────────────────────────────────
 
 ?[name, github, purpose, depends_on, liveness] <- [
   ["criome-cozo",              "LiGoldragon/criome-cozo",              "CozoDB wrapper crate (leaf dependency)",                  "",                                       "trusted_fact"],
@@ -29,7 +29,7 @@
 ]
 :put repo { name => github, purpose, depends_on, liveness }
 
-// ── Repo state seed ─────────────────────────────────────────────────
+#── Repo state seed ─────────────────────────────────────────────────
 
 ?[name, bookmark, build_status, last_checked_ts, notes, liveness] <- [
   ["criome-cozo",              "main",  "passing",  "2026-03-16",  "v0.7.13-alpha.3 cozo-ce, pins rayon 1.10.0",  "observation"],
@@ -40,7 +40,7 @@
 ]
 :put repo_state { name => bookmark, build_status, last_checked_ts, notes, liveness }
 
-// ── Principle seed (doctrine liveness) ──────────────────────────────
+#── Principle seed (doctrine liveness) ──────────────────────────────
 
 ?[id, domain, rule, reason, liveness] <- [
   ["p1", "data-ownership",   "Samskara NEVER sees files, code, or the OS — only relations",              "Pure datalog agent invariant",                      "doctrine"],
@@ -54,7 +54,7 @@
 ]
 :put principle { id => domain, rule, reason, liveness }
 
-// ── Thought seed ────────────────────────────────────────────────────
+#── Thought seed ────────────────────────────────────────────────────
 
 ?[id, kind, scope, status, title, body, created_ts, updated_ts, liveness] <- [
   ["t-user-1", "user", "global", "approved", "Project owner: Li",
@@ -83,7 +83,7 @@
 ]
 :put thought { id => kind, scope, status, title, body, created_ts, updated_ts, liveness }
 
-// ── Thought tags ────────────────────────────────────────────────────
+#── Thought tags ────────────────────────────────────────────────────
 
 ?[thought_id, tag] <- [
   ["t-user-1",         "identity"],
