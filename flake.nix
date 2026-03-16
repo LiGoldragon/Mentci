@@ -28,17 +28,38 @@
         devShells.default = pkgs.mkShell {
           name = "mentci-v1";
           packages = with pkgs; [
+            # Rust
             rustToolchain
             rust-analyzer
+            cargo-nextest
+
+            # VCS
             jujutsu
+
+            # Native build deps (cozo-ce storage-sqlite, openssl-sys, etc.)
+            pkg-config
+            cmake
+            gnumake
             sqlite
+            openssl
+
+            # GitHub
+            gh
+
+            # Nix tooling
+            nil         # Nix LSP
+            nixpkgs-fmt # Nix formatter
           ];
+
           env = {
             RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
           };
+
           shellHook = ''
             export MENTCI_V1_ROOT="$(pwd)"
             echo "mentci-v1: VersionOne workspace active"
+            echo "  rust : $(rustc --version)"
+            echo "  jj   : $(jj --version)"
           '';
         };
       }
