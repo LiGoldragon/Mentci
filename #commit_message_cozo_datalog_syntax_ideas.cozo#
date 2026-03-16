@@ -1,0 +1,59 @@
+  Draft 1 — Semantic layers + design decisions                                                                                                                                                                       
+
+  ?[type, scope, summary] <- [[
+    "snapshot", "Mentci",
+    "samskara-world genesis: relational world model + datalog-native VCS"
+  ]]
+
+  ?[layer, concern, design_decision] <- [
+    ["knowledge",  "thought model",     "atomic thoughts with kind/scope/status, typed edges via thought_link"],
+    ["knowledge",  "trust gate",        "trust_review relation gates draft→approved promotion"],
+    ["knowledge",  "liveness spectrum",  "doctrine > trusted_fact > observation > rumor > web_gossip > superseded > disproven"],
+    ["agent",      "identity",          "persistent agent + per-session tracking with repo scope"],
+    ["world",      "repo graph",        "5 repos with dependency edges and mutable state"],
+    ["world",      "principles",        "8 doctrine-level invariants seeded"],
+    ["vcs",        "content addressing", "blake3 merkle root over per-relation hashes"],
+    ["vcs",        "snapshot strategy",  "deltas every commit, manifests every commit, full capnp snapshots periodic"],
+    ["vcs",        "genesis bootstrap",  "self-hosting fixed point: first commit includes its own VCS relations"],
+    ["archive",    "binary format",      "capnp headerless blocks indexed by reader version"]
+  ]
+
+  ?[tag] <- [
+    ["schema-design"], ["vcs-design"], ["liveness-spectrum"],
+    ["capnp"], ["bootstrap"], ["samskara-world"], ["genesis"]
+  ]
+
+  ---
+  Draft 2 — More terse, query-oriented
+
+  ?[type, scope, summary] <- [[
+    "snapshot", "Mentci",
+    "samskara-world genesis: world model + VCS + liveness + capnp archive"
+  ]]
+
+  ?[concern, what] <- [
+    ["liveness",    "Bool→enum: doctrine/trusted_fact/observation/rumor/web_gossip/superseded/disproven"],
+    ["world model", "thought + thought_link + agent + repo + principle — 15 relations total"],
+    ["vcs",         "world_commit + manifest + delta + snapshot — content-addressed by blake3"],
+    ["archive",     "capnp headerless blocks, reader version index, zstd snapshots"],
+    ["bootstrap",   "genesis commit is the self-hosting fixed point"],
+    ["seed data",   "Li as owner, 5 repos, 8 doctrine principles, 6 initial thoughts"]
+  ]
+
+  ?[tag] <- [["schema"], ["vcs"], ["liveness"], ["capnp"], ["genesis"], ["samskara-world"]]
+
+  ---
+  Draft 3 — Most semantic, least structural
+
+  ?[type, scope, summary] <- [[
+    "snapshot", "Mentci",
+    "samskara-world genesis"
+  ]]
+
+  ?[question, answer] <- [
+    ["what is samskara-world",    "A relational world model: everything an agent knows, stored as CozoDB relations"],
+    ["what is liveness",          "Epistemic weight spectrum replacing live:Bool — from doctrine to disproven"],
+    ["how is state versioned",    "Content-addressed commits: blake3 merkle root over relation hashes"],
+    ["what is the binary format", "Cap'n Proto — headerless data blocks indexed by reader version"],
+    ["what is the genesis",       "Self-hosting fixed point: first commit whose manifest includes itself"]
+  ]
