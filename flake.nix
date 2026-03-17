@@ -10,11 +10,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # Component sources
+    # Component sources (public repos only — private/empty repos are
+    # commented out to avoid blocking flake lock resolution)
     samskara-lojix-contract-src = { url = "github:LiGoldragon/samskara-lojix-contract"; flake = false; };
     criome-cozo-src = { url = "github:LiGoldragon/criome-cozo"; flake = false; };
-    samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };
-    lojix-src = { url = "github:LiGoldragon/lojix"; flake = false; };
+    # samskara-src: private repo — requires auth token, uncomment when available
+    # samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };
+    # lojix-src: empty repo — uncomment once it has initial content
+    # lojix-src = { url = "github:LiGoldragon/lojix"; flake = false; };
   };
 
   outputs = inputs@{ self, nixpkgs, flake-utils, crane, fenix, ... }:
