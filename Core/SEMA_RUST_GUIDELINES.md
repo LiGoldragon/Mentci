@@ -91,14 +91,27 @@ Instead of `if status == "approved"`, the valid values live in a relation.
 
 All versioned relations carry `phase: String` and `dignity: String` columns.
 
-| Phase | Meaning | In world hash |
-|-------|---------|---------------|
-| `sol` | Manifest — committed truth | Yes |
-| `luna` | Becoming — staged, proposed | No |
-| `saturnus` | Archived — superseded | No |
+**Phase** (lifecycle — the planetary tri-state):
 
-New assertions default to `phase: "luna"`. The `commit_world` operation promotes
-luna→sol. Supersession moves sol→saturnus. Restore moves saturnus→sol.
+| Phase | Saṃskṛta | Meaning | In world hash |
+|-------|----------|---------|---------------|
+| `sol` | — | ☉ Manifest — committed truth | Yes |
+| `luna` | — | ☽ Becoming — staged, proposed | No |
+| `saturnus` | — | ♄ Archived — superseded | No |
+
+**Dignity** (trust level — epistemological hierarchy):
+
+| Dignity | Saṃskṛta | Meaning |
+|---------|----------|---------|
+| `eternal` | nitya | Immutable, always-true, foundational invariant |
+| `proven` | siddha | Accomplished, verified through trusted source |
+| `seen` | dṛṣṭa | Witnessed, observed (default for new assertions) |
+| `uncertain` | sandeha | Doubt, unverified claim |
+| `delusion` | bhrama | Error, mistaking rope for snake |
+
+New assertions default to `phase: "luna"`, `dignity: "seen"`. The `commit_world`
+operation promotes luna→sol. Supersession moves sol→saturnus. Restore moves
+saturnus→sol.
 
 ## Actor-First Concurrency
 
