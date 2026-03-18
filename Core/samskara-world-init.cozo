@@ -1,22 +1,30 @@
-#── Liveness vocabulary ──────────────────────────────────────────────
+#── Phase vocabulary ─────────────────────────────────────────────────
 #Every relation that participates in the world state carries a
-#`liveness: String` column instead of the old `live: Bool`.
+#`phase: String` column encoding its lifecycle position, and a
+#`dignity: String` column encoding its trust level.
 //
-#Live portion (included in world hash):
-#  doctrine       — foundational invariant, highest authority
-#  trusted_fact   — verified through observation or trusted source
-#  observation    — learned from codebase, session, or reasoning
-#  rumor          — unverified claim, queryable but not authoritative
-#  web_gossip     — external web source, lowest trust
+#Phase (the planetary tri-state, from the 2→3 ontological chain):
+#  sol       — ☉ manifest truth, in the world hash
+#  luna      — ☽ becoming, staged, not yet committed
+#  saturnus  — ♄ archived, superseded, retained in the ledger
 //
-#Dead portion (excluded from world hash, retained for lineage):
-#  superseded     — replaced by a newer thought via supersession
-#  disproven      — actively contradicted by evidence
+#Dignity (trust level, from astrological essential dignities):
+#  domicile    — foundational invariant, highest authority
+#  exaltation  — verified through trusted source
+#  peregrine   — learned through observation (default)
+#  detriment   — unverified claim
+#  fall        — external web source, lowest trust
 
-:create liveness_vocab {
+:create Phase {
+  name: String =>
+  glyph: String,
+  in_world_hash: Bool,
+  description: String
+}
+
+:create Dignity {
   name: String =>
   rank: Int,
-  in_live_portion: Bool,
   description: String
 }
 
@@ -31,7 +39,8 @@
   body: String,
   created_ts: String,
   updated_ts: String,
-  liveness: String
+  phase: String,
+  dignity: String
 }
 
 :create thought_link {
@@ -60,7 +69,8 @@
   name: String,
   role: String,
   email: String,
-  liveness: String
+  phase: String,
+  dignity: String
 }
 
 :create agent_session {
@@ -70,7 +80,8 @@
   ended_ts: String,
   repo_scope: String,
   summary: String,
-  liveness: String
+  phase: String,
+  dignity: String
 }
 
 #── World layer ─────────────────────────────────────────────────────
@@ -80,7 +91,8 @@
   github: String,
   purpose: String,
   depends_on: String,
-  liveness: String
+  phase: String,
+  dignity: String
 }
 
 :create repo_state {
@@ -89,7 +101,8 @@
   build_status: String,
   last_checked_ts: String,
   notes: String,
-  liveness: String
+  phase: String,
+  dignity: String
 }
 
 :create principle {
@@ -97,14 +110,13 @@
   domain: String,
   rule: String,
   reason: String,
-  liveness: String
+  phase: String,
+  dignity: String
 }
 
 #── Version control layer ───────────────────────────────────────────
 #These relations are meta-level: they track the state of all other
-#relations. They are always "doctrine" liveness — you don't
-#version-control the version-control (the genesis fixed point
-#notwithstanding).
+#relations. They do not carry phase/dignity — they are infrastructure.
 
 :create world_commit {
   id: String =>
