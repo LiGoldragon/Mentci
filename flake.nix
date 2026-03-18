@@ -15,6 +15,8 @@
     criome-cozo-src = { url = "github:LiGoldragon/criome-cozo"; flake = false; };
     samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };
     lojix-src = { url = "github:LiGoldragon/lojix"; flake = false; };
+    samskara-codegen-src = { url = "github:LiGoldragon/samskara-codegen"; flake = false; };
+    mentci-v0-src = { url = "github:Mentci-AI/dev"; flake = false; };
   };
 
   outputs = inputs@{ self, nixpkgs, flake-utils, crane, fenix, ... }:
@@ -32,6 +34,7 @@
             rust-analyzer
             jujutsu
             sqlite
+            capnproto
           ];
           env = {
             RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
