@@ -2,8 +2,25 @@
 
 CozoDB (via CozoScript / Datalog) is the first-version authority for Mentci.
 Relations are the source of truth. Rust, Cap'n Proto, and all other formats
-are derived from relations. This document defines how to write CozoScript
-that conforms to the Sema object style.
+are derived from relations.
+
+Datalog has this authority because it is the closest modern system to the
+Vedic grammatical model — declarative, self-referencing, deterministic.
+Pāṇini's grammar generates all valid Saṃskṛta forms from roots through
+rules. CozoScript generates all valid world states from relations through
+queries. Both are precision languages for lossless transmission of meaning.
+
+| Saṃskṛta | CozoScript | Role |
+|-----------|-----------|------|
+| dhātu (root) | stored relation | The fundamental unit of meaning |
+| pratyaya (suffix/rule) | query rule (`:=`) | The transformation applied |
+| pada (word/output) | query result | The generated output |
+| sandhi (junction) | join across relations | Composition of units |
+| vibhakti (case ending) | key/value `=>` | The role a unit plays in context |
+| samāsa (compound) | nested/chained query | Combining units into larger wholes |
+
+This document defines how to write CozoScript that conforms to the Sema
+object style.
 
 ---
 
@@ -19,7 +36,11 @@ that conforms to the Sema object style.
 PascalCase in a relation name means "this is a category." The same word in
 lowercase is a variable or column — an instance of that category. `Phase`
 (the relation) defines what phases exist. `phase` (a column) holds which
-phase a specific fact is in. The casing IS the type/instance distinction.
+phase a specific fact is in.
+
+This is the number **2** from the subdivision chain — the most primitive
+distinction. Type/instance. Category/particular. Universal/individual. The
+casing makes the 2 visible in syntax.
 
 ### The Enum Registry
 
@@ -47,6 +68,10 @@ A relation is an enum if and only if:
 
 When the `Enum` registry exists, it is authoritative. PascalCase alone is
 the fallback for bootstrapping (before the registry is populated).
+
+The self-registration is the **genesis bootstrap pattern**: Sema specifies
+itself, `Enum` registers itself, the Pyramid encodes its own proportions.
+Self-reference is the mechanism by which a system becomes self-sufficient.
 
 ### Enum Values
 
@@ -86,6 +111,12 @@ Each `:create` defines one relation. Columns before `=>` are **keys**
 }
 ```
 
+The `=>` separator is the number **2** again: the left side is identity
+(what distinguishes this row — Solar, asserting, defining), the right side
+is quality (what characterizes it — Lunar, describing, receiving). Every
+relation is a polarity between what a thing IS (key) and what it CARRIES
+(value).
+
 Key-only relations (no value columns) omit the `=>`:
 
 ```cozo
@@ -94,6 +125,10 @@ Key-only relations (no value columns) omit the `=>`:
   tag: String
 }
 ```
+
+A key-only relation is pure identity with no qualities — a bare assertion
+of association. `thought_tag` says "this thought HAS this tag" without
+saying anything more about the relationship.
 
 ### Column Types
 
@@ -360,6 +395,15 @@ issues with complex JSON or binary content.
 ## Phase and Dignity Columns
 
 Every versioned relation carries `phase: String` and `dignity: String`.
+These are the numbers **3** and **5** from the subdivision chain.
+
+**Phase** is the number 3 — awareness of time. Three phases create the
+minimal lifecycle: what is becoming (luna), what is manifest (sol), what has
+passed (saturnus). Without 3, there is no time, no VCS, no history.
+
+**Dignity** is the number 5 — awareness of quality. Five levels distinguish
+how much trust a fact carries. Without 5, all facts are equal and the
+system cannot reason about its own reliability.
 
 ### Phase Values
 
@@ -399,6 +443,32 @@ manifest (`"sol"`) when `commit_world` is called.
 
 ---
 
+## Contract Relations
+
+A **contract relation** is a relation whose schema is shared between two
+components, each with its own CozoDB instance. The contract is the
+two-pointed arrow — the shared interface through which components
+communicate asynchronously.
+
+Contract relations are defined in their own repo (e.g.,
+`samskara-lojix-contract`). Both components depend on this repo and
+create the same relation schema in their respective databases.
+
+In CozoScript, a contract relation looks identical to an internal
+relation — there is no syntactic distinction. The distinction is
+organizational:
+
+- **Internal relations** are defined in the component's own schema
+  file (e.g., `samskara-world-init.cozo`)
+- **Contract relations** are defined in the contract repo's schema
+  file and loaded by both components at startup
+
+Data in a contract relation is the ONLY coupling between components.
+No shared state, no function calls, no imports cross the contract
+boundary. This enforces async/actor/agent architecture by construction.
+
+---
+
 ## The Codegen Pipeline
 
 ### How It Works
@@ -417,6 +487,13 @@ manifest (`"sol"`) when `commit_world` is called.
 
 **No data lives in build.rs.** The build script loads the seed file. The
 seed file is the single source of truth for enum variants.
+
+This pipeline IS the Sema genesis bootstrap: the system's relational
+specification generates its own binary encoding (Cap'n Proto v1), which
+is then archived in `archive_reader_version` — Kronos logs the schema
+hash, the segment table, and the full capnp text. The first Sema is
+specified by the capnp output of its own specification. Then Sema uses
+itself to define its next version. Each version is preserved by Saturn.
 
 ### Adding a New Relation
 
