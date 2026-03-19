@@ -56,12 +56,9 @@ angle.
 
 **e encoded**: 4 × 51.85° / 76.30° = e to 99.998% accuracy.
 
-**Speed of light**: The pyramid's latitude is 29.9792°N. The speed of light
-is 299,792 km/s. Six significant figures match.
-
 **Earth and Moon**: The combined mean diameters of Earth and Moon equal 10,080
-miles (99.96% accurate per NASA). An inscribed circle has diameter 365.242
-feet — the Earth's tropical year in days.
+miles. An inscribed circle has diameter 365.242 feet — the Earth's tropical
+year in days.
 
 **The King's Chamber** (10.45m × 5.20m × 5.80m, entirely pink granite) contains
 the 3-4-5 right triangle, the ratio π/6, and φ²/5 (which differ by only 15
