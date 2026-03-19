@@ -1,7 +1,8 @@
-# Sema Object Style — Rust
+# Sema Rust Patterns
 
-This document defines the mandatory Sema object rules for Rust in Mentci v1.
-The rules are structural. Violations indicate category error, not style.
+These are the structural patterns of Rust in Mentci v1. They are not
+conventions to follow — they are the architecture itself. A deviation
+indicates a category error, not a style disagreement.
 
 ---
 
@@ -164,7 +165,7 @@ Cap'n Proto encodes them for transport (v1). Rust executes them.
 
 ---
 
-## Primary Rules
+## Primary Patterns
 
 ### 1. Schema Is Samskara
 
@@ -319,10 +320,68 @@ queryable relations of their own, not embedded in description strings.
 
 ---
 
-## Actor-First Concurrency
+## The Actor Pattern
 
 All multi-step transformations, long-running orchestrations, and concurrent
-executions are implemented as supervised actors.
+executions are implemented as supervised actors. The actor is the Rust
+manifestation of the learning cycle — the same four-phase pattern that
+governs the cardinal signs and position derivatives.
+
+### The Actor as Learning Cycle
+
+An actor processes messages through four phases that mirror the cardinal
+signs and their measure formulae (*Science & Astrology*, pp. 9-11):
+
+| Phase | Cardinal sign | Measure | Actor operation |
+|-------|--------------|---------|-----------------|
+| 1. Stimulus arrives | **Aries** (blind action) | Acceleration L/T² | Message dispatched to handler |
+| 2. State reacts | **Cancer** (reaction) | Velocity L/T | Internal state changes in response |
+| 3. World observed | **Libra** (observation) | Position L | Relations queried, result read |
+| 4. Control applied | **Capricorn** (control) | Control L/T³ | World committed, output emitted |
+
+This is integration — the natural order. The actor starts with impulse
+(message), accumulates change (state mutation), observes the result
+(query), and applies control (commit). The learning cycle repeats with
+each message, and the actor refines its behavior through accumulated state.
+
+### OVS Verbs as Mutable / Cardinal / Fixed
+
+The OVS verb system (Section: Object-Verb-Subject) maps onto the three
+modalities. Each modality governs a different aspect of the actor:
+
+| Modality | Role | OVS verbs | What it governs |
+|----------|------|-----------|-----------------|
+| **Mutable** (stimulus/relationship) | What triggers | `accepts`, `carries`, `contracts` | Message types, contract relations |
+| **Cardinal** (action) | What happens | `does` (read/write/consume) | Handler methods, transformations |
+| **Fixed** (state/result) | What persists | `has` (own/val), `spawns` | Owned state, child actors |
+
+The mutable column is the actor's interface — what it receives. The cardinal
+column is its behavior — what it does. The fixed column is its substance —
+what it is. Together they form a complete description:
+
+```
+Mutable (stimulus)  →  Cardinal (action)  →  Fixed (state)
+  accepts Join      →  does handle_join   →  has players: Vec<Player>
+  accepts Query     →  does query_world   →  has db: CriomeDb
+  contracts lojix   →  (no direct Rust)   →  (async relations only)
+```
+
+### The Twelve Measures in an Actor
+
+The full twelve-measure table maps onto the actor lifecycle. Each element
+(fire/water/air/earth) represents a different quality of actor operation:
+
+| Element | Mutable (why) | Cardinal (how) | Fixed (what) |
+|---------|--------------|----------------|--------------|
+| **Fire** (spontaneous) | Hunch/intuition triggers action | Blind acceleration — message handler fires | Force — pure being, the actor exists |
+| **Water** (emotional/change) | Belief/inertia — accumulated state | Velocity/change — state mutates | Momentum/transformation — state persists |
+| **Air** (conceptual) | Knowledge/power — query patterns | Observation — reading the world | Significance/moment — leverage of position |
+| **Earth** (practical) | Energy/work — concrete facts | Control — commit, emit, decide | Establishment — durable output |
+
+The fire row is the actor's existence. The water row is its internal state.
+The air row is its reasoning. The earth row is its effects on the world.
+
+### Structural Properties
 
 1. **Typed Messages**: Communication between actors occurs via typed message
    enums defined as Sema Objects, mirroring `accepts`/`carries` relations.
@@ -414,6 +473,53 @@ samskara rows → native Sema → zstd → base64 → CozoDB              (futur
 All versions coexist via `reader_version` in `archive_reader_version`. Content
 addressing uses BLAKE3 throughout. Correctness is security — the hash IS the
 identity.
+
+---
+
+## Init Envelope Purity
+
+Runtime launch and initialization configuration arrives as one structured
+init message object (Cap'n Proto in v1). Environment variables are
+process-layer plumbing (PATH, HOME, locale), not domain-state inputs.
+
+Cap'n Proto schema files live within their respective component's directory
+(e.g., `samskara/schema/`), not in a centralized schema directory. Each
+component owns its own schema — the contract pattern applied to build
+artifacts.
+
+Domain state must be passed via structured data, not ad-hoc environment
+variables. Data files are auditable, reproducible, and schema-validated.
+When a structured data channel exists, routing state through env vars is
+a category error.
+
+---
+
+## Repository Self-Containment
+
+During Nix evaluation, each repository is a self-contained world. Code must
+never reach into a parent repository, sibling checkout, undeclared local path,
+or ad-hoc absolute filesystem path to obtain package/module code.
+
+If reusable code is needed, it lives inside the active repository or arrives
+through a declared flake input. Deep modules do not escape repo boundaries
+with `../` traversal — shared derivations are exposed from the repo root and
+passed down structurally.
+
+This is the contract pattern applied to the build system: repositories
+communicate through declared interfaces (flake inputs), not filesystem
+adjacency.
+
+---
+
+## Code-First Governance
+
+Repeatable behavior is implemented in code, not instruction text. If a
+behavior can be enforced by a script, guard, or generated artifact, it
+belongs there — not in an expanding prompt payload.
+
+Repeated manual directives (same class of correction appearing multiple
+times) must be converted into executable checks. Documentation states
+intent and contracts; code enforces operational mechanics.
 
 ---
 
