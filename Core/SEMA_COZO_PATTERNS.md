@@ -13,11 +13,15 @@ that conforms to the Sema object style.
 
 | Casing | Meaning | CozoDB role | Rust output |
 |--------|---------|-------------|-------------|
-| `PascalCase` | Enum / vocabulary / categorical type | Single String key, rows = variants | `enum Phase { Sol, Luna, Saturnus }` |
-| `snake_case` | Struct / data / instance relation | Key + value columns, rows = instances | `struct Thought { id, kind, ... }` |
+| `PascalCase` | Categorical type / enum | Single String key, rows = variants | `enum Phase { Sol, Luna, Saturnus }` |
+| `snake_case` | Data / instance relation | Key + value columns, rows = instances | `struct Thought { id, kind, ... }` |
 
 This is enforced by `samskara-codegen`: PascalCase relations with a single
 String key are detected as enums. Everything else becomes a struct.
+
+An enum value that is itself categorical (will have its own subtypes) should
+be PascalCase in the data: `"Sol"`, `"Luna"`, `"Saturnus"`. Terminal values
+that don't expand stay lowercase: `"eternal"`, `"proven"`, `"seen"`.
 
 ```cozo
 # Enum: PascalCase, single String key
@@ -42,8 +46,7 @@ String key are detected as enums. Everything else becomes a struct.
 
 - Dot-namespaced names (`component.relation`) are reserved for future
   multi-component disambiguation. Not used currently.
-- `ALL_CAPS` relation names are reserved for supreme-law constants (none
-  exist yet).
+- `ALL_CAPS` relation names are reserved for supreme-law constants.
 
 ---
 
@@ -87,7 +90,7 @@ Prefer `String` with structured content over `Json`.
 
 ### Column Naming
 
-Always `snake_case`. No dots (dots only work in relation names, not columns).
+Always `snake_case`. Dots do not work in column names.
 
 ```cozo
 # Good
@@ -126,8 +129,7 @@ boundaries. Each segment is executed independently.
 ### Comments
 
 CozoScript uses `#` for comments. The `//` token on its own line separates
-comment blocks (convention, not syntax — CozoDB ignores `//` as a division
-that evaluates to nothing).
+comment blocks (convention, not syntax).
 
 ```cozo
 #── Section heading ─────────────────────────────
@@ -145,15 +147,23 @@ filtered out before execution. The `is_comment_only()` helper handles this.
 
 ## Queries
 
-### Basic Query
+### Variable Binding
+
+CozoDB auto-binds variables that match column names. This eliminates
+repetition — the variable IS the column name:
 
 ```cozo
+# Variables match column names — clean, no repetition
 ?[id, title, phase] := *thought{id, title, phase}
 ```
 
-The `?[...]` head declares output columns. The `*relation{...}` binds
-columns from a stored relation. Named binding is mandatory — positional
-binding is fragile.
+The explicit `{column: Variable}` syntax is only needed when they differ:
+
+```cozo
+# Renaming — only when necessary
+?[thought_id, thought_title] :=
+  *thought{id: thought_id, title: thought_title}
+```
 
 ### Filtering
 
@@ -169,17 +179,17 @@ binding is fragile.
   phase == "sol", dignity == "eternal"
 ```
 
-**Important**: When binding a column to a literal in the relation binding,
-the variable becomes a constant, NOT a head variable:
+**Important**: Binding a column to a literal makes it a constant, not a
+head variable:
 
 ```cozo
-# WRONG — "id" is unbound in the head because it's constrained, not bound
+# WRONG — "id" is unbound in the head
 ?[id] := *thought{id: "t-user-1"}
 
-# RIGHT — bind to a variable, then filter
+# RIGHT — bind to variable, then filter
 ?[id] := *thought{id}, id == "t-user-1"
 
-# RIGHT — use a different head variable
+# RIGHT — use a derived head variable
 ?[found] := *thought{id: "t-user-1"}, found = true
 ```
 
@@ -194,16 +204,6 @@ the variable becomes a constant, NOT a head variable:
 ```
 
 Use `<-` to inject literal data. Rows are arrays. Types are inferred.
-
-### Aggregation
-
-```cozo
-# Count
-?[count] := count = count(*thought{id})
-
-# With grouping
-?[kind, count] := *thought{kind}, count = count(kind)
-```
 
 ### Ordering and Limiting
 
@@ -241,14 +241,13 @@ all 10 must be in `?[...]` and in the `:put` clause.
 ```
 
 `:rm` requires the full column list in the head, bound from the relation.
-It removes matching rows by key.
 
 ### Simulating UPDATE
 
 CozoDB has no `UPDATE` statement. To change a column value:
 
-1. Query the full row
-2. Construct new values
+1. Query the full row with all columns
+2. Construct new values (modify the target column)
 3. `:put` the modified row (replaces by key)
 
 In Rust, the pattern for promoting `phase` from `"luna"` to `"sol"`:
@@ -262,7 +261,7 @@ let luna_rows = db.run_script(&query)?;
 
 // For each row, replace the phase column and :put back
 for row in luna_rows {
-    // ... modify phase value ...
+    // ... modify phase value at phase_idx ...
     let put = format!(
         "?[{col_list}] <- [[{val_list}]] :put {rel} {{{key_cols} => {val_cols}}}"
     );
@@ -280,15 +279,14 @@ for row in luna_rows {
 ::relations
 ```
 
-Returns: `rows` array, each row has relation name, column count, type
-("normal"), key count, value count, etc.
+Returns: `rows` array, each row has relation name, column count, type, etc.
 
-**DataValue wrapping**: Column values are wrapped in tagged JSON:
+**DataValue wrapping**: CozoDB serializes values as tagged JSON:
 
 ```json
-{"Str": "thought"}      // not plain "thought"
-{"Bool": true}           // not plain true
-{"Num": {"Int": 42}}     // not plain 42
+{"Str": "thought"}       // not plain "thought"
+{"Bool": true}            // not plain true
+{"Num": {"Int": 42}}      // not plain 42
 ```
 
 Use `datavalue::as_str()`, `datavalue::as_bool()`, `datavalue::as_i64()`
@@ -330,17 +328,12 @@ let script = format!(
 );
 ```
 
-**Braces in format strings**: `{{` and `}}` produce literal `{` and `}` in
-Rust `format!`. CozoScript binding syntax also uses `{}`. So a Rust format
-string building a CozoScript query needs double braces for CozoScript's
-braces.
+**Braces**: `{{` and `}}` produce literal `{` and `}` in Rust `format!`.
+CozoScript binding also uses `{}`. Double braces in Rust → single braces
+in CozoScript.
 
 **Binary data in String columns**: Use base64 encoding to avoid escaping
-issues with complex JSON or binary content:
-
-```rust
-let encoded = base64::engine::general_purpose::STANDARD.encode(data);
-```
+issues with complex JSON or binary content.
 
 ---
 
@@ -356,15 +349,22 @@ Every versioned relation carries `phase: String` and `dignity: String`.
 | `"luna"` | Becoming — staged, proposed | No |
 | `"saturnus"` | Archived — superseded | No |
 
+Phase values will become PascalCase (`"Sol"`, `"Luna"`, `"Saturnus"`) when
+their corresponding enum relations (Sol, Luna, Saturnus with subtypes) are
+defined. Currently lowercase.
+
 ### Dignity Values
 
-| Value | Rank | Meaning |
-|-------|------|---------|
-| `"eternal"` | 0 | Immutable, foundational invariant |
-| `"proven"` | 1 | Verified through trusted source |
-| `"seen"` | 2 | Witnessed, observed (default) |
-| `"uncertain"` | 3 | Unverified claim |
-| `"delusion"` | 4 | Error, unreliable source |
+| Value | Saṃskṛta | Rank | Meaning |
+|-------|----------|------|---------|
+| `"eternal"` | nitya | 0 | Immutable, foundational invariant |
+| `"proven"` | siddha | 1 | Verified through trusted source |
+| `"seen"` | dṛṣṭa | 2 | Witnessed, observed (default) |
+| `"uncertain"` | sandeha | 3 | Unverified claim |
+| `"delusion"` | bhrama | 4 | Error, unreliable source |
+
+Dignity values are terminal — they do not expand into subtypes. They stay
+lowercase.
 
 ### Querying Live State
 
@@ -386,31 +386,43 @@ manifest (`"sol"`) when `commit_world` is called.
 
 ---
 
-## Adding a New Relation
+## The Codegen Pipeline
+
+### How It Works
+
+1. `build.rs` loads schema (`:create`) and seed (`:put`) from their
+   authoritative `.cozo` files into an in-memory CozoDB
+2. `samskara-codegen` queries the fully populated database
+3. PascalCase relations with a single String key → detected as enums
+4. Enum rows → Cap'n Proto enumerants, sorted alphabetically
+5. All other relations → Cap'n Proto structs, fields ordered by `::columns` index
+6. Column names convert: `snake_case` → `camelCase` for Cap'n Proto
+7. File ID = blake3 hash of all relation/enum names, high bit set
+8. Schema hash = blake3 of the full `.capnp` text
+9. `capnpc` compiles `.capnp` → Rust Reader/Builder types
+
+**No data lives in build.rs.** The build script loads the seed file. The
+seed file is the single source of truth for enum variants.
+
+### Adding a New Relation
 
 Checklist for adding a versioned relation to samskara:
 
 1. **Schema**: Add `:create` to `Mentci/Core/samskara-world-init.cozo`
-   with `phase: String, dignity: String` columns.
+   with `phase: String, dignity: String` columns (if versioned).
 
 2. **Copy**: Copy the schema file to `samskara/schema/samskara-world-init.cozo`.
 
-3. **Seed**: Add seed data to `samskara/schema/samskara-world-seed.cozo`
-   with appropriate phase/dignity values.
+3. **Seed**: Add seed data to `samskara/schema/samskara-world-seed.cozo`.
+   PascalCase enums need seed rows for codegen to detect their variants.
 
-4. **build.rs**: If the relation is a PascalCase enum, seed it in `build.rs`
-   so `samskara-codegen` can detect and generate it.
-
-5. **VERSIONED_RELATIONS**: Add the relation name to the constant in
+4. **VERSIONED_RELATIONS**: Add the relation name to the constant in
    `samskara/src/vcs/mod.rs`.
 
-6. **has_phase_column**: If the relation carries `phase`/`dignity` columns,
+5. **has_phase_column**: If the relation carries `phase`/`dignity` columns,
    add it to the `has_phase_column()` match in `samskara/src/vcs/mod.rs`.
 
-7. **codegen test**: Update `samskara-codegen/tests/integration.rs` if
-   seed data is needed for enum detection.
-
-8. **Verify**: `cargo test` in both `samskara-codegen` and `samskara`.
+6. **Verify**: `cargo test` in both `samskara-codegen` and `samskara`.
 
 ---
 
