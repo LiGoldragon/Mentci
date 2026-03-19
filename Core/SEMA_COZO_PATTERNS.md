@@ -13,33 +13,54 @@ that conforms to the Sema object style.
 
 | Casing | Meaning | CozoDB role | Rust output |
 |--------|---------|-------------|-------------|
-| `PascalCase` | Categorical type / enum | Single String key, rows = variants | `enum Phase { Sol, Luna, Saturnus }` |
+| `PascalCase` | Categorical type | Single String key, rows = variants | `enum Phase { Sol, Luna, Saturnus }` |
 | `snake_case` | Data / instance relation | Key + value columns, rows = instances | `struct Thought { id, kind, ... }` |
 
-This is enforced by `samskara-codegen`: PascalCase relations with a single
-String key are detected as enums. Everything else becomes a struct.
+PascalCase in a relation name means "this is a category." The same word in
+lowercase is a variable or column — an instance of that category. `Phase`
+(the relation) defines what phases exist. `phase` (a column) holds which
+phase a specific fact is in. The casing IS the type/instance distinction.
 
-An enum value that is itself categorical (will have its own subtypes) should
-be PascalCase in the data: `"Sol"`, `"Luna"`, `"Saturnus"`. Terminal values
-that don't expand stay lowercase: `"eternal"`, `"proven"`, `"seen"`.
+### The Enum Registry
+
+The `Enum` relation is the authoritative registry of all categorical types.
+It is self-registering — `Enum` lists itself as an entry:
 
 ```cozo
-# Enum: PascalCase, single String key
-:create Phase {
+:create Enum {
   name: String =>
-  glyph: String,
-  in_world_hash: Bool,
   description: String
 }
 
-# Struct: snake_case, key => value columns
-:create thought {
-  id: String =>
-  kind: String,
-  scope: String,
-  phase: String,
-  dignity: String
-}
+?[name, description] <- [
+  ["Enum",       "Registry of all categorical type relations"],
+  ["Phase",      "Lifecycle tri-state: sol/luna/saturnus"],
+  ["Dignity",    "Epistemological trust hierarchy"],
+  ["CommitType", "Jujutsu commit classification"]
+]
+:put Enum { name => description }
+```
+
+A relation is an enum if and only if:
+1. Its name is PascalCase (the fast signal)
+2. It has a single String key column (the structural signal)
+3. It appears in the `Enum` registry (the authoritative signal)
+
+The codegen validates all three. If the registry exists but the relation
+isn't in it, the relation is treated as a struct despite PascalCase.
+
+### Enum Values
+
+All enum values are lowercase in CozoDB. The codegen converts to PascalCase
+for Rust and camelCase for Cap'n Proto automatically.
+
+```cozo
+# Values stored lowercase in CozoDB
+?[name] <- [["sol"], ["luna"], ["saturnus"]]
+:put Phase { name => ... }
+
+# Codegen produces: enum Phase { Sol, Luna, Saturnus }
+# Cap'n Proto:      enum Phase { sol @0; luna @1; saturnus @2; }
 ```
 
 ### Reserved Conventions
@@ -349,10 +370,6 @@ Every versioned relation carries `phase: String` and `dignity: String`.
 | `"luna"` | Becoming — staged, proposed | No |
 | `"saturnus"` | Archived — superseded | No |
 
-Phase values will become PascalCase (`"Sol"`, `"Luna"`, `"Saturnus"`) when
-their corresponding enum relations (Sol, Luna, Saturnus with subtypes) are
-defined. Currently lowercase.
-
 ### Dignity Values
 
 | Value | Saṃskṛta | Rank | Meaning |
@@ -362,9 +379,6 @@ defined. Currently lowercase.
 | `"seen"` | dṛṣṭa | 2 | Witnessed, observed (default) |
 | `"uncertain"` | sandeha | 3 | Unverified claim |
 | `"delusion"` | bhrama | 4 | Error, unreliable source |
-
-Dignity values are terminal — they do not expand into subtypes. They stay
-lowercase.
 
 ### Querying Live State
 
@@ -392,10 +406,11 @@ manifest (`"sol"`) when `commit_world` is called.
 
 1. `build.rs` loads schema (`:create`) and seed (`:put`) from their
    authoritative `.cozo` files into an in-memory CozoDB
-2. `samskara-codegen` queries the fully populated database
-3. PascalCase relations with a single String key → detected as enums
-4. Enum rows → Cap'n Proto enumerants, sorted alphabetically
-5. All other relations → Cap'n Proto structs, fields ordered by `::columns` index
+2. `samskara-codegen` queries the `Enum` registry for the authoritative
+   list of categorical types
+3. PascalCase + single String key + in `Enum` registry → confirmed enum
+4. Enum rows → Cap'n Proto enumerants (lowercased), sorted alphabetically
+5. All other relations → Cap'n Proto structs, fields by `::columns` index
 6. Column names convert: `snake_case` → `camelCase` for Cap'n Proto
 7. File ID = blake3 hash of all relation/enum names, high bit set
 8. Schema hash = blake3 of the full `.capnp` text
@@ -414,15 +429,17 @@ Checklist for adding a versioned relation to samskara:
 2. **Copy**: Copy the schema file to `samskara/schema/samskara-world-init.cozo`.
 
 3. **Seed**: Add seed data to `samskara/schema/samskara-world-seed.cozo`.
-   PascalCase enums need seed rows for codegen to detect their variants.
 
-4. **VERSIONED_RELATIONS**: Add the relation name to the constant in
+4. **Enum registry**: If adding a PascalCase enum, add a row to the `Enum`
+   seed in `samskara-world-seed.cozo`.
+
+5. **VERSIONED_RELATIONS**: Add the relation name to the constant in
    `samskara/src/vcs/mod.rs`.
 
-5. **has_phase_column**: If the relation carries `phase`/`dignity` columns,
+6. **has_phase_column**: If the relation carries `phase`/`dignity` columns,
    add it to the `has_phase_column()` match in `samskara/src/vcs/mod.rs`.
 
-6. **Verify**: `cargo test` in both `samskara-codegen` and `samskara`.
+7. **Verify**: `cargo test` in both `samskara-codegen` and `samskara`.
 
 ---
 
