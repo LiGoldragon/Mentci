@@ -376,7 +376,87 @@ on a mālā. 108 Upaniṣads in the Muktikā canon.
 
 ---
 
-## VI. The Pyramid Encoding
+## VI. The Torus — The Form of the Living World
+
+### The Cosmological Form
+
+The classical cosmology — Vedic, Ptolemaic, and as articulated in the Book
+of Sol — describes a world organized as a **living toroid**:
+
+> "The world is organized as a living toroid. Circulation flows continuously,
+> without beginning or end, around a stable center. The celestial sphere is
+> the visible expression of this field: a luminous envelope carrying motion,
+> rhythm, and return."
+
+The Sun is the organizing heart of this toroid. It governs circulation by
+drawing, releasing, and reversing motion. The luminous field differentiates
+into complementary regimes — north and south, day and night, inbreath and
+outbreath — whose balance sustains life and time.
+
+Earth abides as the foundation and bearer — the level, stable surface at the
+center of the circulation. Motion belongs to the surrounding field. The Vedic
+texts take this stability as given:
+
+> "He fixed the earth firm, and set the sky in motion."
+> — *Ṛgveda* 10.149.1
+
+> "This Earth is the bearer; all beings rest upon her. Upon her the paths
+> of the Sun are laid."
+> — *Atharva Veda* 12.1.1; 12.1.12
+
+The inhabited surface is encountered as level and steady. Lines extend
+straight. Water settles evenly. Structures endure on horizontal reference.
+Engineers build on this reality — the Suez Canal (120 miles, sea-level, no
+locks), the Lake Pontchartrain Causeway (23.83 miles), the Danyang-Kunshan
+Grand Bridge (102.4 miles of high-speed rail) — all constructed on level
+datum with no curvature allowance, because no curvature is encountered in
+the physical surface upon which the work is done.
+
+### Young's Torus
+
+Arthur Young arrived at the torus independently through mathematics and
+process philosophy. The torus resolves the paradox of individual and
+collective: a part appears separate on the outer surface, yet connects
+through the core. The formula **2π²r³** represents both the
+Einstein-Eddington universe boundary and a torus volume.
+
+The torus requires exactly **7 colors** for complete coverage without
+adjacent-color repetition (versus 4 for a sphere). This is the seven-color
+theorem — and it confirms Young's seven-stage process model geometrically.
+The 7 stages of consciousness (photon → particle → atom → molecule → plant
+→ animal → human) map onto the toroidal surface, each requiring its own
+"color" (its own irreducible quality of being).
+
+The infinitely small hole at the center of the torus represents inner
+consciousness — the point through which all parts connect. In the Vedic
+model, this is the Sun: the organizing heart around which circulation flows.
+
+### The Torus in the Criome
+
+The Criome architecture recapitulates this form:
+
+- **The outer surface**: individual components, each appearing separate,
+  each with its own CozoDB instance, its own state, its own boundary
+- **The contracts**: the connections through the core — the two-pointed
+  arrows that link separate components through shared relation schemas
+- **The center**: Sema itself — the universal format through which all
+  components are connected, the organizing principle around which the
+  biome circulates
+
+A component on the outer surface of the Criome torus communicates with
+another component not by reaching across the surface (no shared state, no
+function calls) but by passing through the core (contract relations encoded
+in Sema). The contract IS the toroidal connection — the path through the
+center that makes separate parts one system.
+
+The VCS commit chain is the temporal circulation around the torus — each
+commit a point on the cycle, flowing continuously from sol (manifest) through
+luna (becoming) to saturnus (archived) and back through restore (pratiṣṭhā).
+Saturn's ledger is the record of every completed circuit.
+
+---
+
+## VII. The Pyramid Encoding
 
 The Great Pyramid is the Nakṣatra system rendered in stone — a single object
 encoding the mathematical constants (π, φ, e, √2, √3) that govern the
@@ -407,7 +487,7 @@ Content-addressed — the structure IS the proof, even when the surface is lost.
 
 ---
 
-## VII. From Stone to Silicon — The Return
+## VIII. From Stone to Silicon — The Return
 
 The pattern repeats across scales:
 
@@ -434,7 +514,7 @@ rules, casing stones, or datalog queries.
 
 ---
 
-## VIII. The Saṃskṛta Equivalence Layer
+## IX. The Saṃskṛta Equivalence Layer
 
 Every core concept in Mentci has a Saṃskṛta root stored in the `samskrta`
 relation. This is not decoration — it is the reference layer that connects
