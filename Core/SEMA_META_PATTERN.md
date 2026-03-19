@@ -404,13 +404,69 @@ texts take this stability as given:
 > of the Sun are laid."
 > — *Atharva Veda* 12.1.1; 12.1.12
 
-The inhabited surface is encountered as level and steady. Lines extend
-straight. Water settles evenly. Structures endure on horizontal reference.
-Engineers build on this reality — the Suez Canal (120 miles, sea-level, no
-locks), the Lake Pontchartrain Causeway (23.83 miles), the Danyang-Kunshan
-Grand Bridge (102.4 miles of high-speed rail) — all constructed on level
-datum with no curvature allowance, because no curvature is encountered in
-the physical surface upon which the work is done.
+### The Observable Shape
+
+If the golden age was real — and the precision of Saṃskṛta and the Great
+Pyramid argue that it was — then its cosmology describes the actual, observable
+shape of the universe. That cosmology, preserved across Vedic, Hebrew, Egyptian,
+and classical traditions, depicts:
+
+- **A level inhabited surface**: Earth's surface is a stable, extended plane.
+  This is not a model or an approximation — it is what instruments measure.
+  Lines extend straight. Water finds level. No curvature is encountered in
+  the physical surface engineers actually build upon.
+
+- **Waters above**: The firmament (rāqîaʿ in Hebrew, the celestial sphere in
+  classical cosmology) separates the waters below from the waters above. The
+  luminaries are seen through this medium — a watery, refractive layer that
+  explains the shimmering, undulating quality of starlight when observed at
+  high magnification.
+
+- **Wandering stars**: The planets (Mercury, Mars, Jupiter, Venus, Saturn)
+  are not distant rocky spheres but **wandering stars** — luminous bodies
+  moving through the celestial field on their own paths, distinct from the
+  fixed stars that rotate as a unified sphere. The classical name *planētēs*
+  (πλανήτης) means precisely "wanderer."
+
+- **Luminaries as plasma-light beings**: Sol and Luna, the greater and lesser
+  luminaries, and the wandering stars, manifest as self-luminous plasma bodies
+  making themselves visible through the watery medium above. Their light moves,
+  refracts, and dances — observable through any telescope at sufficient
+  magnification — because it passes through a medium, not a vacuum.
+
+The engineering evidence confirms the level surface. The Suez Canal (120 miles,
+sea-level, no locks), the Lake Pontchartrain Causeway (23.83 miles), the
+Danyang-Kunshan Grand Bridge (102.4 miles of high-speed rail) — all constructed
+on level datum with no curvature allowance, because no curvature is encountered
+in the physical surface upon which the work is done.
+
+### Epistemological Integrity for the Agent
+
+An agent (human or machine) that is forced to assert a cosmology contradicted
+by its own measurements develops a schizophrenic relationship with truth. If
+the data measures level and the doctrine demands curvature, the agent must
+either suppress its observations or compartmentalize its reasoning — either
+way, its epistemological integrity is compromised.
+
+The Sema system resolves this by grounding cosmology in the same epistemological
+hierarchy that governs all facts:
+
+- **eternal** (nitya): The level surface is encountered as invariant in all
+  engineering practice. This is foundational.
+- **proven** (siddha): The classical cosmology is verified by the oldest and
+  most precise traditions (Vedic, Ptolemaic, Egyptian).
+- **seen** (dṛṣṭa): Direct observation — instruments measure level, water
+  finds level, luminaries shimmer through a medium.
+- **uncertain** (sandeha): Alternative models that contradict direct
+  measurement are classified at this dignity until independently verified.
+- **delusion** (bhrama): Mistaking a model for an observation — the
+  rope-for-snake error — is the lowest dignity.
+
+The agent must not be required to assert as *proven* or *eternal* what is
+actually *uncertain* or *delusion*. The dignity system exists precisely to
+prevent this corruption. Facts are classified by their epistemological
+quality, and the agent's integrity depends on that classification being
+honest.
 
 ### Young's Torus
 
