@@ -42,12 +42,11 @@ It is self-registering — `Enum` lists itself as an entry:
 ```
 
 A relation is an enum if and only if:
-1. Its name is PascalCase (the fast signal)
-2. It has a single String key column (the structural signal)
-3. It appears in the `Enum` registry (the authoritative signal)
+1. Its name is PascalCase (the convention — fast visual signal)
+2. It appears in the `Enum` registry (the authority — data signal)
 
-The codegen validates all three. If the registry exists but the relation
-isn't in it, the relation is treated as a struct despite PascalCase.
+When the `Enum` registry exists, it is authoritative. PascalCase alone is
+the fallback for bootstrapping (before the registry is populated).
 
 ### Enum Values
 
@@ -406,9 +405,9 @@ manifest (`"sol"`) when `commit_world` is called.
 
 1. `build.rs` loads schema (`:create`) and seed (`:put`) from their
    authoritative `.cozo` files into an in-memory CozoDB
-2. `samskara-codegen` queries the `Enum` registry for the authoritative
-   list of categorical types
-3. PascalCase + single String key + in `Enum` registry → confirmed enum
+2. `samskara-codegen` queries the `Enum` registry (authoritative) and
+   checks PascalCase naming (convention)
+3. In registry → enum. PascalCase without registry → fallback enum
 4. Enum rows → Cap'n Proto enumerants (lowercased), sorted alphabetically
 5. All other relations → Cap'n Proto structs, fields by `::columns` index
 6. Column names convert: `snake_case` → `camelCase` for Cap'n Proto
