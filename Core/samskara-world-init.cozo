@@ -1,3 +1,12 @@
+#── Enum registry ───────────────────────────────────────────────────
+#Self-registering: Enum lists itself. A PascalCase relation is an enum
+#if and only if it appears in this registry AND has a single String key.
+
+:create Enum {
+  name: String =>
+  description: String
+}
+
 #── Phase vocabulary ─────────────────────────────────────────────────
 #Every relation that participates in the world state carries a
 #`phase: String` column encoding its lifecycle position, and a
