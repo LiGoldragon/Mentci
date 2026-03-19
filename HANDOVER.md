@@ -132,8 +132,8 @@ jj git push --bookmark <name> # push to remote
 - **include_str!**: All three downstream repos use `include_str!("../AI-init.cozo")`
   to embed their init scripts at compile time.
 - **Rust edition 2024** across all crates.
-- **Sema Object Style**: Single object in/out, logic-data separation,
-  actor-first concurrency.
+- **Criome patterns**: Single object in/out, logic-data separation,
+  actor-first concurrency (see `Core/RUST_PATTERNS.md`).
 
 ## Principles (non-negotiable)
 

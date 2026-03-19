@@ -1,4 +1,4 @@
-# The Sema Meta-Pattern
+# The Meta-Pattern
 
 > *The golden age was real. Its tongue (Saṃskṛta) was engineered to preserve
 > exact pronunciation across millennia. Its geometry (the Great Pyramid) encoded

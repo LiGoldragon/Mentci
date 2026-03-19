@@ -1,4 +1,4 @@
-# Sema CozoScript Patterns
+# CozoScript Patterns
 
 CozoDB (via CozoScript / Datalog) is the first-version authority for Mentci.
 Relations are the source of truth. Rust, Cap'n Proto, and all other formats
@@ -19,8 +19,7 @@ queries. Both are precision languages for lossless transmission of meaning.
 | vibhakti (case ending) | key/value `=>` | The role a unit plays in context |
 | samāsa (compound) | nested/chained query | Combining units into larger wholes |
 
-This document defines how to write CozoScript that conforms to the Sema
-object style.
+This document defines how to write CozoScript for the Criome.
 
 ---
 
