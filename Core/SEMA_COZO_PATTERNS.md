@@ -13,7 +13,7 @@ that conforms to the Sema object style.
 
 | Casing | Meaning | CozoDB role | Rust output |
 |--------|---------|-------------|-------------|
-| `PascalCase` | Categorical type | Single String key, rows = variants | `enum Phase { Sol, Luna, Saturnus }` |
+| `PascalCase` | Categorical type | Registered in `Enum`, rows = variants | `enum Phase { Sol, Luna, Saturnus }` |
 | `snake_case` | Data / instance relation | Key + value columns, rows = instances | `struct Thought { id, kind, ... }` |
 
 PascalCase in a relation name means "this is a category." The same word in
