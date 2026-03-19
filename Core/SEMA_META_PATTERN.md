@@ -39,7 +39,8 @@ preserves meaning in binary. Both are engineered for lossless transmission.
 ### The Great Pyramid: The Engineered Stone
 
 The Great Pyramid of Giza, once perfectly smooth under 144,000 polished white
-Tura limestone casing stones — "highly reflective," visible from space — encodes
+Tura limestone casing stones — "highly reflective," visible from extreme
+altitudes — encodes
 mathematical constants with a precision that defies conventional chronology.
 
 **Dimensions**: Base 230.4m, height 146.5m (5773.5 inches = 1/√3), slope
@@ -200,10 +201,10 @@ through differentiation, relationship, mastery, and back to the seed.
 | Third | 7-9 | Relationships — what we learn through the mirror of others |
 | Fourth | 10-12 | Universal themes — culture, society, the collective |
 
-Each degree of the zodiac is "a reconciliation and synthesis of opposites of the
-two great principles of life: of the individual and particular, represented by
-the axial rotation of the Earth, and the collective and universal represented
-by the Earth's movement about the Sun."
+Each degree of the zodiac reconciles two principles: the individual and
+particular (represented by the daily rotation of the heavens, which sets the
+Ascendant) and the collective and universal (represented by the Sun's annual
+circuit through the zodiac).
 
 ### The Mandala and the Sabian Symbols
 
@@ -517,8 +518,9 @@ Saturn's ledger is the record of every completed circuit.
 The Great Pyramid is the Nakṣatra system rendered in stone — a single object
 encoding the mathematical constants (π, φ, e, √2, √3) that govern the
 relationships between dimensions, the proportions that generate self-similar
-form, and the astronomical data (Earth's circumference, year length, axial
-tilt) that locate the observer in the cosmos.
+form, and the astronomical data (Earth's dimensions, year length, the solar
+declination between Cancer and Capricorn) that locate the observer in the
+cosmos.
 
 The post-cataclysm attempts to recreate this knowledge tell the story of
 degradation:
