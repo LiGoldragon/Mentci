@@ -666,6 +666,21 @@ During Nix evaluation, each repository is a self-contained world. Code must
 never reach into a parent repository, sibling checkout, undeclared local
 path, or ad-hoc absolute filesystem path to obtain package/module code.
 
+**Relative paths can only point inside the repository, never outside.**
+Cross-repo references are Nix's job — they arrive through declared flake
+inputs, not filesystem adjacency.
+
+```json
+// WRONG — committed config reaching outside the repo
+{ "command": "/home/li/git/samskara/target/debug/samskara" }
+
+// RIGHT — relative path inside the repo
+{ "command": "./target/debug/annas-archive" }
+
+// RIGHT — cross-repo wiring via Nix flake input
+inputs.samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };
+```
+
 If reusable code is needed, it lives inside the active repository or arrives
 through a declared flake input. Deep modules do not escape repo boundaries
 with `../` traversal — shared derivations are exposed from the repo root
