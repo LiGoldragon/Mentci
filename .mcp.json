@@ -1,11 +1,1 @@
-{
-  "mcpServers": {
-    "samskara": {
-      "command": "/home/li/git/samskara/target/debug/samskara",
-      "args": ["--memory"],
-      "env": {
-        "RUST_LOG": "info"
-      }
-    }
-  }
-}
+{"mcpServers":{"annas-archive":{"command":"/nix/store/d09m4kqjf4gwm1h469vnwh7jkzasbn2k-annas-archive-mcp"}}}

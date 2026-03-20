@@ -4,5 +4,6 @@ result
 *.db
 .jj/
 Sources/
+.mcp.json
 \#*\#
 *~
