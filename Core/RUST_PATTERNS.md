@@ -259,12 +259,15 @@ Enum types are PascalCase relations with a single String key column (e.g.,
 Wire encodings and storage formats are transport concerns. They do not
 define the domain — samskara does. Schema is Sema; encoding is incidental.
 
-### Single Object In/Out
+### Criome Object Rule — Single Object In, Single Object Out
+
+All values that cross object boundaries are Criome objects. Primitive
+types are internal representations only. Naked tuples are not return
+types.
 
 Every method accepts at most one explicit object argument and returns
 exactly one object. When multiple inputs or outputs are required, define
-a new object. All values crossing component boundaries are Sema objects;
-primitives are internal only. Naked tuples are not return types.
+a new object.
 
 ```rust
 // WRONG — multiple primitives crossing a boundary
@@ -300,6 +303,31 @@ impl CommitResult {
     pub fn from_input(input: CommitInput) -> Result<Self, VcsError> {
         // ...
     }
+}
+```
+
+### Objects Exist; Flows Occur
+
+Objects are nouns that exist independently of execution. Flows are verbs
+that occur during execution. A name that describes a flow cannot name
+an object.
+
+The trinity maps this distinction:
+
+| Category | Planet | Nature | Examples |
+|----------|--------|--------|----------|
+| **Objects** | ☉ Sol | They exist | types, structs, relations, schemas |
+| **Flows** | ☽ Luna | They occur | methods, queries, transformations |
+| **Records** | ♄ Saturnus | They persist | snapshots, commits, archives |
+
+```rust
+// WRONG — flow encoded as object
+struct ShowGreetingFromStdin;
+
+// RIGHT — the object exists; the flow is a method
+struct Greeting;
+impl Greeting {
+    pub fn from_stdin() -> Result<Self, Error> { ... }
 }
 ```
 
@@ -391,9 +419,20 @@ In Rust codegen, they become typed enums.
 - A snake_case relation name in CozoDB → struct type in Rust (PascalCase'd).
 - Avoid suffixes that restate objecthood (`Object`, `Type`, `Entity`).
 
-The capitalization convention mirrors the filesystem durability tiers:
-`ALL_CAPS` = supreme law (never edited by agents), `PascalCase` = stable
-contract (edited only by mandate), `lowercase` = mutable implementation.
+### Capitalization Durability Tiers
+
+Capitalization in paths encodes durability — the resistance of content
+to modification. This is structural, not stylistic.
+
+| Tier | Paths/Files | Code | Durability |
+|------|-------------|------|------------|
+| `ALL_CAPS` | `CLAUDE.md`, `LICENSE`, `CONSTRAINTS/` | — | Immutable law. Never edited. Always prevails. |
+| `PascalCase` | `Core/`, `Architecture.md` | types, traits | Stable contract. Changes require mandate. |
+| `lowercase` | `src/`, `config.yaml` | methods, fields | Mutable implementation. Freely editable. |
+
+Durability composes from the **maximum tier** in the path. A single
+`ALL_CAPS` segment makes the entire path immutable. When tiers conflict,
+the highest prevails.
 
 ### Trait-Domain Rule
 
@@ -449,6 +488,27 @@ Prefer `from_*`, `to_*`, `into_*`. Avoid verbs like `read`, `write`,
 | `from_columns_result` | Construct from `::columns` output |
 | `to_capnp_text` | Emit as Cap'n Proto schema text |
 | `into_commit` | Consume self to produce a commit |
+
+### Construction Resolves to the Receiving Type
+
+All construction and parsing logic resides on the receiving type. The
+identity claimed by the method name is always the return type.
+
+```rust
+// WRONG — free function claims identity of a type it doesn't own
+fn parse_config(input: String) -> Config;
+
+// RIGHT — the type owns its own construction
+impl FromStr for Config {
+    type Err = Error;
+    fn from_str(input: &str) -> Result<Self, Self::Err> { ... }
+}
+
+// RIGHT — when ownership transfer is semantic
+impl From<String> for Config {
+    fn from(input: String) -> Self { ... }
+}
+```
 
 ---
 

@@ -446,54 +446,10 @@ manifest (`"sol"`) when `commit_world` is called.
 
 ## Commit Message Format
 
-A commit message is a **CozoScript tuple of three tuples** — valid syntax,
-not a comment-based DSL. The three positions mirror the Sol/Luna/Saturnus
-trinity:
+For commit message format, see [VCS_PATTERNS.md](VCS_PATTERNS.md).
 
-| Position | Planet | Role | Shape |
-|----------|--------|------|-------|
-| 1 | ☉ Sol | Identity — what kind of change | `(CommitType)` or `(CommitType, scope)` |
-| 2 | ☽ Luna | Transformation — what changed | `(Action, "what transformed")` |
-| 3 | ♄ Saturnus | Context — why it was needed | `(Verdict, "why")` or `()` |
-
-The diff handles bytes. The message handles meaning.
-
-### Enum Values
-
-- **CommitType** (Sol): fix, feat, doctrine, refactor, schema, contract,
-  codegen, prune, doc, nix, test, migrate
-- **Action** (Luna): add, remove, rename, rewrite, extract, merge, split,
-  move, replace, fix, extend, reduce
-- **Verdict** (Saturnus): error, evolution, dependency, gap, redundancy,
-  violation, drift
-
-All values are validated against their respective `CommitType`, `Action`,
-and `Verdict` relations. Scope draws from `principle.domain` ∪ `repo.name`.
-
-### Examples
-
-```cozo
-# Feature with scope
-(("feat", "vcs"), ("add", "world state restore from archive"), ("gap", "no recovery path"))
-
-# Simple fix, self-evident
-(("fix"), ("fix", "typo in RUST_PATTERNS.md"), ())
-
-# Schema change
-(("schema", "samskara"), ("extend", "dignity tracking on thoughts"), ("gap", "no epistemological quality"))
-
-# Migration
-(("migrate"), ("rename", "pattern files: drop sema/criome prefix"), ("redundancy", "filenames over-coupled"))
-
-# Doctrine
-(("doctrine", "core"), ("rewrite", "Rust patterns: Criome-focused narrative"), ("evolution", "sema-centric framing obscured the final vision"))
-```
-
-### Storage
-
-`world_commit.message` stays a `String` column — the tuple is stored as its
-string representation. A parser reconstructs it. The format is valid
-CozoScript inline data syntax, parseable as a nested tuple.
+The `CommitType`, `Action`, and `Verdict` enum relations defined in the
+world seed are the authoritative source for commit message values.
 
 ---
 
