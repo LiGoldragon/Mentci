@@ -98,7 +98,7 @@ I was unaware, I became aware, I will remember.
 The triangle is the minimal closed shape. The simplex category Δ is the
 categorical foundation of homotopy — the mathematics of continuous transformation.
 
-In Mentci: Sol (is), Luna (will be), Saturnus (was). The VCS trinity.
+In Mentci: Sol (is), Luna (will be), Saturnus (was). The phase trinity.
 
 ### 5 — Awareness of Quality
 

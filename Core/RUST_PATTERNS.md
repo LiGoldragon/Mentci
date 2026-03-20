@@ -472,8 +472,8 @@ Every significant Criome component decomposes into three:
 | Subsystem | Role | Planetary analogy |
 |-----------|------|-------------------|
 | **Foundation** (schema, relations, seed data) | What exists | ☉ Sol — the manifest |
-| **VCS** (snapshot, delta, commit, restore) | What changes | ☽ Luna — the becoming |
-| **Codegen** (samskara-codegen, capnp, types) | What endures | ♄ Saturn — the crystallized |
+| **Codegen** (samskara-codegen, capnp, types) | What is generated | ☽ Luna — the generative, reflective |
+| **VCS** (snapshot, delta, commit, restore) | What is preserved | ♄ Saturn — the ledger, the archive |
 
 As each subsystem matures, it may split out into its own component with its
 own contracts — following the cell division pattern. The VCS layer currently
