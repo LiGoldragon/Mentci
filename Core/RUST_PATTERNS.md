@@ -264,7 +264,24 @@ define the domain — samskara does. Schema is Sema; encoding is incidental.
 Every method accepts at most one explicit object argument and returns
 exactly one object. When multiple inputs or outputs are required, define
 a new object. All values crossing component boundaries are Sema objects;
-primitives are internal only.
+primitives are internal only. Naked tuples are not return types.
+
+```rust
+// WRONG — multiple primitives crossing a boundary
+fn get_download_url(&self, md5: &str, path_index: Option<u32>,
+                    domain_index: Option<u32>) -> Result<DownloadInfo, Error>
+
+// WRONG — naked tuple return
+fn parse_results(html: &str) -> Result<(Vec<SearchResult>, bool), Error>
+
+// RIGHT — one object in, one object out
+fn download_url(&self, request: DownloadRequest) -> Result<DownloadInfo, Error>
+
+// RIGHT — the type itself knows how to construct from source material
+impl SearchResponse {
+    pub fn from_html(html: &str, page: u32) -> Result<Self, Error> { ... }
+}
+```
 
 ```rust
 struct CommitInput {
@@ -290,7 +307,18 @@ impl CommitResult {
 
 Reusable behavior belongs to named types or traits. Free functions exist
 only as orchestration shells in `main.rs`. Test helpers are methods on a
-test fixture struct.
+test fixture struct. Constructors are associated functions (`from_*`,
+`new`), never module-level free functions.
+
+```rust
+// WRONG — free function constructs a type from outside
+pub fn parse_item_details(json: &str, md5: &str) -> Result<ItemDetails, Error>
+
+// RIGHT — the type constructs itself
+impl ItemDetails {
+    pub fn from_json(json: &str, md5: &str) -> Result<Self, Error> { ... }
+}
+```
 
 ### Single Owner
 
@@ -315,6 +343,20 @@ constants. All such data must be:
 
 Enum relations replace hardcoded string constants. Instead of
 `if status == "approved"`, the valid values live in a `Status` relation.
+
+An enum with an `Unknown(String)` fallback variant self-describes its
+known set — do not duplicate variant names as a separate string array.
+Use `is_known()` or pattern matching instead.
+
+```rust
+// WRONG — redundant list duplicating enum variants
+const KNOWN_FORMATS: &[&str] = &["pdf", "epub", "mobi"];
+if KNOWN_FORMATS.contains(&input) { ... }
+
+// RIGHT — the enum IS the source of truth
+let format = FileFormat::from(input);
+if format.is_known() { ... }
+```
 
 ---
 
@@ -362,6 +404,7 @@ domains.
 ```rust
 use core::str::FromStr;
 
+// Fallible parsing — use FromStr
 impl FromStr for Phase {
     type Err = ParsePhaseError;
 
@@ -374,19 +417,92 @@ impl FromStr for Phase {
         }
     }
 }
+
+// Infallible parsing with Unknown fallback — use From<&str>
+impl From<&str> for FileFormat {
+    fn from(s: &str) -> Self {
+        match s.trim().to_lowercase().as_str() {
+            "pdf" => Self::Pdf,
+            "epub" => Self::Epub,
+            // ...
+            other => Self::Unknown(other.to_string()),
+        }
+    }
+}
+
+// Config to component — use From<Config>
+impl From<Config> for Client {
+    fn from(config: Config) -> Self { Self::from_config(config) }
+}
 ```
 
 ### Direction Encodes Action
 
 Prefer `from_*`, `to_*`, `into_*`. Avoid verbs like `read`, `write`,
-`load`, `save` when direction already conveys meaning.
+`load`, `save`, `parse` when direction already conveys meaning.
 
 | Pattern | Meaning |
 |---------|---------|
 | `from_db` | Construct by introspecting CozoDB |
+| `from_html` | Construct by scraping HTML |
+| `from_json` | Construct by deserializing JSON |
 | `from_columns_result` | Construct from `::columns` output |
 | `to_capnp_text` | Emit as Cap'n Proto schema text |
 | `into_commit` | Consume self to produce a commit |
+
+---
+
+## Error Types
+
+### Scoping
+
+An error type is named `Error`. The crate name provides the namespace —
+`annas_archive::Error`, `criome_cozo::Error`, not `AnnaError` or
+`CozoError`. Inside the crate, `Error` is unambiguous. The same
+scoping principle applies to `Config`, `Client`, and other crate-primary
+types — avoid prefixing with the crate name.
+
+### Structured Variants
+
+Error variants carry structured fields, not string bags. The caller
+knows what operation they invoked — the error carries what went wrong,
+not a narrative retelling of context.
+
+```rust
+// WRONG — stringly-typed, loses structure
+Http { status: u16, context: String },
+Parse { context: String },
+AllDomainsFailed { context: String },
+
+// RIGHT — structured, no redundant context
+Http { status: u16 },
+MissingField { field: &'static str },
+DomainsExhausted,
+```
+
+`String` fields are reserved for messages from external systems (the
+remote's words, not ours):
+
+```rust
+/// The remote API returned an error message.
+Remote { message: String },
+```
+
+### Manual Impls
+
+Error enums implement `Debug`, `Display`, and `std::error::Error`
+manually — no `thiserror`. `From<T>` conversions bridge dependency
+errors into the crate's `Error`.
+
+```rust
+impl From<reqwest::Error> for Error {
+    fn from(err: reqwest::Error) -> Self { Error::Network(err) }
+}
+
+impl From<serde_json::Error> for Error {
+    fn from(err: serde_json::Error) -> Self { Error::Decode(err) }
+}
+```
 
 ---
 
