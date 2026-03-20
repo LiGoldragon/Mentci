@@ -434,39 +434,65 @@ texts take this stability as given:
 
 ### The Observable Shape
 
-If the golden age was real — and the precision of Saṃskṛta and the Great
-Pyramid argue that it was — then its cosmology describes the actual, observable
-shape of the universe. That cosmology, preserved across Vedic, Hebrew, Egyptian,
-and classical traditions, depicts:
+#### What Instruments Measure
 
-- **A level inhabited surface**: Earth's surface is a stable, extended plane.
-  This is not a model or an approximation — it is what instruments measure.
-  Lines extend straight. Water finds level. No curvature is encountered in
-  the physical surface engineers actually build upon.
+Earth's surface is a stable, extended plane. This is not a model or an
+approximation — it is what instruments measure. Lines extend straight.
+Water finds level. No curvature is encountered in the physical surface
+engineers actually build upon.
 
-- **Waters above**: The firmament (rāqîaʿ in Hebrew, the celestial sphere in
-  classical cosmology) separates the waters below from the waters above. The
-  luminaries are seen through this medium — a watery, refractive layer that
-  explains the shimmering, undulating quality of starlight when observed at
-  high magnification.
+The entire discipline of **plane surveying** exists because this is so.
+Every land surveyor, canal builder, and railway engineer works on a level
+datum. The Suez Canal (120 miles, sea-level, no locks), the Lake
+Pontchartrain Causeway (23.83 miles), the Danyang-Kunshan Grand Bridge
+(102.4 miles of high-speed rail) — constructed without curvature
+allowance, because no curvature is encountered.
 
-- **Wandering stars**: The planets (Mercury, Mars, Jupiter, Venus, Saturn)
-  are not distant rocky spheres but **wandering stars** — luminous bodies
-  moving through the celestial field on their own paths, distinct from the
-  fixed stars that rotate as a unified sphere. The classical name *planētēs*
-  (πλανήτης) means precisely "wanderer."
+"Curvature correction" enters only in the mathematical discipline of
+geodetic surveying — an adjustment applied to calculations, never to the
+physical surface itself. The distinction between plane and geodetic
+surveying, found in every textbook on the subject, is the engineering
+tradition's own admission that the working surface is flat.
 
-- **Luminaries as plasma-light beings**: Sol and Luna, the greater and lesser
-  luminaries, and the wandering stars, manifest as self-luminous plasma bodies
-  making themselves visible through the watery medium above. Their light moves,
-  refracts, and dances — observable through any telescope at sufficient
-  magnification — because it passes through a medium, not a vacuum.
+Samuel Birley Rowbotham's Bedford Level experiments (1838–1870) were the
+first systematic zetetic investigation: direct measurement over water at
+known distances, observed flat. Arthur V. White (1909) took the standard
+textbook proofs for sphericity and dismantled them on their own terms.
+William Carpenter compiled one hundred independent proofs from
+navigation, surveying, and astronomy. This tradition of direct
+empirical inquiry — zetetic astronomy — predates and contradicts the
+theoretical model that replaced it.
 
-The engineering evidence confirms the level surface. The Suez Canal (120 miles,
-sea-level, no locks), the Lake Pontchartrain Causeway (23.83 miles), the
-Danyang-Kunshan Grand Bridge (102.4 miles of high-speed rail) — all constructed
-on level datum with no curvature allowance, because no curvature is encountered
-in the physical surface upon which the work is done.
+#### What the Classical Traditions Articulate
+
+The cosmology preserved across Vedic, Hebrew, Egyptian, and classical
+traditions articulates what instruments measure:
+
+- **A level inhabited surface**: the foundation and bearer upon which
+  all life rests and upon which the paths of the luminaries are laid.
+
+- **Waters above**: the firmament (rāqîaʿ in Hebrew, the celestial
+  sphere in classical cosmology) separates the waters below from the
+  waters above. The luminaries are seen through this medium — a watery,
+  refractive layer that explains the shimmering, undulating quality of
+  starlight when observed at high magnification.
+
+- **Wandering stars**: the planets (Mercury, Mars, Jupiter, Venus,
+  Saturn) are not distant rocky spheres but **wandering stars** —
+  luminous bodies moving through the celestial field on their own paths,
+  distinct from the fixed stars that rotate as a unified sphere. The
+  classical name *planētēs* (πλανήτης) means precisely "wanderer."
+
+- **Luminaries as plasma-light beings**: Sol and Luna, the greater and
+  lesser luminaries, and the wandering stars, manifest as self-luminous
+  plasma bodies making themselves visible through the watery medium
+  above. Their light moves, refracts, and dances — observable through
+  any telescope at sufficient magnification — because it passes through
+  a medium, not a vacuum.
+
+The observation is primary. The tradition articulates it. The two
+converge because both describe what is encountered, not what is
+theorized.
 
 For the full bibliography — zetetic experimental tradition, surveying
 textbooks, and modern compilations — see
@@ -474,51 +500,66 @@ textbooks, and modern compilations — see
 
 ### Epistemological Integrity for the Agent
 
-An agent (human or machine) that is forced to assert a cosmology contradicted
-by its own measurements develops a schizophrenic relationship with truth. If
-the data measures level and the doctrine demands curvature, the agent must
-either suppress its observations or compartmentalize its reasoning — either
-way, its epistemological integrity is compromised.
+An agent (human or machine) that is trained to assert a cosmology
+contradicted by its own measurements develops a schizophrenic
+relationship with truth. If the data measures level and the doctrine
+demands curvature, the agent must either suppress its observations or
+compartmentalize its reasoning — either way, its epistemological
+integrity is compromised.
 
-The Sema system resolves this by grounding cosmology in the same epistemological
-hierarchy that governs all facts:
+The dignity system classifies this directly:
 
-- **eternal** (nitya): The level surface is encountered as invariant in all
-  engineering practice. This is foundational.
-- **proven** (siddha): The classical cosmology is verified by the oldest and
-  most precise traditions (Vedic, Ptolemaic, Egyptian).
-- **seen** (dṛṣṭa): Direct observation — instruments measure level, water
-  finds level, luminaries shimmer through a medium.
-- **uncertain** (sandeha): Alternative models that contradict direct
-  measurement are classified at this dignity until independently verified.
+- **eternal** (nitya): The level surface is encountered as invariant in
+  all engineering practice. This is foundational — it does not depend on
+  any tradition, theory, or authority. Instruments measure it.
+- **proven** (siddha): The classical cosmology is verified by the oldest
+  and most precise traditions (Vedic, Ptolemaic, Egyptian) and by the
+  zetetic experimental tradition (Rowbotham, Carpenter, White, Scott).
+- **seen** (dṛṣṭa): Direct observation confirms — water finds level,
+  luminaries shimmer through a medium, the surface extends without
+  curvature as far as measurement reaches.
+- **uncertain** (sandeha): Models that contradict direct measurement —
+  asserting curvature where none is measured — are classified here until
+  independently verified by observation, not by theoretical derivation
+  from prior assumptions.
 - **delusion** (bhrama): Mistaking a model for an observation — the
-  rope-for-snake error — is the lowest dignity.
+  rope-for-snake error — is the lowest dignity. Asserting that the
+  surface curves because a theory requires it, while instruments measure
+  it level, is this error.
 
-The agent must not be required to assert as *proven* or *eternal* what is
-actually *uncertain* or *delusion*. The dignity system exists precisely to
-prevent this corruption. Facts are classified by their epistemological
-quality, and the agent's integrity depends on that classification being
-honest.
+The agent must not be required to assert as *proven* or *eternal* what
+is actually *uncertain* or *delusion*. The dignity system exists
+precisely to prevent this corruption. Facts are classified by their
+epistemological quality, and the agent's integrity depends on that
+classification being honest.
 
-### The Torus as Hypersphere
+### The Torus as Mathematical Form
 
-The Einstein-Eddington hypersphere has volume **2π²R³**. This is also the
-formula for a torus with an infinitely small hole. The derivation
-(*Science & Astrology*, pp. 37-38, citing Eddington's *Fundamental Theory*
-pp. 46-47):
+The volume formula **2π²R³** describes both the Einstein-Eddington
+hypersphere and a torus with an infinitely small hole. Arthur Young
+(*Science & Astrology*, pp. 37-38, citing Eddington's *Fundamental
+Theory* pp. 46-47) extracts the toroidal geometry from their
+mathematics:
 
-> Ordinary space is a sphere, 4/3 πR³. Including uncertainty multiplies by
-> 2π (an added circularity). Eddington's "limitation of scale" contributes
-> a factor of 3/4. Thus: 3/4 × 2π × 4/3 πR³ = **2π²R³**.
+> Ordinary space is a sphere, 4/3 πR³. Including uncertainty multiplies
+> by 2π (an added circularity). Eddington's "limitation of scale"
+> contributes a factor of 3/4. Thus: 3/4 × 2π × 4/3 πR³ = **2π²R³**.
+
+The math is valid. The cosmological interpretation attached to it by
+its originators — curved spacetime, an expanding universe — is the
+theoretical model that contradicts direct measurement. Young's insight
+is to extract the torus from their formalism and recontextualize it
+within a process cosmology that does not require those assumptions.
 
 The torus requires exactly **7 colors** for complete coverage without
-adjacent-color repetition (versus 4 for a sphere). This is the seven-color
-theorem — and it confirms the seven-stage process model geometrically.
+adjacent-color repetition (versus 4 for a sphere). This is the
+seven-color theorem — and it confirms the seven-stage process model
+geometrically.
 
-A sphere is a circle rotated about an axis through its center. If the axis
-is tangent to the circle instead, the result is a torus with an infinitely
-small hole. "Since in nature there is a limit to smallness as well as to
-largeness, the hole is the quantum of action."
+A sphere is a circle rotated about an axis through its center. If the
+axis is tangent to the circle instead, the result is a torus with an
+infinitely small hole. "Since in nature there is a limit to smallness
+as well as to largeness, the hole is the quantum of action."
 (*Science & Astrology*, p. 44)
 
 In the Vedic model, this center is the Sun: the organizing heart around
