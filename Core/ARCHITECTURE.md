@@ -45,7 +45,7 @@ to this database.
 
 Lojix is a Rust-capabilities-matching datalog DSL transpiler. It:
 
-1. Reads "live" DSL relations from its own CozoDB
+1. Reads sol-phase DSL relations from its own CozoDB
 2. Transpiles them to executable code
 3. Executes the transpiled code
 4. Translates results back into datalog relations
@@ -54,12 +54,13 @@ Lojix is a Rust-capabilities-matching datalog DSL transpiler. It:
 Lojix owns its CozoDB instance. No other agent reads from or writes
 to this database.
 
-### The "live" Boolean
+### Phase and Dignity
 
-Every DSL relation carries a `live` boolean column. When `live = true`,
-the relation represents active code that Lojix will transpile and execute.
-When `live = false`, the relation is historical — it remains in the DB for
-audit and replay but is not part of the current execution surface.
+Every versioned relation carries `phase` and `dignity` columns.
+`phase = "sol"` marks manifest (active) relations. `phase = "luna"` marks
+staged (proposed). `phase = "saturnus"` marks archived (historical).
+Dignity encodes trust level: eternal, proven, seen, uncertain, delusion.
+See `COZO_PATTERNS.md` and `RUST_PATTERNS.md` for full definitions.
 
 ## Data Ownership (Sema Principle)
 
