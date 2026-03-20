@@ -16,7 +16,7 @@
     # Component sources
     samskara-lojix-contract-src = { url = "github:LiGoldragon/samskara-lojix-contract"; flake = false; };
     criome-cozo-src = { url = "github:LiGoldragon/criome-cozo"; flake = false; };
-    # samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };  # private repo
+    samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };
     # lojix-src = { url = "github:LiGoldragon/lojix"; flake = false; };  # empty repo
     samskara-codegen-src = { url = "github:LiGoldragon/samskara-codegen"; flake = false; };
     annas-archive-src = { url = "github:LiGoldragon/annas-archive"; flake = false; };
@@ -46,8 +46,37 @@
           inherit cargoArtifacts;
         });
 
-        # MCP wrapper — on PATH via devShell, no store paths in config
-        # TODO: add samskara-mcp once the repo is public
+        # Samskara — pure datalog agent
+        samskara = let
+          cozoFilter = path: _type: builtins.match ".*\\.cozo$" path != null;
+          src = pkgs.lib.cleanSourceWith {
+            src = inputs.samskara-src;
+            filter = path: type:
+              (cozoFilter path type) || (craneLib.filterCargoSources path type);
+          };
+          commonArgs = {
+            inherit src;
+            pname = "samskara";
+            postUnpack = ''
+              depDir=$(dirname $sourceRoot)
+              cp -rL ${inputs.criome-cozo-src} $depDir/criome-cozo
+              cp -rL ${inputs.samskara-lojix-contract-src} $depDir/samskara-lojix-contract
+              cp -rL ${inputs.samskara-codegen-src} $depDir/samskara-codegen
+            '';
+            nativeBuildInputs = [ pkgs.capnproto ];
+          };
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        in craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+        });
+
+        # MCP wrappers — on PATH via devShell, no store paths in config
+        samskara-mcp = pkgs.writeShellScriptBin "samskara-mcp" ''
+          exec env \
+            RUST_LOG="''${RUST_LOG:-info}" \
+            samskara --memory
+        '';
+
         annas-archive-mcp = pkgs.writeShellScriptBin "annas-archive-mcp" ''
           exec env \
             ANNAS_ARCHIVE_API_KEY="$(gopass show -o annas-archive.gl/secret-key)" \
@@ -57,6 +86,9 @@
 
         mcpConfig = builtins.toJSON {
           mcpServers = {
+            samskara = {
+              command = "samskara-mcp";
+            };
             annas-archive = {
               command = "annas-archive-mcp";
             };
@@ -75,6 +107,8 @@
             pkgs.capnproto
             pkgs.gopass
             claude-code.packages.${system}.default
+            samskara
+            samskara-mcp
             annas-archive
             annas-archive-mcp
           ];

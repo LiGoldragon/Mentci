@@ -165,7 +165,8 @@
         "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs_2",
         "samskara-codegen-src": "samskara-codegen-src",
-        "samskara-lojix-contract-src": "samskara-lojix-contract-src"
+        "samskara-lojix-contract-src": "samskara-lojix-contract-src",
+        "samskara-src": "samskara-src"
       }
     },
     "rust-analyzer-src": {
@@ -214,6 +215,22 @@
       "original": {
         "owner": "LiGoldragon",
         "repo": "samskara-lojix-contract",
+        "type": "github"
+      }
+    },
+    "samskara-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774043970,
+        "narHash": "sha256-ToE732XRvvVCdlvLIrNnr8j4km94UZ+D1jjHmUadVZ4=",
+        "owner": "LiGoldragon",
+        "repo": "samskara",
+        "rev": "065c5c6ae952c882657c09cc7205e9e6c557cf25",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LiGoldragon",
+        "repo": "samskara",
         "type": "github"
       }
     },
