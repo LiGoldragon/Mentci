@@ -399,9 +399,8 @@ Each zodiac sign contains exactly 9 padas (108 / 12 = 9). The four padas
 of each Nakṣatra cycle through the four puruṣārthas: dharma (1st pada),
 artha (2nd), kāma (3rd), mokṣa (4th).
 
-108 = 2² × 3³. φ(108) = 36. 12 × 9 = 108. Distance from Earth to Sun ≈ 108
-solar diameters. Distance from Earth to Moon ≈ 108 lunar diameters. 108 beads
-on a mālā. 108 Upaniṣads in the Muktikā canon.
+108 = 2² × 3³. φ(108) = 36. 12 × 9 = 108. 108 beads on a mālā. 108
+Upaniṣads in the Muktikā canon.
 
 ---
 

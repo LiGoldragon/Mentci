@@ -37,6 +37,27 @@
   description: String
 }
 
+#── Commit message enums ──────────────────────────────────────────────
+#A commit message is a tuple of three tuples — Sol/Luna/Saturnus:
+#  (Sol: identity)        (CommitType) or (CommitType, scope)
+#  (Luna: transformation) (Action, "what transformed")
+#  (Saturnus: context)    (Verdict, "why") or ()
+
+:create CommitType {
+  name: String =>
+  description: String
+}
+
+:create Action {
+  name: String =>
+  description: String
+}
+
+:create Verdict {
+  name: String =>
+  description: String
+}
+
 #── Saṃskṛta equivalence layer ─────────────────────────────────────
 #Maps core English terms to their Vedic/Saṃskṛta roots.
 #domain: which relation or concept the term belongs to.
