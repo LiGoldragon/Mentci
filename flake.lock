@@ -221,11 +221,11 @@
     "samskara-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774043970,
-        "narHash": "sha256-ToE732XRvvVCdlvLIrNnr8j4km94UZ+D1jjHmUadVZ4=",
+        "lastModified": 1774045708,
+        "narHash": "sha256-4Lf7J4zeS0F9+wd7ZOk6tCjMgRPLQSXK//0Z3i6lrsw=",
         "owner": "LiGoldragon",
         "repo": "samskara",
-        "rev": "065c5c6ae952c882657c09cc7205e9e6c557cf25",
+        "rev": "ac9717b06febfc9d0f2963b629b2da141e609519",
         "type": "github"
       },
       "original": {
