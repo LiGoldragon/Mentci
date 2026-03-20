@@ -46,17 +46,19 @@
           inherit cargoArtifacts;
         });
 
-        # Generate .mcp.json at shell entry — paths resolve to Nix store
-        # TODO: add samskara once the repo is public
+        # MCP wrapper — on PATH via devShell, no store paths in config
+        # TODO: add samskara-mcp once the repo is public
+        annas-archive-mcp = pkgs.writeShellScriptBin "annas-archive-mcp" ''
+          exec env \
+            ANNAS_ARCHIVE_API_KEY="$(gopass show -o annas-archive.gl/secret-key)" \
+            RUST_LOG="''${RUST_LOG:-info}" \
+            annas-archive
+        '';
+
         mcpConfig = builtins.toJSON {
           mcpServers = {
             annas-archive = {
-              command = "${pkgs.writeShellScript "annas-archive-mcp" ''
-                exec env \
-                  ANNAS_ARCHIVE_API_KEY="$(${pkgs.gopass}/bin/gopass show -o annas-archive.gl/secret-key)" \
-                  RUST_LOG="''${RUST_LOG:-info}" \
-                  ${annas-archive}/bin/annas-archive
-              ''}";
+              command = "annas-archive-mcp";
             };
           };
         };
@@ -65,14 +67,16 @@
       {
         devShells.default = pkgs.mkShell {
           name = "mentci-v1";
-          packages = with pkgs; [
+          packages = [
             rustToolchain
-            rust-analyzer
-            jujutsu
-            sqlite
-            capnproto
-            gopass
+            pkgs.rust-analyzer
+            pkgs.jujutsu
+            pkgs.sqlite
+            pkgs.capnproto
+            pkgs.gopass
             claude-code.packages.${system}.default
+            annas-archive
+            annas-archive-mcp
           ];
           env = {
             RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
@@ -80,7 +84,7 @@
           shellHook = ''
             export MENTCI_V1_ROOT="$(pwd)"
 
-            # Generate .mcp.json from Nix — all paths are store paths
+            # Generate .mcp.json — commands resolve via PATH, no store paths
             echo '${mcpConfig}' > .mcp.json
 
             echo "mentci-v1: workspace active (claude + samskara + annas-archive)"

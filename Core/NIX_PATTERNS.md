@@ -176,6 +176,39 @@ Every Rust crate in the ecosystem has a flake with this structure:
 
 ---
 
+## No Store Paths
+
+Nix store paths (`/nix/store/...`) never appear in generated config,
+committed files, or user-facing output. Binaries are resolved via PATH.
+The dev shell puts packages on PATH; config files reference command
+names.
+
+```nix
+# WRONG — store path leaked into generated config
+mcpConfig = builtins.toJSON {
+  command = "${annas-archive}/bin/annas-archive";
+};
+
+# RIGHT — wrapper on PATH, config uses the command name
+annas-archive-mcp = pkgs.writeShellScriptBin "annas-archive-mcp" ''
+  exec annas-archive
+'';
+
+devShells.default = pkgs.mkShell {
+  packages = [ annas-archive annas-archive-mcp ];
+};
+
+mcpConfig = builtins.toJSON {
+  command = "annas-archive-mcp";
+};
+```
+
+Store paths are an implementation detail of Nix's content-addressed
+store. They are not stable identifiers — they change when inputs
+change. Code and config reference names; Nix resolves names to paths.
+
+---
+
 ## Documentation Protocol
 
 Same as Rust: impersonal, timeless, precise. Document non-boilerplate

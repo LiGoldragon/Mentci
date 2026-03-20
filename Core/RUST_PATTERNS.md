@@ -667,17 +667,28 @@ never reach into a parent repository, sibling checkout, undeclared local
 path, or ad-hoc absolute filesystem path to obtain package/module code.
 
 **Relative paths can only point inside the repository, never outside.**
+This includes Nix store paths — `/nix/store/...` is outside the repo.
 Cross-repo references are Nix's job — they arrive through declared flake
-inputs, not filesystem adjacency.
+inputs and resolve via PATH, not filesystem paths.
 
 ```json
-// WRONG — committed config reaching outside the repo
+// WRONG — absolute path to sibling repo
 { "command": "/home/li/git/samskara/target/debug/samskara" }
 
-// RIGHT — relative path inside the repo
-{ "command": "./target/debug/annas-archive" }
+// WRONG — Nix store path leaked into config
+{ "command": "/nix/store/abc123-annas-archive-mcp" }
 
-// RIGHT — cross-repo wiring via Nix flake input
+// RIGHT — command name, resolved via PATH from dev shell
+{ "command": "annas-archive-mcp" }
+```
+
+```nix
+# RIGHT — binary on PATH via devShell packages
+devShells.default = pkgs.mkShell {
+  packages = [ annas-archive annas-archive-mcp ];
+};
+
+# RIGHT — cross-repo source via flake input
 inputs.samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };
 ```
 
@@ -687,8 +698,8 @@ with `../` traversal — shared derivations are exposed from the repo root
 and passed down structurally.
 
 This is the contract pattern applied to the build system: repositories
-communicate through declared interfaces (flake inputs), not filesystem
-adjacency.
+communicate through declared interfaces (flake inputs and PATH), not
+filesystem adjacency or store paths.
 
 ---
 
