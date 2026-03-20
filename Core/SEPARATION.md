@@ -73,6 +73,7 @@ Each pattern document owns its domain:
 | `MICRO_REPO_PATTERNS.md` | Repository boundaries, contracts, flake inputs |
 | `ARCHITECTURE.md` | System-level design, component relationships |
 | `META_PATTERN.md` | Mathematical and philosophical foundations |
+| `REFERENCES.md` | Primary sources and bibliography for claims in Core/ |
 
 A rule about Nix naming does not appear in RUST_PATTERNS.md.
 A rule about error types does not appear in COZO_PATTERNS.md.
