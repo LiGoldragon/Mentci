@@ -209,6 +209,27 @@ change. Code and config reference names; Nix resolves names to paths.
 
 ---
 
+## Credential Injection
+
+Secrets (API keys, private keys) are injected at runtime via wrapper
+scripts. They never appear in the Nix store, committed config, or
+generated output.
+
+```nix
+pkgs.writeShellScriptBin "service-mcp" ''
+  exec env \
+    API_KEY="$(gopass show -o path/to/secret)" \
+    service-binary
+'';
+```
+
+The wrapper is on PATH via devShell. The MCP config references the
+wrapper by name. The secret is fetched at process launch and exists
+only in the child's environment — invisible to the Nix store, the
+MCP client, and any logging harness.
+
+---
+
 ## Documentation Protocol
 
 Same as Rust: impersonal, timeless, precise. Document non-boilerplate

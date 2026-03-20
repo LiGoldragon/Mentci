@@ -122,3 +122,15 @@ schemars = "1.0"
 ```
 
 Client features (`"client"`) are for dev-dependencies only (testing).
+
+---
+
+## Testing
+
+1. **Unit tests** with fixture data (offline, `#[cfg(test)]`)
+2. **Live integration tests** (`#[ignore]`, requires network + credentials)
+3. **MCP client test** — start the server via the wrapper, verify tools
+   are discoverable and return valid responses
+
+Ship after step 3, not step 1. A server that passes unit tests but
+fails when an MCP client connects is not tested.

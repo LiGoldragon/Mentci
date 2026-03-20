@@ -100,3 +100,28 @@ Mentci workspace     (aggregates all)
 
 Never rename a type in one repo and "fix the callers later." The
 tree must build at every step.
+
+---
+
+## Repository identity
+
+A rewrite is a new repo, not a force-push to an existing one. Existing
+repos have history, branches, and contributors that cannot be discarded.
+Create a new repo under the correct owner. If the old repo must be
+superseded, archive it — do not overwrite it.
+
+---
+
+## Provenance and dignity on external claims
+
+When documenting external service behavior (APIs, credentials, access
+tiers), every claim carries provenance and dignity:
+
+- **proven**: verified against the actual service (tested, observed)
+- **seen**: read from primary documentation (official FAQ, account page)
+- **uncertain**: from web search, third-party guides, or AI training data
+- **delusion**: contradicted by direct observation
+
+If the primary source cannot be accessed (JS-rendered, paywalled),
+the claim is `uncertain` at best. Do not present `uncertain` claims
+as `proven`.
