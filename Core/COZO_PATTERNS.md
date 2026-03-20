@@ -553,23 +553,21 @@ itself to define its next version. Each version is preserved by Saturn.
 
 Checklist for adding a versioned relation to samskara:
 
-1. **Schema**: Add `:create` to `Mentci/Core/samskara-world-init.cozo`
+1. **Schema**: Add `:create` to `samskara/schema/samskara-world-init.cozo`
    with `phase: String, dignity: String` columns (if versioned).
 
-2. **Copy**: Copy the schema file to `samskara/schema/samskara-world-init.cozo`.
+2. **Seed**: Add seed data to `samskara/schema/samskara-world-seed.cozo`.
 
-3. **Seed**: Add seed data to `samskara/schema/samskara-world-seed.cozo`.
+3. **Enum registry**: If adding a PascalCase enum, add a row to the `Enum`
+   seed in `samskara/schema/samskara-world-seed.cozo`.
 
-4. **Enum registry**: If adding a PascalCase enum, add a row to the `Enum`
-   seed in `samskara-world-seed.cozo`.
-
-5. **VERSIONED_RELATIONS**: Add the relation name to the constant in
+4. **VERSIONED_RELATIONS**: Add the relation name to the constant in
    `samskara/src/vcs/mod.rs`.
 
-6. **has_phase_column**: If the relation carries `phase`/`dignity` columns,
+5. **has_phase_column**: If the relation carries `phase`/`dignity` columns,
    add it to the `has_phase_column()` match in `samskara/src/vcs/mod.rs`.
 
-7. **Verify**: `cargo test` in both `samskara-codegen` and `samskara`.
+6. **Verify**: `cargo test` in both `samskara-codegen` and `samskara`.
 
 ---
 
