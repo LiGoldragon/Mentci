@@ -39,6 +39,26 @@ It does not summarize, excerpt, or restate. The link is the reference.
 
 ---
 
+## Read before writing
+
+Before editing any Core/ document, read all essential documents first:
+
+1. `ARCHITECTURE.md` — the system design and component relationships
+2. `META_PATTERN.md` — the philosophical and mathematical foundations
+3. The document being edited — in full, not just the section
+
+The purpose is not to memorize content but to grasp the author's
+intent, vocabulary, and framing. Edits that contradict the existing
+voice — using superseded terminology, introducing foreign concepts,
+or restating what another document already says — indicate that the
+reading step was skipped.
+
+This applies equally to human and agent authors. The documents are
+the institutional memory. Editing without reading is editing without
+understanding.
+
+---
+
 ## Scope boundaries
 
 Each pattern document owns its domain:
@@ -56,3 +76,27 @@ Each pattern document owns its domain:
 
 A rule about Nix naming does not appear in RUST_PATTERNS.md.
 A rule about error types does not appear in COZO_PATTERNS.md.
+
+---
+
+## Cascade operations
+
+Renaming a public type in a leaf crate breaks every downstream
+consumer. Plan the full dependency graph before starting.
+
+Order: leaf first, then upward through the tree. Each repo must
+build against the updated upstream before proceeding to the next.
+
+```
+criome-cozo          (leaf — rename here first)
+  ↑
+samskara-codegen     (depends on criome-cozo)
+samskara-lojix-contract  (depends on criome-cozo)
+  ↑
+samskara             (depends on all above)
+  ↑
+Mentci workspace     (aggregates all)
+```
+
+Never rename a type in one repo and "fix the callers later." The
+tree must build at every step.

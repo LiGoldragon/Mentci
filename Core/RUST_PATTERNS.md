@@ -348,6 +348,40 @@ impl ItemDetails {
 }
 ```
 
+Domain concepts are types, not primitives. A content hash is not a
+`String`. A language code is not a `String`. If a value has semantic
+identity beyond its representation, it is its own type.
+
+```rust
+// WRONG — a hash could be confused with any other string
+pub fn details(&self, md5: &str) -> Result<ItemDetails, Error>
+
+// RIGHT — the type encodes what the value IS
+pub struct Md5([u8; 16]);
+pub fn details(&self, md5: &Md5) -> Result<ItemDetails, Error>
+```
+
+### Binary Representation
+
+When a value has a fixed-size binary form, store it as bytes. Hex
+strings are a display concern, not a storage concern.
+
+```rust
+// WRONG — 32 hex chars pretending to be data
+pub struct Md5(String);
+
+// RIGHT — 16 bytes with hex serde
+pub struct Md5([u8; 16]);
+
+impl Md5 {
+    pub fn to_hex(&self) -> String { ... }
+}
+```
+
+Serde serializes to hex for JSON/human interchange. Internal code
+operates on bytes. This applies to MD5, BLAKE3, SHA-256, and all
+content hashes used in the Criome.
+
 ### Single Owner
 
 Every object has exactly one owner. This is the actor model meeting Rust's
@@ -418,6 +452,20 @@ In Rust codegen, they become typed enums.
 - A PascalCase relation name in CozoDB → enum type in Rust.
 - A snake_case relation name in CozoDB → struct type in Rust (PascalCase'd).
 - Avoid suffixes that restate objecthood (`Object`, `Type`, `Entity`).
+
+### Ontology Validation
+
+Terms introduced in Core/ documents must exist in the current project
+ontology. Before naming a new rule, principle, or pattern:
+
+1. Check `ARCHITECTURE.md` for active component names
+2. Check `META_PATTERN.md` for active conceptual vocabulary
+3. If a term appeared in old documents (CriomOS GUIDELINES, sajban)
+   but is absent from current Mentci docs, it is not active
+
+The Criome is the universal term — the living biome of all
+relationships. Sema is a building block within it, not the framing
+term. Rules are "Criome Object Rule", not "Sema Object Rule".
 
 ### Capitalization Durability Tiers
 
