@@ -66,6 +66,22 @@
         "type": "github"
       }
     },
+    "criome-store-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774116918,
+        "narHash": "sha256-iX7TgUEBFnPSk8I25aUFy6rQYtUZcwS/+ze1mWLBtoQ=",
+        "owner": "LiGoldragon",
+        "repo": "criome-store",
+        "rev": "cd886e50daae0fbe112d03a194429a0ed1b4dbab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LiGoldragon",
+        "repo": "criome-store",
+        "type": "github"
+      }
+    },
     "fenix": {
       "inputs": {
         "nixpkgs": [
@@ -177,6 +193,7 @@
         "claude-code": "claude-code",
         "crane": "crane",
         "criome-cozo-src": "criome-cozo-src",
+        "criome-store-src": "criome-store-src",
         "fenix": "fenix",
         "flake-utils": "flake-utils_2",
         "lojix-src": "lojix-src",
@@ -238,11 +255,11 @@
     "samskara-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774114697,
-        "narHash": "sha256-z667Z6pFODSIsAaBr++r7h0E0lSN3cbqGF8j65AIQ+w=",
+        "lastModified": 1774118444,
+        "narHash": "sha256-buQqnqfLbFwWnyeGWbCtQsDXoaLcBuTt1YwlmM+laYw=",
         "owner": "LiGoldragon",
         "repo": "samskara",
-        "rev": "d2d330225e519505477a96dff499ae19c971d190",
+        "rev": "d21ff11a3486e9196be0aad4a3ed15fa1c468bac",
         "type": "github"
       },
       "original": {

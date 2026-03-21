@@ -19,6 +19,7 @@
     samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };
     lojix-src = { url = "github:Criome/lojix"; flake = false; };
     samskara-codegen-src = { url = "github:LiGoldragon/samskara-codegen"; flake = false; };
+    criome-store-src = { url = "github:LiGoldragon/criome-store"; flake = false; };
     annas-archive-src = { url = "github:LiGoldragon/annas-archive"; flake = false; };
     # mentci-v0-src = { url = "github:Mentci-AI/dev"; flake = false; };  # private/deleted
   };
@@ -60,6 +61,7 @@
             postUnpack = ''
               depDir=$(dirname $sourceRoot)
               cp -rL ${inputs.criome-cozo-src} $depDir/criome-cozo
+              cp -rL ${inputs.criome-store-src} $depDir/criome-store
               cp -rL ${inputs.samskara-lojix-contract-src} $depDir/samskara-lojix-contract
               cp -rL ${inputs.samskara-codegen-src} $depDir/samskara-codegen
             '';
