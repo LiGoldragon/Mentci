@@ -66,6 +66,22 @@
         "type": "github"
       }
     },
+    "criome-store-contract-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774124315,
+        "narHash": "sha256-sdBmWWyCI3yViPIGeqYdHLD6wTf2zAwBgtsIk4ONc6M=",
+        "owner": "LiGoldragon",
+        "repo": "criome-store-contract",
+        "rev": "48b426fa84b75dcb56dddea989ff1be968177d99",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LiGoldragon",
+        "repo": "criome-store-contract",
+        "type": "github"
+      }
+    },
     "criome-store-src": {
       "flake": false,
       "locked": {
@@ -79,6 +95,22 @@
       "original": {
         "owner": "LiGoldragon",
         "repo": "criome-store",
+        "type": "github"
+      }
+    },
+    "criome-stored-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774124482,
+        "narHash": "sha256-pkDWMVjE6Pxxb4f48K38EMt6XP29HbuAUhEwbHBaNaE=",
+        "owner": "LiGoldragon",
+        "repo": "criome-stored",
+        "rev": "a5f2ec2a292508fd1e5c21d7d6e3e98bb743eb16",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LiGoldragon",
+        "repo": "criome-stored",
         "type": "github"
       }
     },
@@ -193,7 +225,9 @@
         "claude-code": "claude-code",
         "crane": "crane",
         "criome-cozo-src": "criome-cozo-src",
+        "criome-store-contract-src": "criome-store-contract-src",
         "criome-store-src": "criome-store-src",
+        "criome-stored-src": "criome-stored-src",
         "fenix": "fenix",
         "flake-utils": "flake-utils_2",
         "lojix-src": "lojix-src",

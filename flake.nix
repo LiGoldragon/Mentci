@@ -21,6 +21,8 @@
     lojix-src = { url = "github:Criome/lojix"; flake = false; };
     samskara-codegen-src = { url = "github:LiGoldragon/samskara-codegen"; flake = false; };
     criome-store-src = { url = "github:LiGoldragon/criome-store"; flake = false; };
+    criome-store-contract-src = { url = "github:LiGoldragon/criome-store-contract"; flake = false; };
+    criome-stored-src = { url = "github:LiGoldragon/criome-stored"; flake = false; };
     annas-archive-src = { url = "github:LiGoldragon/annas-archive"; flake = false; };
     # mentci-v0-src = { url = "github:Mentci-AI/dev"; flake = false; };  # private/deleted
   };
@@ -98,6 +100,30 @@
           inherit cargoArtifacts;
         });
 
+        # criome-stored — content-addressed store agent
+        criome-stored = let
+          cozoFilter = path: _type: builtins.match ".*\\.cozo$" path != null;
+          src = pkgs.lib.cleanSourceWith {
+            src = inputs.criome-stored-src;
+            filter = path: type:
+              (cozoFilter path type) || (craneLib.filterCargoSources path type);
+          };
+          commonArgs = {
+            inherit src;
+            pname = "criome-stored";
+            postUnpack = ''
+              depDir=$(dirname $sourceRoot)
+              cp -rL ${inputs.criome-cozo-src} $depDir/criome-cozo
+              cp -rL ${inputs.criome-store-src} $depDir/criome-store
+              cp -rL ${inputs.criome-store-contract-src} $depDir/criome-store-contract
+              cp -rL ${inputs.samskara-core-src} $depDir/samskara-core
+            '';
+          };
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        in craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+        });
+
         # MCP wrappers — on PATH via devShell, no store paths in config
         samskara-mcp = pkgs.writeShellScriptBin "samskara-mcp" ''
           db="''${SAMSKARA_DB_PATH:-''${MENTCI_V1_ROOT:+$MENTCI_V1_ROOT/../samskara/world.db}}"
@@ -106,6 +132,12 @@
           exec env \
             RUST_LOG="''${RUST_LOG:-info}" \
             samskara --db-path "$db"
+        '';
+
+        criome-stored-mcp = pkgs.writeShellScriptBin "criome-stored-mcp" ''
+          exec env \
+            RUST_LOG="''${RUST_LOG:-info}" \
+            criome-stored
         '';
 
         annas-archive-mcp = pkgs.writeShellScriptBin "annas-archive-mcp" ''
@@ -119,6 +151,9 @@
           mcpServers = {
             samskara = {
               command = "samskara-mcp";
+            };
+            criome-stored = {
+              command = "criome-stored-mcp";
             };
             annas-archive = {
               command = "annas-archive-mcp";
@@ -144,6 +179,8 @@
           claude-code.packages.${system}.default
           annas-archive
           annas-archive-mcp
+          criome-stored
+          criome-stored-mcp
         ];
 
       in
