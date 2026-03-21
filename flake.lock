@@ -123,6 +123,22 @@
         "type": "github"
       }
     },
+    "lojix-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774090132,
+        "narHash": "sha256-FO+8m8IODCJqttbuvgQj+JNzWuOl2qssxJkMGjA0mUM=",
+        "owner": "Criome",
+        "repo": "lojix",
+        "rev": "10c4ee429ef4b0dac2c5d5e884a31df5c103722e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "Criome",
+        "repo": "lojix",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1773628058,
@@ -163,6 +179,7 @@
         "criome-cozo-src": "criome-cozo-src",
         "fenix": "fenix",
         "flake-utils": "flake-utils_2",
+        "lojix-src": "lojix-src",
         "nixpkgs": "nixpkgs_2",
         "samskara-codegen-src": "samskara-codegen-src",
         "samskara-lojix-contract-src": "samskara-lojix-contract-src",
@@ -189,11 +206,11 @@
     "samskara-codegen-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774089589,
-        "narHash": "sha256-QrWB8FjzXCaSwXQSIJK6UkF5kgGgLGn2wPM3MDvA2Pw=",
+        "lastModified": 1774090005,
+        "narHash": "sha256-vqXkH7AlMZghqaETdJVRv0MjrLzEBpclZDG2MiEp7xo=",
         "owner": "LiGoldragon",
         "repo": "samskara-codegen",
-        "rev": "1be9d9081c60d1e9573b3fd513b10a9eb9199fdf",
+        "rev": "5941643f3944464e1359acc282f9baf4ef440f41",
         "type": "github"
       },
       "original": {
@@ -221,11 +238,11 @@
     "samskara-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774089412,
-        "narHash": "sha256-qvrZ27KP9YJ2iv1jAlpaqQ36CDfOP+fzKta4QW2BPKk=",
+        "lastModified": 1774089962,
+        "narHash": "sha256-kX/Q+ZzSt3WV4y6ZbHQTID9F28Y0gO9tJZB6KEElOVw=",
         "owner": "LiGoldragon",
         "repo": "samskara",
-        "rev": "d9b857544b54b33ca0360543c4bcfd1bf4e2dbb2",
+        "rev": "196c1d07f0a4e33803da384f895d5b7f55734257",
         "type": "github"
       },
       "original": {

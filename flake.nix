@@ -17,7 +17,7 @@
     samskara-lojix-contract-src = { url = "github:LiGoldragon/samskara-lojix-contract"; flake = false; };
     criome-cozo-src = { url = "github:LiGoldragon/criome-cozo"; flake = false; };
     samskara-src = { url = "github:LiGoldragon/samskara"; flake = false; };
-    # lojix-src = { url = "github:LiGoldragon/lojix"; flake = false; };  # empty repo
+    lojix-src = { url = "github:Criome/lojix"; flake = false; };
     samskara-codegen-src = { url = "github:LiGoldragon/samskara-codegen"; flake = false; };
     annas-archive-src = { url = "github:LiGoldragon/annas-archive"; flake = false; };
     # mentci-v0-src = { url = "github:Mentci-AI/dev"; flake = false; };  # private/deleted
@@ -70,6 +70,31 @@
           inherit cargoArtifacts;
         });
 
+        # Lojix — DSL transpiler agent
+        lojix = let
+          cozoFilter = path: _type: builtins.match ".*\\.cozo$" path != null;
+          src = pkgs.lib.cleanSourceWith {
+            src = inputs.lojix-src;
+            filter = path: type:
+              (cozoFilter path type) || (craneLib.filterCargoSources path type);
+          };
+          commonArgs = {
+            inherit src;
+            pname = "lojix";
+            postUnpack = ''
+              depDir=$(dirname $sourceRoot)
+              cp -rL ${inputs.criome-cozo-src} $depDir/criome-cozo
+              cp -rL ${inputs.samskara-lojix-contract-src} $depDir/samskara-lojix-contract
+              cp -rL ${inputs.samskara-codegen-src} $depDir/samskara-codegen
+              cp -rL ${inputs.samskara-src} $depDir/samskara
+            '';
+            nativeBuildInputs = [ pkgs.capnproto ];
+          };
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        in craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+        });
+
         # MCP wrappers — on PATH via devShell, no store paths in config
         samskara-mcp = pkgs.writeShellScriptBin "samskara-mcp" ''
           db="''${SAMSKARA_DB_PATH:-''${MENTCI_V1_ROOT:+$MENTCI_V1_ROOT/../samskara/world.db}}"
@@ -112,6 +137,7 @@
             claude-code.packages.${system}.default
             samskara
             samskara-mcp
+            lojix
             annas-archive
             annas-archive-mcp
           ];
