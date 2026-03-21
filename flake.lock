@@ -53,11 +53,11 @@
     "criome-cozo-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774102595,
-        "narHash": "sha256-qJy0hrCOwtlkDcPZ7hv59JhkGMnhqVflAMkXd2ENU/Q=",
+        "lastModified": 1774103515,
+        "narHash": "sha256-pKg6alkWd9qTqLRRJA5FaR49DvrPTx0JQO1BM450XXs=",
         "owner": "LiGoldragon",
         "repo": "criome-cozo",
-        "rev": "bb218a97d7e9058b03e2ccba39b15b57e3291474",
+        "rev": "b94f4eb93681c96f653084e93a749bad06c32148",
         "type": "github"
       },
       "original": {
