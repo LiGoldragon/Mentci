@@ -199,6 +199,7 @@
         "lojix-src": "lojix-src",
         "nixpkgs": "nixpkgs_2",
         "samskara-codegen-src": "samskara-codegen-src",
+        "samskara-core-src": "samskara-core-src",
         "samskara-lojix-contract-src": "samskara-lojix-contract-src",
         "samskara-src": "samskara-src"
       }
@@ -236,6 +237,22 @@
         "type": "github"
       }
     },
+    "samskara-core-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774123755,
+        "narHash": "sha256-dXBn2OjS5Pu+lkI4utaPvPAWrypypoAHhZ1d+NrNPAU=",
+        "owner": "LiGoldragon",
+        "repo": "samskara-core",
+        "rev": "2b0dbebae4fd4228ee2421b7177050a15d4af18d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LiGoldragon",
+        "repo": "samskara-core",
+        "type": "github"
+      }
+    },
     "samskara-lojix-contract-src": {
       "flake": false,
       "locked": {
@@ -255,11 +272,11 @@
     "samskara-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774118614,
-        "narHash": "sha256-3CRytpr3vwFbpVojae9CdmhG8jN0a6CmD/yobVqpMS8=",
+        "lastModified": 1774124079,
+        "narHash": "sha256-NRPwtRH5YDm/nSxn9SAdo8uufd6nmVi+ZTs5hzKlurs=",
         "owner": "LiGoldragon",
         "repo": "samskara",
-        "rev": "1e1187a598a16073c79f6b17f9bdb7383ba8c2a7",
+        "rev": "bff650790b19b4feb009f9074752b4955300aa7d",
         "type": "github"
       },
       "original": {
