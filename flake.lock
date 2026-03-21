@@ -174,11 +174,11 @@
     "lojix-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774090132,
-        "narHash": "sha256-FO+8m8IODCJqttbuvgQj+JNzWuOl2qssxJkMGjA0mUM=",
+        "lastModified": 1774129193,
+        "narHash": "sha256-FcAJgsWNUjy4O0RTg+Y4hE1+CpHuPwtbQC2ReYDICK8=",
         "owner": "Criome",
         "repo": "lojix",
-        "rev": "10c4ee429ef4b0dac2c5d5e884a31df5c103722e",
+        "rev": "7b932143dacf8ca20c007a3ffc925c92cf9286e9",
         "type": "github"
       },
       "original": {
@@ -306,11 +306,11 @@
     "samskara-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774124079,
-        "narHash": "sha256-NRPwtRH5YDm/nSxn9SAdo8uufd6nmVi+ZTs5hzKlurs=",
+        "lastModified": 1774130001,
+        "narHash": "sha256-cHfDpN25ghWRT7HK0ZbvMCljF6gfuw/eZzDKI3dsTng=",
         "owner": "LiGoldragon",
         "repo": "samskara",
-        "rev": "bff650790b19b4feb009f9074752b4955300aa7d",
+        "rev": "baea6d3d81a9f341253c9c0b51020cd8a96a36b0",
         "type": "github"
       },
       "original": {

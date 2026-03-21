@@ -89,6 +89,7 @@
             postUnpack = ''
               depDir=$(dirname $sourceRoot)
               cp -rL ${inputs.criome-cozo-src} $depDir/criome-cozo
+              cp -rL ${inputs.samskara-core-src} $depDir/samskara-core
               cp -rL ${inputs.samskara-lojix-contract-src} $depDir/samskara-lojix-contract
               cp -rL ${inputs.samskara-codegen-src} $depDir/samskara-codegen
               cp -rL ${inputs.samskara-src} $depDir/samskara
