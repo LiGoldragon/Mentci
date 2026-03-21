@@ -123,34 +123,54 @@
           };
         };
 
+        mcpConfigLite = builtins.toJSON {
+          mcpServers = {
+            annas-archive = {
+              command = "annas-archive-mcp";
+            };
+          };
+        };
+
+        commonPackages = [
+          rustToolchain
+          pkgs.rust-analyzer
+          pkgs.jujutsu
+          pkgs.sqlite
+          pkgs.capnproto
+          pkgs.gopass
+          claude-code.packages.${system}.default
+          annas-archive
+          annas-archive-mcp
+        ];
+
       in
       {
         devShells.default = pkgs.mkShell {
           name = "mentci-v1";
-          packages = [
-            rustToolchain
-            pkgs.rust-analyzer
-            pkgs.jujutsu
-            pkgs.sqlite
-            pkgs.capnproto
-            pkgs.gopass
-            claude-code.packages.${system}.default
+          packages = commonPackages ++ [
             samskara
             samskara-mcp
             lojix
-            annas-archive
-            annas-archive-mcp
           ];
           env = {
             RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
           };
           shellHook = ''
             export MENTCI_V1_ROOT="$(pwd)"
-
-            # Generate .mcp.json — commands resolve via PATH, no store paths
             echo '${mcpConfig}' > .mcp.json
-
             echo "mentci-v1: workspace active (claude + samskara + annas-archive)"
+          '';
+        };
+
+        devShells.lite = pkgs.mkShell {
+          name = "mentci-lite";
+          packages = commonPackages ++ [ lojix ];
+          env = {
+            RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+          };
+          shellHook = ''
+            echo '${mcpConfigLite}' > .mcp.json
+            echo "mentci-lite: workspace active (claude + annas-archive, no samskara)"
           '';
         };
       }
