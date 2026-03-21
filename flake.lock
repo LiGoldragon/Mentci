@@ -53,11 +53,11 @@
     "criome-cozo-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774111928,
-        "narHash": "sha256-3W+x/9ZEr1VdFlKLfWJX8u0Z8Z6Xfudp7QwxhLA3rVc=",
+        "lastModified": 1774136226,
+        "narHash": "sha256-4A+7+ufW42WT9euGSpRFfKMJmTy/AHQ6r3P7L+SST1I=",
         "owner": "LiGoldragon",
         "repo": "criome-cozo",
-        "rev": "5f090cddd3a8a21c12e9f641e1c3c0aeb102faf3",
+        "rev": "35ccd4ffa6569ef9fc42a5494d8728add2d12064",
         "type": "github"
       },
       "original": {
@@ -274,11 +274,11 @@
     "samskara-core-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774131010,
-        "narHash": "sha256-+YYsNlRYn/8kVfQUSLXOJQDS2EB+Xcx+gP2PDeZnmnU=",
+        "lastModified": 1774133097,
+        "narHash": "sha256-debQPKgu5RV0KcuIePiLgFpj4DAGfDbuRgVDnmK5ZWM=",
         "owner": "LiGoldragon",
         "repo": "samskara-core",
-        "rev": "a2d7921cadb6cee2003d6f28b31bcbf664b56077",
+        "rev": "66a2682c36495abc1cab37f5e5ff47b7a070459d",
         "type": "github"
       },
       "original": {
