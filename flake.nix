@@ -72,9 +72,12 @@
 
         # MCP wrappers — on PATH via devShell, no store paths in config
         samskara-mcp = pkgs.writeShellScriptBin "samskara-mcp" ''
+          db="''${SAMSKARA_DB_PATH:-''${MENTCI_V1_ROOT:+$MENTCI_V1_ROOT/../samskara/world.db}}"
+          db="''${db:-$HOME/.local/share/samskara/world.db}"
+          mkdir -p "$(dirname "$db")"
           exec env \
             RUST_LOG="''${RUST_LOG:-info}" \
-            samskara --memory
+            samskara --db-path "$db"
         '';
 
         annas-archive-mcp = pkgs.writeShellScriptBin "annas-archive-mcp" ''
