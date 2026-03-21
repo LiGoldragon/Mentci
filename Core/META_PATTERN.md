@@ -584,9 +584,9 @@ in Sema). The contract IS the toroidal connection — the path through the
 center that makes separate parts one system.
 
 The VCS commit chain is the temporal circulation around the torus — each
-commit a point on the cycle, flowing continuously from sol (manifest) through
-luna (becoming) to saturnus (archived) and back through restore (pratiṣṭhā).
-Saturn's ledger is the record of every completed circuit.
+commit a point on the cycle, flowing continuously from manifest (active) through
+becoming (staged) to retired (archived) and back through restore (pratiṣṭhā).
+The retired ledger is the record of every completed circuit.
 
 ---
 
@@ -642,16 +642,17 @@ rules, casing stones, or datalog queries.
 
 ## IX. The Saṃskṛta Equivalence Layer
 
-Every core concept in Mentci has a Saṃskṛta root stored in the `samskrta`
-relation. This is not decoration — it is the reference layer that connects
-the modern implementation to its ancient source:
+Every core concept in Mentci has roots in classical languages, stored in
+the `samskrta` (Sanskrit) and `latina` (Latin) equivalence relations. English
+names are the operational identifiers; classical roots preserve etymological
+provenance:
 
-| Term | Saṃskṛta | Domain | Meaning |
-|------|----------|--------|---------|
-| sol | sūrya | Phase | the sun, source of light |
-| luna | candra | Phase | the moon, reflector |
-| saturnus | śani | Phase | saturn, time-lord, boundary |
-| eternal | nitya | Dignity | permanent, always-existing |
+| Term | Saṃskṛta | Latina | Domain | Meaning |
+|------|----------|--------|--------|---------|
+| manifest | — | sol | Phase | active, current (the sun, source of light) |
+| becoming | — | luna | Phase | staged, proposed (the moon, reflector) |
+| retired | — | saturnus | Phase | archived (saturn, time-lord, boundary) |
+| eternal | nitya | — | Dignity | permanent, always-existing |
 | proven | siddha | Dignity | accomplished, perfected |
 | seen | dṛṣṭa | Dignity | witnessed, perceived directly |
 | uncertain | sandeha | Dignity | doubt, uncertainty |

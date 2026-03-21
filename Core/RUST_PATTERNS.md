@@ -79,7 +79,7 @@ entity with its own owner and its own position in the Criome.
 
 The contract owner controls the membrane. Critical contracts are governed by
 **quorum contracts** — N-of-M threshold agreements where a relation moves
-from luna to sol only when the quorum threshold is met. Phase + dignity +
+from becoming to manifest only when the quorum threshold is met. Phase + dignity +
 multi-agent commits provide this machinery without a separate governance
 system.
 
@@ -388,8 +388,8 @@ Every object has exactly one owner. This is the actor model meeting Rust's
 borrow checker — the same principle at two levels:
 
 - **Relational level**: The `phase` column encodes lifecycle. Only
-  `sol`-phase rows participate in the world hash. Ownership transfers
-  (luna→sol→saturnus) are explicit commit operations (saṅkalpa).
+  `manifest`-phase rows participate in the world hash. Ownership transfers
+  (becoming→manifest→retired) are explicit commit operations (saṅkalpa).
 
 - **Rust level**: Move semantics. No `Arc<Mutex<T>>` for domain state.
   Actors own their state exclusively and communicate via typed messages.
@@ -431,13 +431,14 @@ For definitions and values, see `COZO_PATTERNS.md` §Phase and Dignity.
 
 | Phase | World hash | Rust ownership analogy |
 |-------|-----------|----------------------|
-| `sol` | **Yes** | Owned value — committed, immovable until superseded |
-| `luna` | No | Mutable borrow — staged, can be modified before commit |
-| `saturnus` | No | Archived — moved to cold storage, recoverable via restore |
+| `manifest` | **Yes** | Owned value — committed, immovable until superseded |
+| `becoming` | No | Mutable borrow — staged, can be modified before commit |
+| `retired` | No | Archived — moved to cold storage, recoverable via restore |
 
-**Commit** (saṅkalpa) is Luna→Sol: staged facts become manifest.
-**Supersede** is Sol→Saturn: old truth moves to the archive.
-**Restore** (pratiṣṭhā) is Saturn→Sol: archived state returns.
+**Commit** (saṅkalpa) is becoming→manifest: staged facts become active.
+**Supersede** is manifest→retired: old truth moves to the archive.
+**Restore** (pratiṣṭhā) is retired→manifest: archived state returns.
+Latin equivalents (sol/luna/saturnus) are preserved in the `latina` relation.
 
 Phase and dignity are orthogonal. Both are `String` columns — not enums
 in CozoDB, but validated against the `Phase` and `Dignity` enum relations.
@@ -497,9 +498,9 @@ impl FromStr for Phase {
 
     fn from_str(input: &str) -> Result<Self, Self::Err> {
         match input {
-            "sol" => Ok(Phase::Sol),
-            "luna" => Ok(Phase::Luna),
-            "saturnus" => Ok(Phase::Saturnus),
+            "manifest" => Ok(Phase::Manifest),
+            "becoming" => Ok(Phase::Becoming),
+            "retired" => Ok(Phase::Retired),
             _ => Err(ParsePhaseError(input.to_string())),
         }
     }

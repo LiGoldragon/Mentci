@@ -29,7 +29,7 @@ This document defines how to write CozoScript for the Criome.
 
 | Casing | Meaning | CozoDB role | Rust output |
 |--------|---------|-------------|-------------|
-| `PascalCase` | Categorical type | Registered in `Enum`, rows = variants | `enum Phase { Sol, Luna, Saturnus }` |
+| `PascalCase` | Categorical type | Registered in `Enum`, rows = variants | `enum Phase { Manifest, Becoming, Retired }` |
 | `snake_case` | Data / instance relation | Key + value columns, rows = instances | `struct Thought { id, kind, ... }` |
 
 PascalCase in a relation name means "this is a category." The same word in
@@ -54,7 +54,7 @@ It is self-registering — `Enum` lists itself as an entry:
 
 ?[name, description] <- [
   ["Enum",       "Registry of all categorical type relations"],
-  ["Phase",      "Lifecycle tri-state: sol/luna/saturnus"],
+  ["Phase",      "Lifecycle tri-state: manifest/becoming/retired"],
   ["Dignity",    "Epistemological trust hierarchy"],
   ["CommitType", "Jujutsu commit classification"],
   ["Action",     "Commit transformation verb"],
@@ -81,11 +81,11 @@ for Rust and camelCase for Cap'n Proto automatically.
 
 ```cozo
 # Values stored lowercase in CozoDB
-?[name] <- [["sol"], ["luna"], ["saturnus"]]
+?[name] <- [["manifest"], ["becoming"], ["retired"]]
 :put Phase { name => ... }
 
-# Codegen produces: enum Phase { Sol, Luna, Saturnus }
-# Cap'n Proto:      enum Phase { sol @0; luna @1; saturnus @2; }
+# Codegen produces: enum Phase { Manifest, Becoming, Retired }
+# Cap'n Proto:      enum Phase { manifest @0; becoming @1; retired @2; }
 ```
 
 ### Reserved Conventions
@@ -225,14 +225,14 @@ The explicit `{column: Variable}` syntax is only needed when they differ:
 
 ```cozo
 # Equality
-?[id, title] := *thought{id, title, phase}, phase == "sol"
+?[id, title] := *thought{id, title, phase}, phase == "manifest"
 
 # Inequality
-?[id, title] := *thought{id, title, phase}, phase != "saturnus"
+?[id, title] := *thought{id, title, phase}, phase != "retired"
 
 # Multiple conditions (comma = AND)
 ?[id, title] := *thought{id, title, phase, dignity},
-  phase == "sol", dignity == "eternal"
+  phase == "manifest", dignity == "eternal"
 ```
 
 **Important**: Binding a column to a literal makes it a constant, not a
@@ -278,7 +278,7 @@ Use `<-` to inject literal data. Rows are arrays. Types are inferred.
 ### `:put` — Insert or Update
 
 ```cozo
-?[id, kind, phase, dignity] <- [["t-1", "observation", "luna", "seen"]]
+?[id, kind, phase, dignity] <- [["t-1", "observation", "becoming", "seen"]]
 :put thought {id => kind, phase, dignity}
 ```
 
@@ -306,14 +306,14 @@ CozoDB has no `UPDATE` statement. To change a column value:
 2. Construct new values (modify the target column)
 3. `:put` the modified row (replaces by key)
 
-In Rust, the pattern for promoting `phase` from `"luna"` to `"sol"`:
+In Rust, the pattern for promoting `phase` from `"becoming"` to `"manifest"`:
 
 ```rust
-// Query all luna rows with all columns
+// Query all becoming rows with all columns
 let query = format!(
-    "?[{col_list}] := *{rel}{{{col_list}}}, phase == \"luna\""
+    "?[{col_list}] := *{rel}{{{col_list}}}, phase == \"becoming\""
 );
-let luna_rows = db.run_script(&query)?;
+let becoming_rows = db.run_script(&query)?;
 
 // For each row, replace the phase column and :put back
 for row in luna_rows {
@@ -410,9 +410,9 @@ system cannot reason about its own reliability.
 
 | Value | Meaning | In world hash |
 |-------|---------|---------------|
-| `"sol"` | Manifest — committed truth | Yes |
-| `"luna"` | Becoming — staged, proposed | No |
-| `"saturnus"` | Archived — superseded | No |
+| `"manifest"` | Active — committed truth | Yes |
+| `"becoming"` | Staged — proposed, not yet committed | No |
+| `"retired"` | Archived — superseded | No |
 
 ### Dignity Values
 
@@ -428,10 +428,10 @@ system cannot reason about its own reliability.
 
 ```cozo
 # All manifest facts (in the world hash)
-?[id, title] := *thought{id, title, phase}, phase == "sol"
+?[id, title] := *thought{id, title, phase}, phase == "manifest"
 
-# All visible facts (manifest + staged, hide archived)
-?[id, title, phase] := *thought{id, title, phase}, phase != "saturnus"
+# All visible facts (manifest + becoming, hide retired)
+?[id, title, phase] := *thought{id, title, phase}, phase != "retired"
 
 # Only eternal-dignity principles
 ?[id, rule] := *principle{id, rule, dignity}, dignity == "eternal"
@@ -439,8 +439,8 @@ system cannot reason about its own reliability.
 
 ### Default for New Assertions
 
-New facts enter with `phase = "luna"`, `dignity = "seen"`. They become
-manifest (`"sol"`) when `commit_world` is called.
+New facts enter with `phase = "becoming"`, `dignity = "seen"`. They become
+active (`"manifest"`) when `commit_world` is called.
 
 ---
 
@@ -535,8 +535,8 @@ CozoDB serializes query results as JSON with tagged value types:
 {
   "headers": ["id", "title", "phase"],
   "rows": [
-    [{"Str": "t-1"}, {"Str": "Hello"}, {"Str": "sol"}],
-    [{"Str": "t-2"}, {"Str": "World"}, {"Str": "luna"}]
+    [{"Str": "t-1"}, {"Str": "Hello"}, {"Str": "manifest"}],
+    [{"Str": "t-2"}, {"Str": "World"}, {"Str": "becoming"}]
   ]
 }
 ```

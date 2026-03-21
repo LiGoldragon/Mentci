@@ -15,12 +15,23 @@
 - [x] Propagate phase/dignity to existing relations in samskara (replaced `live: Bool`)
 - [x] Schema consolidation — `samskara/schema/` is single authority
 - [x] Sema refactor — WorldVcs struct, JjMirror struct, methods not free functions
+- [x] Commit samskara's dirty worktree (18 changes from reconciliation)
+- [x] Phase rename: sol→manifest, luna→becoming, saturnus→retired
+- [x] Durable SQLite backend + idempotent boot (world.db in samskara repo)
+- [x] world_schema self-description + dynamic VERSIONED_RELATIONS
+- [x] CozoScript codegen (to_cozo_init_text + to_cozo_seed_text + to_capnp_text)
+- [x] Lojix type dependency on samskara::schema capnp types
+- [x] Two-way roundtrip test (seed→DB→seed losslessness proof)
+- [x] latina + samskrta equivalence relations seeded
+- [x] Execution plan + migration map stored in samskara world.db
 
 ## Next Steps
 
-- [ ] Commit samskara's dirty worktree (18 changes from reconciliation)
+- [ ] Ownership model on relations (agent registry gates mutations)
+- [ ] CozoDB triggers for invariant enforcement
+- [ ] Review gates for phase transitions (becoming→manifest, manifest→retired)
+- [ ] DB-defined MCP tools (handler_script in tool relation)
 - [ ] Design the Lojix DSL grammar
-- [ ] Update `criome-cozo` with phase-aware query helpers
-- [ ] Self-referencing capnp file ID (hash schema with zeroed ID, use hash as ID)
-- [ ] Hard-coded phase/dignity string literals → constants or enum queries
-- [ ] Write `.capnp` schema for WorldSnapshot / WorldDelta (currently JSON+zstd+base64)
+- [ ] Self-referencing capnp file ID
+- [ ] Write `.capnp` schema for WorldSnapshot / WorldDelta
+- [ ] Core/ docs → eventually live as relations in DB (stopgap medium)

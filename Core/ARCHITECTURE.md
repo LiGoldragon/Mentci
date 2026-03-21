@@ -57,8 +57,9 @@ to this database.
 ### Phase and Dignity
 
 Every versioned relation carries `phase` and `dignity` columns.
-`phase = "sol"` marks manifest (active) relations. `phase = "luna"` marks
-staged (proposed). `phase = "saturnus"` marks archived (historical).
+`phase = "manifest"` marks active relations. `phase = "becoming"` marks
+staged (proposed). `phase = "retired"` marks archived (historical).
+The Latin equivalents (sol, luna, saturnus) are preserved in the `latina` relation.
 Dignity encodes trust level: eternal, proven, seen, uncertain, delusion.
 See `COZO_PATTERNS.md` and `RUST_PATTERNS.md` for full definitions.
 
