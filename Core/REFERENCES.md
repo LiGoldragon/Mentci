@@ -1,3 +1,7 @@
+<!-- SUPERSEDED: This document is now a read-only projection of samskara
+     relations. The authoritative source is the `source` relation in samskara's
+     world.db. To query: ?[id, title, url, kind] := *source{id, title, url, kind} -->
+
 # References
 
 Primary sources and bibliography for claims made in Core/ documents.

@@ -1,3 +1,8 @@
+<!-- SUPERSEDED: This document is now a read-only projection of samskara
+     relations. The authoritative source is the `rule` relation in samskara's
+     world.db. To query: ?[id, body, rationale] := *rule{id, body, rationale,
+     microtheory: "nix"} -->
+
 # Nix Patterns
 
 How to write Nix for the Criome. Nix is the build system and

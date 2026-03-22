@@ -1,3 +1,8 @@
+<!-- SUPERSEDED: This document is now a read-only projection of samskara
+     relations. The authoritative source is the `rule` relation in samskara's
+     world.db. To query: ?[id, body, rationale] := *rule{id, body, rationale,
+     microtheory: "vcs"} -->
+
 # VCS Patterns
 
 Version control for the Criome. Jujutsu is the interface. Git is the
