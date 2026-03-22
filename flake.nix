@@ -209,6 +209,20 @@
           };
         };
 
+        mcpConfigReader = builtins.toJSON {
+          mcpServers = {
+            samskara-reader = {
+              command = "samskara-reader-mcp";
+            };
+            criome-stored = {
+              command = "criome-stored-mcp";
+            };
+            annas-archive = {
+              command = "annas-archive-mcp";
+            };
+          };
+        };
+
         mcpConfigLite = builtins.toJSON {
           mcpServers = {
             samskara-reader = {
@@ -253,6 +267,19 @@
             export MENTCI_V1_ROOT="$(pwd)"
             echo '${mcpConfig}' > .mcp.json
             echo "mentci-v1: workspace active (claude + samskara + annas-archive)"
+          '';
+        };
+
+        devShells.reader = pkgs.mkShell {
+          name = "mentci-reader";
+          packages = commonPackages ++ [ lojix ];
+          env = {
+            RUST_SRC_PATH = "${pkgs.rustPlatform.rustLibSrc}";
+          };
+          shellHook = ''
+            export MENTCI_V1_ROOT="$(pwd)"
+            echo '${mcpConfigReader}' > .mcp.json
+            echo "mentci-reader: workspace active (claude + samskara-reader + criome-stored + annas-archive)"
           '';
         };
 
