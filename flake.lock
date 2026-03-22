@@ -117,11 +117,11 @@
     "criome-stored-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774124482,
-        "narHash": "sha256-pkDWMVjE6Pxxb4f48K38EMt6XP29HbuAUhEwbHBaNaE=",
+        "lastModified": 1774175167,
+        "narHash": "sha256-tRUXrCm2MlOUXZpRzxWCEai8dPSSKp4kccvhoouHRMQ=",
         "owner": "LiGoldragon",
         "repo": "criome-stored",
-        "rev": "a5f2ec2a292508fd1e5c21d7d6e3e98bb743eb16",
+        "rev": "0ce07fd331bd5dfab497e1a1513f823e29f359e0",
         "type": "github"
       },
       "original": {
@@ -291,11 +291,11 @@
     "samskara-core-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774133097,
-        "narHash": "sha256-debQPKgu5RV0KcuIePiLgFpj4DAGfDbuRgVDnmK5ZWM=",
+        "lastModified": 1774175147,
+        "narHash": "sha256-aah3Bh3aJmnKVap+t/iLr2qTGJg6HVhAXI4RhF/t/II=",
         "owner": "LiGoldragon",
         "repo": "samskara-core",
-        "rev": "66a2682c36495abc1cab37f5e5ff47b7a070459d",
+        "rev": "3110472a81627551cba6b258303855314d087f1d",
         "type": "github"
       },
       "original": {
@@ -323,11 +323,11 @@
     "samskara-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774131022,
-        "narHash": "sha256-EM34PnZlvJjQo8nB7G5yU1pvwUmnnLYkGDh2FAFlFL8=",
+        "lastModified": 1774175157,
+        "narHash": "sha256-5dMBXE4HqbMfLhIxIFTHAyF8yK7arpae7lsfS8qHDcg=",
         "owner": "LiGoldragon",
         "repo": "samskara",
-        "rev": "85403842bd981cefe9984221f01bd6fe88a0d17f",
+        "rev": "90b5c4740ab8d3914e169d51b5ee73e985daaf49",
         "type": "github"
       },
       "original": {

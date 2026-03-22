@@ -1,0 +1,71 @@
+digraph samskara {
+  rankdir=TB;
+  fontname="Helvetica";
+  node [fontname="Helvetica", fontsize=10, shape=box, style="rounded,filled"];
+  edge [fontname="Helvetica", fontsize=8];
+  compound=true;
+
+  // ── Qualitative bedrock ─────────────────────────────────────────
+  Element [fillcolor="#ffffcc"];
+  Modality [fillcolor="#ffffcc"];
+  Aspect [fillcolor="#ffffcc"];
+  Sect [fillcolor="#ffffcc"];
+
+  // ── Positional ──────────────────────────────────────────────────
+  Sign [fillcolor="#ccffcc"];
+  House [fillcolor="#ccffcc"];
+  Decan [fillcolor="#ccffcc"];
+  Nakshatra [fillcolor="#ccffcc"];
+  SolarDivision [fillcolor="#ccffcc"];
+  Sephirah [fillcolor="#ccffcc"];
+  Path [fillcolor="#ccffcc"];
+
+  // ── Agentive ────────────────────────────────────────────────────
+  Planet [fillcolor="#ffcccc"];
+  Rulership [fillcolor="#ffcccc"];
+  Node [fillcolor="#ffcccc"];
+
+  // ── Symbolic ────────────────────────────────────────────────────
+  Measure [fillcolor="#ccccff"];
+  Correspondence [fillcolor="#ccccff"];
+  TarotMajor [fillcolor="#ccccff"];
+
+  // ── Governance ──────────────────────────────────────────────────
+  thought [fillcolor="#e0e0e0"];
+  thought_link [fillcolor="#e0e0e0"];
+  principle [fillcolor="#e0e0e0"];
+  agent [fillcolor="#e0e0e0"];
+  repo [fillcolor="#e0e0e0"];
+  repo_state [fillcolor="#e0e0e0"];
+  source [fillcolor="#cce0ff"];
+  SourceType [fillcolor="#cce0ff"];
+  relation_meta [fillcolor="#e0e0e0"];
+  relation_morphism [fillcolor="#e0e0e0"];
+  relation_tradition [fillcolor="#e0e0e0"];
+
+  // ── Structural (VCS) ───────────────────────────────────────────
+  Phase [fillcolor="#e8e8ff"];
+  Dignity [fillcolor="#e8e8ff"];
+  world_schema [fillcolor="#d0d0ff"];
+  world_commit [fillcolor="#d0d0ff"];
+
+  // ── Ontological morphisms ──────────────────────────────────────
+  Sign -> Element [label="element", color="darkgreen"];
+  Sign -> Modality [label="modality", color="darkgreen"];
+  Sign -> Planet [label="ruler", color="orange", style=dashed];
+  Measure -> Sign [label="sign", color="blue"];
+  Measure -> Element [label="element", color="darkgreen"];
+  Measure -> Modality [label="modality", color="darkgreen"];
+  Rulership -> Planet [label="planet", color="darkgreen"];
+  Rulership -> Sign [label="sign", color="darkgreen"];
+
+  // ── Governance morphisms ───────────────────────────────────────
+  thought_link -> thought [label="from/to", color="darkgreen"];
+  repo_state -> repo [label="name", color="darkgreen"];
+  source -> SourceType [label="source_type", color="darkgreen"];
+
+  // ── Self-describing morphisms ──────────────────────────────────
+  relation_meta -> world_schema [label="relation_name", color="darkgreen"];
+  relation_morphism -> world_schema [label="source/target", color="darkgreen"];
+  relation_tradition -> world_schema [label="relation_name", color="darkgreen"];
+}
