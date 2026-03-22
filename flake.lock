@@ -276,11 +276,11 @@
     "samskara-codegen-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774186782,
-        "narHash": "sha256-b+MC4ndqpCDNYiCWqxk/+RPMKHeuv/7LDPUKfbCPBhc=",
+        "lastModified": 1774201808,
+        "narHash": "sha256-8Nc6IEDfpNz+kLc+xVkwFt34Px8UGl8x6GjKpWxYHI8=",
         "owner": "LiGoldragon",
         "repo": "samskara-codegen",
-        "rev": "a2a1e6e672df65748e79526f6ceedddff02606f7",
+        "rev": "aa9d76824280696fc8b7d564fa431cf57d822050",
         "type": "github"
       },
       "original": {
