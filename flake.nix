@@ -23,6 +23,7 @@
     criome-store-src = { url = "github:LiGoldragon/criome-store"; flake = false; };
     criome-store-contract-src = { url = "github:LiGoldragon/criome-store-contract"; flake = false; };
     criome-stored-src = { url = "github:LiGoldragon/criome-stored"; flake = false; };
+    samskara-reader-src = { url = "github:LiGoldragon/samskara-reader"; flake = false; };
     annas-archive-src = { url = "github:LiGoldragon/annas-archive"; flake = false; };
     claude-chill-src = { url = "github:davidbeesley/claude-chill"; flake = false; };
     # mentci-v0-src = { url = "github:Mentci-AI/dev"; flake = false; };  # private/deleted
@@ -126,6 +127,27 @@
           inherit cargoArtifacts;
         });
 
+        # Samskara Reader — read-only MCP server for samskara world state
+        samskara-reader = let
+          src = pkgs.lib.cleanSourceWith {
+            src = inputs.samskara-reader-src;
+            filter = path: type:
+              (craneLib.filterCargoSources path type);
+          };
+          commonArgs = {
+            inherit src;
+            pname = "samskara-reader";
+            postUnpack = ''
+              depDir=$(dirname $sourceRoot)
+              cp -rL ${inputs.criome-cozo-src} $depDir/criome-cozo
+              cp -rL ${inputs.samskara-core-src} $depDir/samskara-core
+            '';
+          };
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        in craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+        });
+
         # claude-chill — PTY proxy that eliminates scroll jitter
         claude-chill = let
           src = pkgs.lib.cleanSourceWith {
@@ -158,6 +180,14 @@
             criome-stored
         '';
 
+        samskara-reader-mcp = pkgs.writeShellScriptBin "samskara-reader-mcp" ''
+          db="''${SAMSKARA_DB_PATH:-''${MENTCI_V1_ROOT:+$MENTCI_V1_ROOT/../samskara/world.db}}"
+          db="''${db:-$HOME/.local/share/samskara/world.db}"
+          exec env \
+            RUST_LOG="''${RUST_LOG:-info}" \
+            samskara-reader --db-path "$db"
+        '';
+
         annas-archive-mcp = pkgs.writeShellScriptBin "annas-archive-mcp" ''
           exec env \
             ANNAS_ARCHIVE_API_KEY="$(gopass show -o annas-archive.gl/secret-key)" \
@@ -181,6 +211,9 @@
 
         mcpConfigLite = builtins.toJSON {
           mcpServers = {
+            samskara-reader = {
+              command = "samskara-reader-mcp";
+            };
             annas-archive = {
               command = "annas-archive-mcp";
             };
@@ -198,6 +231,8 @@
           claude-chill
           annas-archive
           annas-archive-mcp
+          samskara-reader
+          samskara-reader-mcp
           criome-stored
           criome-stored-mcp
         ];

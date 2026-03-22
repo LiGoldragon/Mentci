@@ -69,11 +69,11 @@
     "criome-cozo-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774178103,
-        "narHash": "sha256-HBOdphB8KyxxKjZrTSCwn8dHiho4ezKyBZSzPmjnPSs=",
+        "lastModified": 1774183451,
+        "narHash": "sha256-6h741nxVKYj9SD0L3HoVSG+jVBJvcuoc9dDePJtfpKA=",
         "owner": "LiGoldragon",
         "repo": "criome-cozo",
-        "rev": "87e03d5c37e54c20b31d6b59d668ae997b101865",
+        "rev": "48ec4b9a758b644bdc22985d7bff9246aa657e3b",
         "type": "github"
       },
       "original": {
@@ -252,6 +252,7 @@
         "samskara-codegen-src": "samskara-codegen-src",
         "samskara-core-src": "samskara-core-src",
         "samskara-lojix-contract-src": "samskara-lojix-contract-src",
+        "samskara-reader-src": "samskara-reader-src",
         "samskara-src": "samskara-src"
       }
     },
@@ -291,11 +292,11 @@
     "samskara-core-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774175147,
-        "narHash": "sha256-aah3Bh3aJmnKVap+t/iLr2qTGJg6HVhAXI4RhF/t/II=",
+        "lastModified": 1774183453,
+        "narHash": "sha256-csuH9aWQBJyRvJTJj9OJJkBTk38GfCNROZvq7T6O4DI=",
         "owner": "LiGoldragon",
         "repo": "samskara-core",
-        "rev": "3110472a81627551cba6b258303855314d087f1d",
+        "rev": "41aef1c70b38fee67eaaacbb7dc1dfb48206e48c",
         "type": "github"
       },
       "original": {
@@ -320,14 +321,30 @@
         "type": "github"
       }
     },
+    "samskara-reader-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1774183206,
+        "narHash": "sha256-LF0/SOQFfPhFOJ4N+NCAs90sG02LGeA9N/d3U2KGuB4=",
+        "owner": "LiGoldragon",
+        "repo": "samskara-reader",
+        "rev": "5d1a6b4bef6640c72a8ee8f5483a561ec06b84fb",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LiGoldragon",
+        "repo": "samskara-reader",
+        "type": "github"
+      }
+    },
     "samskara-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1774175157,
-        "narHash": "sha256-5dMBXE4HqbMfLhIxIFTHAyF8yK7arpae7lsfS8qHDcg=",
+        "lastModified": 1774183456,
+        "narHash": "sha256-3UrdzMpeuHxhuzeR0VkRoQwsyU6PjQ8EWMzE0mUcxn4=",
         "owner": "LiGoldragon",
         "repo": "samskara",
-        "rev": "90b5c4740ab8d3914e169d51b5ee73e985daaf49",
+        "rev": "5ba0bc3f22315dc697eb49c55c8c7f3a8864008b",
         "type": "github"
       },
       "original": {
