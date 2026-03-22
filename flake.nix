@@ -24,6 +24,7 @@
     criome-store-contract-src = { url = "github:LiGoldragon/criome-store-contract"; flake = false; };
     criome-stored-src = { url = "github:LiGoldragon/criome-stored"; flake = false; };
     annas-archive-src = { url = "github:LiGoldragon/annas-archive"; flake = false; };
+    claude-chill-src = { url = "github:davidbeesley/claude-chill"; flake = false; };
     # mentci-v0-src = { url = "github:Mentci-AI/dev"; flake = false; };  # private/deleted
   };
 
@@ -125,6 +126,22 @@
           inherit cargoArtifacts;
         });
 
+        # claude-chill — PTY proxy that eliminates scroll jitter
+        claude-chill = let
+          src = pkgs.lib.cleanSourceWith {
+            src = inputs.claude-chill-src;
+            filter = path: type:
+              (craneLib.filterCargoSources path type);
+          };
+          commonArgs = {
+            inherit src;
+            pname = "claude-chill";
+          };
+          cargoArtifacts = craneLib.buildDepsOnly commonArgs;
+        in craneLib.buildPackage (commonArgs // {
+          inherit cargoArtifacts;
+        });
+
         # MCP wrappers — on PATH via devShell, no store paths in config
         samskara-mcp = pkgs.writeShellScriptBin "samskara-mcp" ''
           db="''${SAMSKARA_DB_PATH:-''${MENTCI_V1_ROOT:+$MENTCI_V1_ROOT/../samskara/world.db}}"
@@ -178,6 +195,7 @@
           pkgs.capnproto
           pkgs.gopass
           claude-code.packages.${system}.default
+          claude-chill
           annas-archive
           annas-archive-mcp
           criome-stored

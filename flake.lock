@@ -16,6 +16,22 @@
         "type": "github"
       }
     },
+    "claude-chill-src": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1770502636,
+        "narHash": "sha256-VfFEYyAyQYr4tkkTkn+wmOK/6rPY75POuJua+Q98IH8=",
+        "owner": "davidbeesley",
+        "repo": "claude-chill",
+        "rev": "2595cf7f89e33381453cb4fba2b8bf8eb26921df",
+        "type": "github"
+      },
+      "original": {
+        "owner": "davidbeesley",
+        "repo": "claude-chill",
+        "type": "github"
+      }
+    },
     "claude-code": {
       "inputs": {
         "flake-utils": "flake-utils",
@@ -222,6 +238,7 @@
     "root": {
       "inputs": {
         "annas-archive-src": "annas-archive-src",
+        "claude-chill-src": "claude-chill-src",
         "claude-code": "claude-code",
         "crane": "crane",
         "criome-cozo-src": "criome-cozo-src",
