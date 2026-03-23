@@ -1,0 +1,162 @@
+digraph samskara {
+  rankdir=LR;
+  fontname="Helvetica";
+  node [shape=box, style="filled,rounded", fontname="Helvetica", fontsize=11];
+  edge [fontname="Helvetica", fontsize=9, color="#666666"];
+  bgcolor="transparent";
+  compound=true;
+
+  // ── Qualitative layer (elements, modalities, aspects) ──────────
+  subgraph cluster_qualitative {
+    label="qualitative";
+    style="dashed,rounded";
+    color="#8B4513";
+    fontcolor="#8B4513";
+    Element [fillcolor="#FFE4B5"];
+    Modality [fillcolor="#FFE4B5"];
+    Aspect [fillcolor="#FFE4B5"];
+    Dignity [fillcolor="#FFE4B5"];
+  }
+
+  // ── Positional layer (signs, houses, positions) ────────────────
+  subgraph cluster_positional {
+    label="positional";
+    style="dashed,rounded";
+    color="#2E8B57";
+    fontcolor="#2E8B57";
+    Sign [fillcolor="#90EE90"];
+    Rulership [fillcolor="#90EE90"];
+  }
+
+  // ── Symbolic layer (measures, correspondences) ─────────────────
+  subgraph cluster_symbolic {
+    label="symbolic";
+    style="dashed,rounded";
+    color="#4169E1";
+    fontcolor="#4169E1";
+    Measure [fillcolor="#B0C4DE"];
+  }
+
+  // ── Agentive layer (planets, agents) ───────────────────────────
+  subgraph cluster_agentive {
+    label="agentive";
+    style="dashed,rounded";
+    color="#8B0000";
+    fontcolor="#8B0000";
+    Planet [fillcolor="#FFB6C1"];
+    agent [fillcolor="#FFB6C1"];
+    agent_session [fillcolor="#FFB6C1"];
+  }
+
+  // ── Structural layer (enums, types, VCS infra) ─────────────────
+  subgraph cluster_structural {
+    label="structural";
+    style="dashed,rounded";
+    color="#555555";
+    fontcolor="#555555";
+    Enum [fillcolor="#D3D3D3"];
+    Phase [fillcolor="#D3D3D3"];
+    CommitType [fillcolor="#D3D3D3"];
+    Action [fillcolor="#D3D3D3"];
+    Verdict [fillcolor="#D3D3D3"];
+    world_schema [fillcolor="#D3D3D3"];
+    world_commit [fillcolor="#D3D3D3"];
+    world_manifest [fillcolor="#D3D3D3"];
+    world_delta [fillcolor="#D3D3D3"];
+    world_snapshot [fillcolor="#D3D3D3"];
+  }
+
+  // ── Governance layer (knowledge, rules, repos) ─────────────────
+  subgraph cluster_governance {
+    label="governance";
+    style="dashed,rounded";
+    color="#800080";
+    fontcolor="#800080";
+    thought [fillcolor="#DDA0DD"];
+    thought_link [fillcolor="#DDA0DD"];
+    thought_tag [fillcolor="#DDA0DD"];
+    principle [fillcolor="#DDA0DD"];
+    guideline [fillcolor="#DDA0DD"];
+    repo [fillcolor="#DDA0DD"];
+    repo_state [fillcolor="#DDA0DD"];
+    relation_meta [fillcolor="#DDA0DD"];
+    relation_morphism [fillcolor="#DDA0DD"];
+    relation_tradition [fillcolor="#DDA0DD"];
+    samskrta [fillcolor="#DDA0DD"];
+    latina [fillcolor="#DDA0DD"];
+  }
+
+  // ── Taxonomy layer (sys_command family) ────────────────────────
+  subgraph cluster_taxonomy {
+    label="taxonomy";
+    style="dashed,rounded";
+    color="#006400";
+    fontcolor="#006400";
+    Tool [fillcolor="#98FB98"];
+    CommandStatus [fillcolor="#98FB98"];
+    FlagConstraint [fillcolor="#98FB98"];
+    sys_command [fillcolor="#98FB98"];
+    sys_command_flag [fillcolor="#98FB98"];
+    sys_command_alt [fillcolor="#98FB98"];
+    sys_command_usage [fillcolor="#98FB98"];
+    sys_workflow [fillcolor="#98FB98"];
+    sys_workflow_meta [fillcolor="#98FB98"];
+  }
+
+  // ── Sandbox layer ──────────────────────────────────────────────
+  subgraph cluster_sandbox {
+    label="sandbox";
+    style="dashed,rounded";
+    color="#FF8C00";
+    fontcolor="#FF8C00";
+    DbAccess [fillcolor="#FFDAB9"];
+    sandbox [fillcolor="#FFDAB9"];
+    sandbox_permission [fillcolor="#FFDAB9"];
+  }
+
+  // ── Infrastructure layer ───────────────────────────────────────
+  subgraph cluster_infrastructure {
+    label="infrastructure";
+    style="dashed,rounded";
+    color="#696969";
+    fontcolor="#696969";
+    source [fillcolor="#C0C0C0"];
+    SourceType [fillcolor="#C0C0C0"];
+    archive_reader_version [fillcolor="#C0C0C0"];
+  }
+
+  // ── Explicit morphisms (from relation_morphism) ────────────────
+  Measure -> Sign [label="sign", style=bold, color="#4169E1"];
+  Measure -> Element [label="element", color="#4169E1"];
+  Measure -> Modality [label="modality", color="#4169E1"];
+  Sign -> Element [label="element"];
+  Sign -> Modality [label="modality"];
+  Sign -> Planet [label="ruler", style=dashed];
+  Rulership -> Planet [label="planet"];
+  Rulership -> Sign [label="sign"];
+  source -> SourceType [label="source_type"];
+  repo_state -> repo [label="name"];
+  thought_link -> thought [label="from_id"];
+  thought_link -> thought [label="to_id"];
+  relation_meta -> world_schema [label="relation_name"];
+  relation_morphism -> world_schema [label="source"];
+  relation_morphism -> world_schema [label="target"];
+  relation_tradition -> world_schema [label="relation_name"];
+
+  // ── Implicit FK edges (not yet in relation_morphism) ───────────
+  guideline -> Sign [label="sign", style=dashed, color="#800080"];
+  sandbox -> agent [label="agent_id", style=dashed, color="#FF8C00"];
+  sandbox -> DbAccess [label="db_access", style=dashed, color="#FF8C00"];
+  sandbox_permission -> sandbox [label="sandbox_id", style=dashed, color="#FF8C00"];
+  sys_command -> Tool [label="tool", style=dashed, color="#006400"];
+  sys_command -> CommandStatus [label="status", style=dashed, color="#006400"];
+  sys_command_flag -> FlagConstraint [label="constraint", style=dashed, color="#006400"];
+  sys_command_alt -> sys_command [label="(tool,sub)", style=dashed, color="#006400"];
+  sys_command_usage -> sys_command [label="(tool,sub)", style=dashed, color="#006400"];
+  sys_command_flag -> sys_command [label="(tool,sub)", style=dashed, color="#006400"];
+  sys_workflow -> sys_workflow_meta [label="workflow", style=dashed, color="#006400"];
+  agent_session -> agent [label="agent_id", style=dashed, color="#8B0000"];
+  thought_tag -> thought [label="thought_id", style=dashed, color="#800080"];
+  world_delta -> world_commit [label="commit_hash", style=dashed, color="#555555"];
+  world_manifest -> world_commit [label="commit_hash", style=dashed, color="#555555"];
+}

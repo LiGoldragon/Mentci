@@ -7,3 +7,8 @@ Sources/
 .mcp.json
 \#*\#
 *~
+
+# Generated graphs
+*.dot
+*.svg
+*.png
