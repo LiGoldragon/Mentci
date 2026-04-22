@@ -53,6 +53,6 @@
 # - github.org
 # - github.repo
 
-sync.remote: "git+ssh://git@github.com/LiGoldragon/mentci-next.git"
+# sync.remote: "git+ssh://git@github.com/LiGoldragon/mentci-next.git"
 
 dolt.shared-server: true
