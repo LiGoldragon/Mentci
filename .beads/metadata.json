@@ -1,7 +1,11 @@
 {
   "database": "dolt",
   "backend": "dolt",
-  "dolt_mode": "embedded",
+  "dolt_mode": "server",
+  "dolt_server_host": "127.0.0.1",
+  "dolt_server_port": 13306,
+  "dolt_server_user": "root",
   "dolt_database": "mentci_next",
-  "project_id": "b0d34fc0-648c-4f00-9fa6-bddfe2d4e19a"
+  "project_id": "11b6b169-7442-48be-84b2-335a3fccb319",
+  "global_dolt_database": "beads_global"
 }
