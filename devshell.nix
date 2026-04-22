@@ -1,13 +1,11 @@
-{ pkgs }:
+{ pkgs, inputs, system }:
 pkgs.mkShell {
-  # Add build dependencies
-  packages = [ ];
+  packages = [
+    inputs.mentci-tools.packages.${system}.dolt
+  ];
 
-  # Add environment variables
   env = { };
 
-  # Load custom bash code
   shellHook = ''
-
   '';
 }

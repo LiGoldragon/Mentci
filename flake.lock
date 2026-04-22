@@ -21,6 +21,29 @@
         "type": "github"
       }
     },
+    "mentci-tools": {
+      "inputs": {
+        "blueprint": [
+          "blueprint"
+        ],
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1776856462,
+        "narHash": "sha256-qRT1nqlEFxwMAit1tYaIjYiYVYarh55e/zLKhWyiMws=",
+        "owner": "LiGoldragon",
+        "repo": "mentci-tools",
+        "rev": "0ea878f7484269b3fd94fda7cf45fd04dd05a6ad",
+        "type": "github"
+      },
+      "original": {
+        "owner": "LiGoldragon",
+        "repo": "mentci-tools",
+        "type": "github"
+      }
+    },
     "nixpkgs": {
       "locked": {
         "lastModified": 1773821835,
@@ -40,6 +63,7 @@
     "root": {
       "inputs": {
         "blueprint": "blueprint",
+        "mentci-tools": "mentci-tools",
         "nixpkgs": "nixpkgs"
       }
     },
