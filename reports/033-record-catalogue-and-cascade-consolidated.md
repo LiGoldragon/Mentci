@@ -321,14 +321,18 @@ actor fires: it hardcodes the schema-of-schema seed records
 themselves), then seeds the Opus/Derivation/OpusDep family and
 the initial rule set. These are all asserted into a Revision-0.
 
-Then the **ingester tool** (an external binary, very likely
-linking r-a crates per report 029) is invoked against the
-workspace's `.rs` files. It parses and resolves them into
-`nexus-schema` records and streams `Assert` verbs at criomed
-over the criome-msg surface. Criomed wraps them in a single
-Revision. The ingester exits. **From that moment on, text is
-never parsed again unless a fresh ingestion is explicitly
-requested.**
+At this point criomed is ready to accept nexus requests. The
+first Assert / Mutate / Query arrives from a user or LLM via
+nexusd → criomed. There is **no** automated ingest of `.rs` —
+sema populates only via nexus requests. The engine's own
+source accumulates in sema over time as someone (Li, LLM
+agents) writes nexus requests to assert the records that
+describe the engine itself. The current hand-written `.rs`
+in canonical repos is scaffolding that produces the MVP
+binary via cargo; over time each crate is rewritten into sema
+and rsc's projection supersedes the hand-written text. See
+reports/051 for the self-hosting gradient and reports/054 for
+the no-ingester invariant.
 
 **Warm edit.** The user (or an agent) sends, over nexusd →
 criomed, something like:
@@ -420,19 +424,13 @@ The full open-question list lives in report 031. The specific
 items that originated in 023/024/025 and are **not** resolved
 by this report:
 
-- **Hash-vs-name refs contradiction (report 027).** Named refs
-  exist (OpusRoot, Bookmark) but the repeated invariant is
-  "references are `RecordId`s." The boundary — which kinds of
-  records may carry named refs versus only hashes — isn't
-  fully spec'd.
-- **Ingester scope.** Do we link r-a crates (chalk-ir, hir
-  lowering) inside the ingester binary, keep it a thin wrapper
-  over `rustc --emit=…`, or build our own parser? Report 029
-  argues for vendoring r-a crates; no decision is recorded.
-- **Edit UX.** Two consistent stories: (a) user edits text in
-  an editor, rsc re-ingests the changed file, criomed diffs at
-  the record level; (b) user (or agent) sends structural
-  `Patch`/`Mutate` verbs. Both must work eventually; MVP can
+- **Hash-vs-name refs** — resolved by the slot-ref /
+  `SlotBinding` model; records store `Slot(u64)` and the index
+  holds `slot → { current_content_hash, display_name }`. See
+  architecture.md §5.
+- **Edit UX** — resolved: nexus requests only (Assert, Mutate,
+  Patch, Retract). No text round-trip. See reports/054, 057.
+- (remaining open questions — if any — listed below)
   pick one, and has not.
 - **Diagnostic translation granularity.** Rustc gives us
   `(path, line, col)` spans; rsc's reverse-projection map lets

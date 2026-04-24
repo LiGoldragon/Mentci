@@ -15,63 +15,122 @@ documentation, strictly separated:
 | `reports/NNN-*.md` | **Concrete shapes + decision records.** Type sketches, record definitions, message enums, research syntheses, historical context. | `Opus { … }` full rkyv sketch |
 | the repos themselves | **Implementation.** Rust code, tests, flakes, Cargo.toml. | `nexus-schema/src/opus.rs` |
 
-**If a doc-layer rule is violated**, rewrite: move type sketches
+If a doc-layer rule is violated, rewrite: move type sketches
 out of `docs/architecture.md` into a report; move runnable code
 out of reports into the appropriate repo. This file stays slim
 so it remains readable in one pass.
 
 When architecture changes, update this file first, then write a
-new report explaining the change. Don't edit old reports —
-they're decision-journey records.
+new report describing the change. Per Li's rule ("delete wrong
+reports, don't banner them"), superseded reports are deleted —
+they do not stay as banner-wrapped relics.
 
 ---
 
 ## 1 · The engine in one paragraph
 
-**sema is the truth.** At any instant, the records in sema are
-the current, evaluated, canonical state — there is no separate
-layer above sema that holds "computed values" apart from what
-sema already contains. Every message that reaches the engine
-can potentially edit sema; rules and derivations are themselves
-records in sema; when an edit cascades, the cascade settles as
-more sema records. This is the whole point of the design: one
-store of truth, one way to change it, full introspection.
+**Sema is all we are concerned with.** Sema is the records —
+the canonical, content-addressed, evaluated state of the
+engine. Every concept the engine reasons about (code, schema,
+rules, plans, authz, history, world data) is expressed as
+records in sema. The records are stored in rkyv, content-
+addressed by blake3. The rest of the engine exists to serve
+sema:
 
-**Sema holds code as logic, not text.** The record kinds in
-sema describe *semantic structure* — `Fn`, `Struct`, `Enum`,
-`Module`, `Expr`, `Type`, `Signature`, … (see
-[reports/004](../reports/004-sema-types-for-rust.md)). Sema
-never contains source bytes, token streams, or abstract syntax
-trees as records. Text is either transport (nexus syntax ↔
-record trees at nexusd's boundary) or projection (records → `.rs`
-via rsc when rustc needs to consume bytes). An entire class of
-rustc errors (`unresolved import`, `cannot find type in this
-scope`) doesn't exist in sema because references are
-content-hash IDs and invalid references are rejected at
-mutation time. See
-[reports/026](../reports/026-sema-is-code-as-logic.md).
-
-Three daemons work around that invariant:
-
-- **nexusd** — the translator: nexus text ↔ rkyv at the human
-  boundary.
-- **criomed** — sema's engine: receives every message, applies
-  mutations, lets rules cascade, maintains invariants,
-  dispatches concrete work to lojixd.
-- **lojixd** — the hands: does what sema can't (spawns cargo /
-  nix / nixos-rebuild subprocesses; reads and writes the
-  lojix-store filesystem; materialises files). Its inputs
-  are plan records read from sema; its outputs become outcome
-  records written back.
-
-The MVP target is **self-hosting**: the engine's own source
-lives as records in sema; editing those records cascades through
-sema into concrete plan records; lojixd executes the plans;
-resulting binaries can re-edit the same records.
+- **criomed** is sema's engine. It receives every request,
+  validates it (schema, references, permissions, invariants),
+  and applies the change to sema. Rules and derivations are
+  themselves records; cascades settle inside sema. Nothing
+  "lives above" sema holding derived values.
+- **nexusd** is the translator. Nexus is a text request
+  language — structured, controlled, permissioned — used
+  because humans and LLMs can't hand-type rkyv. nexusd parses
+  nexus text into `criome-msg` rkyv envelopes (`Assert`,
+  `Mutate`, `Retract`, `Query`, `Compile`, …) and serialises
+  replies back.
+- **lojixd** is the hands. It performs effects sema can't
+  (spawning cargo / nix subprocesses; reading and writing the
+  lojix-store filesystem; materialising files). Inputs are
+  plan records read from sema; outputs become outcome records
+  written back.
+- **rsc** projects sema → `.rs` text for rustc/cargo to
+  consume. One-way emission.
+- **lojix-store** is a content-addressed filesystem (nix-store
+  analogue) holding real unix files, referenced from sema by
+  hash.
 
 ---
 
-## 2 · The three daemons
+## 2 · Three invariants
+
+These are load-bearing. Everything downstream depends on them.
+
+### Invariant A — Rust is only an output
+
+Sema changes **only** in response to nexus requests. There is
+**no** `.rs` → sema parsing path. No ingester. rsc projects
+sema → `.rs` one-way for rustc/cargo; nothing in the engine
+ever reads that text back. External tools may do whatever they
+want in user-space, but only nexus requests reach the engine.
+
+### Invariant B — Nexus is a language, not a record format
+
+Sema is rkyv (binary, content-addressed). **Nexus is a request
+language** (text) used to talk to criomed. Parsing nexus
+produces `criome-msg` rkyv envelopes; it does not produce sema
+directly. There are no "nexus records." There is sema (rkyv),
+and there are nexus messages (text requests). The analogy is
+SQL-and-a-DB: SQL is a request language; stored rows are in
+the DB's on-disk format. No one calls a row a "SQL record."
+
+### Invariant C — Sema is the concern; everything orbits
+
+If a component does not serve sema directly, it is not core.
+criomed = sema's engine / guardian. nexusd = sema's
+text-request translator. lojixd = executor for effects sema
+can't perform directly — outcomes return as sema. rsc = sema →
+`.rs` projector. lojix-store = artifact files, referenced
+*from* sema.
+
+---
+
+## 3 · The request flow
+
+```
+  user writes nexus text
+      │
+      ▼
+  nexusd ─────── parses text → criome-msg (rkyv)
+      │           (CriomeRequest::Assert / Mutate / Retract /
+      │            Query / Compile / Subscribe / …)
+      ▼
+  criomed ─────── validates:
+      │            • schema conformance
+      │            • reference resolution (slot-refs exist)
+      │            • authorization (capability tokens; BLS quorum post-MVP)
+      │            • rule-engine feasibility
+      │            • invariant preservation
+      │
+      │          if valid → apply to sema; otherwise → reject
+      │
+      ▼
+  criomed replies via criome-msg rkyv
+      │
+      ▼
+  nexusd ─────── rkyv → nexus text
+      │
+      ▼
+  user reads reply
+```
+
+**Every edit is a request.** criomed is the arbiter; assertions,
+mutations, retractions can all be rejected. This is the
+hallucination wall: unknown names, broken references,
+schema-invalid shapes, unauthorised actions all fail here.
+
+---
+
+## 4 · The three daemons (expanded)
 
 ```
      nexus text (humans, LLMs, nexus-cli)
@@ -79,25 +138,24 @@ resulting binaries can re-edit the same records.
         │ ▼
      ┌─────────┐
      │ nexusd  │ messenger: text ↔ rkyv only; validates syntax +
-     │         │ protocol version; forwards to criomed; serialises
-     │         │ replies back to text. Stateless modulo in-flight
-     │         │ correlations.
+     │         │ protocol version; forwards requests to criomed;
+     │         │ serialises replies back to text. Stateless modulo
+     │         │ in-flight request correlations.
      └────┬────┘
           │ rkyv (criome-msg contract)
           ▼
      ┌─────────┐
-     │ criomed │ sema's engine — maintains the single truth.
-     │         │ • receives every message; applies mutations
-     │         │ • rules and derivations in sema cascade as
-     │         │   records update; the cascade is how "evaluation"
-     │         │   happens (nothing sits outside sema)
-     │         │ • resolves RawPattern → PatternExpr (hallucination
-     │         │   wall)
+     │ criomed │ sema's engine — validates, applies, cascades.
+     │         │ • receives every request; checks validity
+     │         │ • writes accepted mutations to sema
+     │         │ • rules cascade as records update (nothing
+     │         │   lives outside sema)
+     │         │ • resolves RawPattern → PatternExpr
      │         │ • fires subscriptions on commits
-     │         │ • reads concrete plan records from sema and
-     │         │   dispatches them to lojixd
+     │         │ • reads plan records from sema; dispatches
+     │         │   execution verbs to lojixd
      │         │ • signs capability tokens; tracks reachability
-     │         │   for lojix-store GC (also via records)
+     │         │   for lojix-store GC
      │         │ • never touches binary bytes itself
      └────┬────┘
           │ rkyv (lojix-msg — concrete "do this" verbs)
@@ -111,7 +169,8 @@ resulting binaries can re-edit the same records.
      │          │     placement + path lookup + index updates)
      │          │   • FileMaterialiser (store entries → workdir)
      │          │ • receives concrete plans: RunCargo, RunNix,
-     │          │   RunNixosRebuild, PutStoreEntry, GetStorePath, ...
+     │          │   RunNixosRebuild, PutStoreEntry, GetStorePath,
+     │          │   MaterializeFiles, …
      │          │ • executes; places binary file tree into
      │          │   lojix-store under its blake3-derived path
      │          │ • replies {output-hash, warnings, wall_ms}
@@ -120,286 +179,233 @@ resulting binaries can re-edit the same records.
 
 **Invariants**:
 
-- Text crosses only at nexusd's boundary.
+- Text crosses only at nexusd's boundary. Internal daemon-
+  to-daemon messages are rkyv.
 - No daemon-to-daemon path routes bulk data through criomed —
   when forge work inside lojixd writes to lojix-store, it does
   so in-process under a criomed-signed capability token; no
   bytes ever cross criomed.
 - Criomed never sees compiled binary bytes; it only records
-  their hashes in sema.
-- There is no `Launch` protocol message. Binaries are
-  materialised to filesystem paths (nix-store style); you run
-  them from a shell.
+  their hashes (as slot-refs resolved to blake3 via sema) in
+  sema.
+- There is no `Launch` protocol verb. Store entries are real
+  files at hash-derived paths; you `exec` them from a shell.
 
 ---
 
-## 3 · The two stores
+## 5 · The two stores
 
 ### sema — records database
 
 - **Owner**: criomed.
-- **Backend**: content-addressed records, keyed by the blake3
-  of their canonical rkyv encoding. Storage engine is an
-  embedded redb.
-- **Holds**: every structural record (Struct, Enum, Module,
-  Program, Opus, Derivation, Type, Origin, traits, …).
-- **Writes**: single-writer through criomed's internal writer
-  actor.
-- **Reads**: parallel, MVCC semantics from the storage engine.
-- **Identity of a workspace opus** tracked in a name→root-hash
-  table (git-refs analogue).
+- **Backend**: redb-backed, content-addressed records keyed
+  by blake3 of their canonical rkyv encoding.
+- **Reference model** (per reports/050/054): records store
+  **slot-refs** (`Slot(u64)`), not content hashes. Sema's
+  index maps `slot → { current_content_hash, display_name,
+  valid_from, valid_to }` as `SlotBinding` records. Content
+  edits update the slot's current-hash (no ripple-rehash of
+  dependents). Renames update the slot's display-name (no
+  record rewrites anywhere).
+- **Change log**: per-kind. Each record-kind has its own redb
+  table keyed `(Slot, seq)` carrying `ChangeLogEntry { rev,
+  op, new/old hash, principal, sig_proof }`. Per-kind is
+  ground truth; `index::K` + global `rev_index` are derivable
+  views.
+- **Scope**: slots are **global** (not opus-scoped); one name
+  per slot, globally consistent.
 
 ### lojix-store — content-addressed filesystem
 
-An analogue to the nix-store, but content-addressed by blake3.
-**It holds actual unix files and directory trees**, not blobs
-inside a single append-only file. A compiled Rust binary lives
-as a real executable on disk under a hash-derived path; you can
-`exec` it directly.
+An analogue to the nix-store, hashed by blake3. **Holds actual
+unix files and directory trees**, not blobs inside a single
+packed file. A compiled Rust binary lives as a real executable
+at a hash-derived path; you `exec` it directly.
 
 - **Owner**: lojixd.
-- **Layout**: a filesystem directory (e.g. `~/.lojix/store/`)
-  with one hash-keyed subdirectory per content-addressed
-  artifact — the shape is close to nix's
-  `/nix/store/<hash>-<name>/` tree, but the hash prefix is the
-  identity (no out-of-band name is needed). A store entry may
-  be a single file, a directory tree with an executable inside,
-  or a larger fileset — whatever lojixd materialised.
-- **Index database**: a separate index (lojixd-owned; likely
-  redb) maps `blake3 → path + metadata + reachability`. It is
-  the book-keeping side; it does not *contain* the files.
-- **Holds**: compiled binaries and their runtime trees; user
-  file attachments referenced by sema records; nix-produced
-  artifacts that sema records point at. Always real files on
-  disk, never packed blobs.
-- **No typing**. Store entries don't carry a kind; their type
-  is known only through the sema records that reference their
-  hashes.
+- **Layout**: hash-keyed subdirectory per store entry, close
+  to nix's `/nix/store/<hash>-<name>/` tree.
+- **Index DB**: lojixd-owned redb table mapping
+  `blake3 → { path, metadata, reachability }`. The index does
+  not contain the files; it maps to them.
+- **Holds**: compiled binaries and their runtime trees;
+  user file attachments referenced by sema; nix-produced
+  artifacts sema points at. Always real files on disk.
+- **No typing**. The type of a store entry is known only
+  through the sema record that references its hash.
 - **Access control**: capability tokens, signed by criomed.
 
 ### Relationship
 
-Sema records carry content-hash fields (`BlobRef` / store-entry
-references) that point at lojix-store entries. "Record says
-hash H; lojixd can resolve H to a filesystem path." Criomed
-keeps a reachability view (which hashes are live) and can
-direct garbage collection; it never handles the file bytes
-themselves and never reads the store directly.
-
-Because store entries are real files, **running a compiled
-artifact is just exec'ing the path** that lojixd resolves H to
-— no `Launch` protocol verb, no extraction step, no copy. This
-is the same reason `nix build` followed by running
-`./result/bin/foo` works: the hash path *is* the runnable
-location.
+Sema records carry `StoreEntryRef` (blake3) fields pointing at
+lojix-store entries. Criomed maintains the reachability view
+and drives GC; lojixd resolves hashes to filesystem paths;
+binaries are `exec`'d directly from their store path (no
+extraction, no copy, no `Launch` verb).
 
 ---
 
-## 4 · Repo layout
+## 6 · Key type families (named, not specified)
 
-~16 code repos + 1 spec-only + `tools-documentation`. **[L]**
-marks lojix-family members.
+Concrete field lists live in reports; this file only names.
 
-- **Layer 0 — text grammars** — nota (spec), nota-serde-core
-  (shared lexer+ser+de kernel), nota-serde (façade), nexus
-  (spec), nexus-serde (façade).
-- **Layer 1 — schema vocabulary** — nexus-schema (may rename to
-  `sema-schema` later): sema records (including Opus,
-  Derivation, OpusDep, RustToolchainPin, NarHashSri, FlakeRef,
-  OverrideUri, TargetTriple — these are user-written records,
-  not a separate lojix schema), pattern types, query ops.
-  (A separate `lojix-schema` crate was proposed in report 019
-  but superseded by 021 once criomed's incremental evaluator
-  took over build-spec resolution.)
-- **Layer 2 — contract crates** — criome-msg (nexusd↔criomed),
-  lojix-msg **[L]** (criomed↔lojixd; carries **concrete
-  execution verbs** — RunCargo / RunNix / RunNixosRebuild /
-  PutStoreEntry / GetStorePath / MaterializeFiles — not Opus
-  references).
-- **Layer 3 — storage** — sema (records DB, backs criomed),
-  lojix-store **[L]** (content-addressed filesystem: hash-keyed
-  directory tree of real unix files + an index DB for metadata;
-  nix-store analogue; no daemon of its own — lojixd owns
-  writes, reads are filesystem ops + a reader library — no
-  daemon; writes via lojixd, reads via mmap).
-- **Layer 4 — daemons** — nexusd (messenger), criomed (guardian),
-  lojixd **[L]** (single lojix daemon — forge + store + deploy
-  as internal actors).
-- **Layer 5 — clients + build libs** — nexus-cli (flag-less
-  CLI; the only text client), rsc (pure records-to-source
-  library; lojixd links it).
-- **Spec-only (terminal state)** — lojix **[L]** (README for
-  the namespace; parallels `nexus` and `nota` spec repos).
-
-> **Transitional-state warning**: `/home/li/git/lojix/` is
-> *currently* a working Rust crate containing Li's CriomOS
-> deploy orchestrator (CLI + ractor actor pipeline). The
-> "spec-only" entry above is the **terminal** shape after the
-> migration in [reports/030](../reports/030-lojix-transition-plan.md).
-> Until Phase F of that plan, the lojix repo's code is
-> production infrastructure. Agents must not treat the layout
-> above as an instruction to delete the existing crate.
-
-**Lojix family membership** is a second axis orthogonal to
-layer. A crate is lojix-family iff it participates in the
-content-addressed typed build/store/deploy pipeline (Li's
-"expanded nix"). Criteria: carries `NarHashSri`/`FlakeRef`/
-artifact records, or drives nix/cargo, or manages the
-content-addressed filesystem, or is the typed wire for any of
-those.
-
-### The `lojix-*` namespace — Li's expanded nix
-
-"lojix" is Li's play on nix — "my take on an expanded and more
-correct nix." Broad scope: covers everything nix covers
-(compile, store, deploy, derive). The prefix is an umbrella; a
-crate carrying `lojix-*` participates in the artifacts pillar.
-
-Three-pillar framing:
-
-- **criome** — the runtime (nexusd, criomed, the daemon graph)
-- **sema** — records, meaning, schemas, patterns
-- **lojix** — artifacts, build, compile, store, deploy
-
-criome ⊇ {sema, lojix}. nexus is the communication skin spanning
-all of criome, not a fourth pillar.
-
-**Two axes per daemon**:
-
-| Daemon | Runtime | Family |
-|---|---|---|
-| `nexusd` | criome | criome (nexus skin) |
-| `criomed` | criome | criome |
-| `lojixd` | criome | lojix |
-
-All daemons run at the criome-runtime layer; `lojixd` is also
-a lojix-family member.
-
-**Shelved**: `arbor` (prolly-tree versioning) — post-MVP.
-
-Concrete record types, message enums, and the rename journey
-live in [reports/019](../reports/019-lojix-as-pillar.md),
-[reports/017](../reports/017-architecture-refinements.md), and
-earlier. This file names the components; it does not define
-their shapes.
-
----
-
-## 5 · Key type families (named, not specified)
-
-- **Opus** — pure-Rust artifact specification. User-written
-  sema record. Nix-like and extremely explicit: toolchain
-  pinned by derivation reference, outputs enumerated, features
-  as plain strings, every build-affecting input a field so
-  the record's hash captures the full closure. Lives in
-  `nexus-schema`. criomed's incremental evaluator resolves it
-  to a concrete RunCargo plan at edit time; lojixd never sees
-  the Opus directly.
+- **Opus** — pure-Rust artifact specification. User-authored
+  sema record. Toolchain pinned by derivation reference,
+  outputs enumerated, every build-affecting input a field so
+  the record's hash captures the full closure.
 - **Derivation** — escape hatch for non-pure deps. Wraps a nix
-  flake output (or inline nix expression) with a content-hash
-  and named outputs. User-written sema record. Lives in
-  `nexus-schema`.
-- **OpusDep** — opus → {opus | derivation} link spec.
-  User-written. Lives in `nexus-schema`.
-- **RawPattern** — the wire form of a nexus pattern, carrying
-  user-facing names (`StructName`, `FieldName`, `BindName`).
-  Appears on criome-msg; never used inside criomed after
-  resolution.
-- **PatternExpr** — the resolved form, carrying schema IDs
-  (`StructId`, `FieldId`). Pinned to a specific sema snapshot.
-  Internal to criomed.
-- **CriomeRequest / CriomeReply** — the nexusd↔criomed
-  protocol verbs (lookup, query, assert, mutate, subscribe,
-  compile, …).
-- **lojix-msg verbs** — concrete execution instructions in the
-  criomed→lojixd direction: RunCargo, RunNix, RunNixosRebuild,
-  PutBlob (streaming variants for large payloads), GetBlob,
-  ContainsBlob, MaterializeFiles, DeleteBlob (criomed-driven
-  GC). Each reply is a result of that concrete operation. No
-  `CompileRequest { opus: OpusId }` — that level of abstraction
-  is criomed's internal concern.
-
-Concrete field lists live in
-[reports/017 §1, §2](../reports/017-architecture-refinements.md)
-and subsequent reports. If a type below needs to grow, update
-its report (or write a new one); don't inline the shape here.
+  flake output or inline nix expression.
+- **OpusDep** — opus → {opus | derivation} link.
+- **Slot** — `u64` content-agnostic identity. Counter-minted
+  by criomed with freelist-reuse. Seed range `[0, 1024)`
+  reserved.
+- **SlotBinding** — `{ slot, content_hash, display_name,
+  valid_from, valid_to }`. Bitemporal; slot-reuse is safe for
+  historical queries.
+- **MemberEntry** — `{ slot, visibility, kind }` attached to
+  an opus, declaring which slots it contributes at what
+  visibility.
+- **RawPattern** — wire form of a nexus pattern, carrying
+  user-facing names. Transient on criome-msg.
+- **PatternExpr** — resolved form, carrying slot-refs. Pinned
+  to a sema snapshot. Internal to criomed.
+- **CriomeRequest / CriomeReply** — nexusd↔criomed protocol
+  verbs.
+- **lojix-msg verbs** — concrete execution in criomed→lojixd
+  direction: RunCargo, RunNix, RunNixosRebuild, PutStoreEntry,
+  GetStorePath, MaterializeFiles, DeleteStoreEntry. No
+  `CompileRequest { opus: OpusId }` — criomed plans; lojixd
+  executes.
 
 ---
 
-## 6 · Data flow
+## 7 · Data flow
 
 ### Single query
 
 ```
- human nexus text
+ human nexus text: (Query (Fn :name :resolve_pattern))
         ▼
-  nexusd: lex + parse → RawPattern
-        │ rkyv criome-msg (Query { pattern })
+  nexusd parses → RawPattern; wraps as criome-msg::Query
         ▼
-  criomed: resolver(RawPattern, sema_snapshot) → PatternExpr
-        │ matcher runs against records
+  criomed validates; resolver(RawPattern, sema snapshot) → PatternExpr
         ▼
-  rkyv reply (Records)
+  matcher runs; records returned
         ▼
-  nexusd: serialize → nexus text
+  criomed replies via rkyv
+        ▼
+  nexusd serialises reply to nexus text
         ▼
  human
 ```
 
-### Compile + self-host loop (edit-time + run-time)
+### Mutation request (validation + apply)
 
-**Edit-time** (mutations cascade through sema):
 ```
- human: (Mutate (Opus nexusd …))
+ user: (Mutate (Fn :slot 42 :body (Block …)))
         ▼
- nexusd → criomed
+ nexusd → criomed (criome-msg::Mutate)
         ▼
- criomed applies the mutation to sema:
-   • Opus record updates
-   • rules/derivations in sema reference it; the cascade
-     settles as updated plan records, dependency records,
-     pattern rebindings — all IN sema
-   • subscriptions fire
-        ▼ (no lojixd yet; sema is the evaluation)
-```
-
-**Run-time** (dispatch a plan record):
-```
- human: (Compile nexusd)
+ criomed validates:
+   • kind well-formed?
+   • all slot-refs in the body resolve to existing slots?
+   • author authorised? (caps / BLS post-MVP)
+   • rule engine permits? (e.g., not mutating a seed-protected
+     record)
+        ▼ (if any check fails → reject with Diagnostic)
+ criomed writes new content to sema:
+   • per-kind ChangeLogEntry appended
+   • SlotBinding updated with new current-hash
+   • subscriptions on slot 42 fire → downstream cascades
+     re-derive
         ▼
- nexusd → criomed
-        ▼
- criomed reads the relevant plan record from sema and
- issues the concrete verb to lojixd:
-        ▼ rkyv RunCargo { workdir, args, env, fetch_files, … }
- lojixd:
-   • materialises fetch_files from lojix-store into workdir
-     (filesystem copy or symlink from hash-keyed store paths)
-   • spawns cargo
-   • hashes the built artifact tree; places it into lojix-store
-     under its blake3-derived path (in-process); updates the
-     store's index DB
-   • replies { store-entry-hash, warnings, wall_ms }
-        ▼
- criomed writes the outcome back as a sema record
- (e.g. CompiledBinary pointing at the store-entry hash)
-        ▼
- reply flows back to human
+ criomed replies success
 ```
 
-**Self-host close**: human materialises the new binary to a
-filesystem path, runs it; running binary connects to nexusd
-and asserts new records; criomed incrementally re-plans; next
-compile is different — LOOP CLOSES.
+### Compile + self-host loop
+
+Edit-time (requests accumulate):
+- User issues nexus requests (Assert / Mutate / Patch) that
+  change code records in sema. Each is validated; cascades
+  settle; sema reflects the new state.
+
+Run-time (plan dispatch):
+- User issues `(Compile (Opus :slot N))`.
+- criomed reads the relevant plan record from sema; dispatches
+  `RunCargo { workdir-spec, fetch_files, … }` to lojixd.
+- lojixd materialises store entries into the workdir; spawns
+  cargo; hashes the output tree; places it in lojix-store at
+  its hash path; replies.
+- criomed writes `CompiledBinary` record to sema pointing at
+  the store-entry hash.
+
+Self-host close:
+- User runs the new binary directly from its lojix-store path.
+- New binary connects to nexusd; asserts records; cascades fire
+  against the live sema. Loop closes.
 
 ---
 
-## 7 · Grammar shape
+## 8 · Repo layout
+
+Canonical list lives in [`docs/workspace-manifest.md`](workspace-manifest.md);
+this section is the architectural roles.
+
+- **Layer 0 — text grammars**: nota (spec), nota-serde-core
+  (shared lexer+ser+de kernel), nota-serde (façade),
+  nexus (spec), nexus-serde (façade).
+- **Layer 1 — schema vocabulary**: nexus-schema (record-kind
+  declarations: Fn, Struct, Opus, SlotBinding, MemberEntry,
+  Rule, ChangeLogEntry, …).
+- **Layer 2 — contract crates**: criome-msg (nexusd↔criomed;
+  requests + replies), lojix-msg (criomed↔lojixd; execution
+  verbs).
+- **Layer 3 — storage**: sema (records DB — redb-backed;
+  owned by criomed), lojix-store (content-addressed
+  filesystem — owned by lojixd; includes a reader library).
+- **Layer 4 — daemons**: nexusd (translator), criomed (sema's
+  engine), lojixd (executor).
+- **Layer 5 — clients + projectors**: nexus-cli (the text
+  client), rsc (sema → `.rs` projector; linked by lojixd).
+- **Spec-only (terminal state)**: lojix (namespace README).
+
+Currently `criome-msg`, `lojix-msg`, `criomed`, `lojixd` are
+CANON-MISSING — not yet scaffolded. See
+`docs/workspace-manifest.md` for status.
+
+> **Transitional-state note**: `/home/li/git/lojix/` is
+> currently Li's working CriomOS deploy orchestrator
+> (CLI + ractor actor pipeline). The "spec-only" terminal
+> shape is reached after the migration in
+> [reports/030](../reports/030-lojix-transition-plan.md).
+> Agents must not treat the layout above as an instruction
+> to delete the existing crate.
+
+### Three-pillar framing
+
+- **criome** — the runtime (nexusd, criomed, lojixd; the
+  daemon graph).
+- **sema** — the records.
+- **lojix** — the artifacts pillar (build, compile, store,
+  deploy).
+
+criome ⊇ {sema, lojix}. nexus is the communication skin
+spanning all of criome; not a fourth pillar.
+
+**Lojix family membership** is orthogonal to layer. A crate is
+lojix-family iff it participates in the content-addressed
+typed build/store/deploy pipeline. `lojixd` is the only
+current lojix-family daemon.
+
+**Shelved**: `arbor` (prolly-tree versioning) — post-MVP.
+
+---
+
+## 9 · Grammar shape
 
 Nota is a strict subset of nexus. A single lexer (in
 nota-serde-core) handles both, gated by a dialect knob. The
-grammar is organised as a **delimiter-family matrix** (see
-[reports/013](../reports/013-nexus-syntax-proposal.md)):
+grammar is organised as a **delimiter-family matrix**:
 
 - Outer character picks the family — records `( )`, composites
   `{ }`, evaluation `[ ]`, flow `< >`.
@@ -407,181 +413,157 @@ grammar is organised as a **delimiter-family matrix** (see
   concrete, one for abstracted/pattern, two for
   committed/scoped.
 
+**Every top-level nexus expression is a request.** The head of
+a top-level `( )`-form is a request verb (`Assert`, `Mutate`,
+`Retract`, `Query`, `Compile`, `Subscribe`, …). Nested
+expressions are record constructions that the request refers
+to. Parsing rejects top-level expressions that aren't requests.
+
 **Sigil budget is closed.** Six total: `;;` (comment), `#`
 (byte-literal prefix), `~` (mutate), `@` (bind), `!` (negate),
 `=` (bind-alias, narrow use). New features land as delimiter-
 matrix slots or Pascal-named records — **never new sigils**.
 
+See [reports/013](../reports/013-nexus-syntax-proposal.md) for
+the matrix derivation and [reports/056](../reports/056-nexus-grammar-under-request-lens.md)
+for the request-only lens refinements.
+
 ---
 
-## 8 · Project-wide rules
+## 10 · Project-wide rules
 
-Foundational rules observed across sessions.
+Foundational rules. Every session follows these.
 
-- **No ETAs.** Don't estimate time to complete work. Describe
-  the work; don't schedule it.
-- **No backward compat.** The engine is being born. Rename,
-  move, restructure freely. Applies until Li declares a
-  compatibility boundary.
-- **Text only crosses nexusd.** Every internal daemon-to-daemon
-  message is rkyv.
-- **Schema is the documentation.** Patterns and types resolve
-  against sema; hallucinated names are rejected early.
-- **sema is the truth.** Not a store that an evaluator sits
-  above — sema's current contents ARE the evaluated state.
-  Rules and derivations are themselves records; mutation
-  cascades happen inside sema. criomed is the engine that
-  applies mutations and maintains invariants; it doesn't hold a
-  separate cache of "derived values."
-- **Sema holds code as logic, not text.** Record kinds describe
-  semantic structure (`Fn`, `Struct`, `Expr`, `Type`, …). Text
-  is transport (nexus syntax at nexusd's boundary) or projection
-  (records → `.rs` via rsc). No `SourceRecord`, no
-  `TokenStream`, no `Ast` as records. Structural invariants
-  (references are content-hash IDs; kinds are schema-validated)
-  make a class of rustc errors impossible by construction.
-- **lojixd is for effects sema can't do** — spawn processes,
-  touch the filesystem, invoke external tools. Its inputs are
-  plan records read from sema; its outputs are outcome records
-  written back. It never sees an Opus directly; it receives
-  concrete execution verbs.
+- **Rust is only an output.** No `.rs` → sema parsing. rsc
+  emits one-way.
+- **Nexus is a request language.** Sema is rkyv. There are no
+  "nexus records."
+- **Sema is all we are concerned with.** Everything else
+  orbits sema.
+- **Text only crosses nexusd.** All internal traffic is rkyv.
+- **Every edit is a request.** criomed validates; requests can
+  be rejected; this is the hallucination wall.
+- **References are slot-refs.** Records store `Slot(u64)`;
+  the index resolves slot → current hash + display name.
+- **Content-addressing is non-negotiable.** Record identity is
+  the blake3 of its canonical rkyv encoding.
+- **A binary is just a path.** No `Launch` verb; store entries
+  are real files.
 - **Criomed is the overlord** of lojix-store. Tracks
   reachability; signs tokens; directs GC.
-- **A binary is just a path.** No `Launch` message;
-  materialisation is filesystem.
-- **Sigils as last resort.** New features land in the matrix
-  or as records. The sigil budget is frozen.
-- **One artifact per repo.** rust/style.md rule 1.
-- **Content-addressing is non-negotiable.** Record identity is
-  the blake3 of its canonical encoding. Don't add mutable
-  fields that would break identity.
+- **lojixd is for effects sema can't do.** Its inputs are plan
+  records; its outputs are outcome records. It never sees an
+  Opus directly.
+- **No backward compat.** The engine is being born. Rename,
+  move, restructure freely until Li declares a compatibility
+  boundary.
+- **No ETAs.** Describe the work; don't schedule it.
+- **Delete wrong reports, don't banner them.** Keep the report
+  tree tight.
+- **Sigils as last resort.** New features are delimiter-matrix
+  slots or Pascal-named records.
+- **One artifact per repo** (per rust/style.md rule 1).
 
 ---
 
-## 9 · Reading order for a new session
+## 11 · Reading order for a new session
 
-1. **This file** — the canonical shape.
-2. [reports/026](../reports/026-sema-is-code-as-logic.md) —
-   **most recent critical refinement**: sema holds code as
-   fully-specified logic, not text. Corrects contamination in
-   023/024/025. Narrows where rustc is needed and what
-   "compile-validity" means as records.
-3. [reports/021](../reports/021-criomed-evaluates-lojixd-executes.md)
-   — sema IS the evaluation; criomed is sema's engine; lojixd
-   is a thin executor. Supersedes 020 §6–§7.
-4. [reports/020](../reports/020-lojix-single-daemon.md) —
-   lojix shape: one daemon (`lojixd`), one contract
-   (`lojix-msg`), no lojix CLI. Supersedes 019 §5–§6.
-5. [reports/019](../reports/019-lojix-as-pillar.md) — lojix as
-   the artifacts pillar; broad-lojix framing; three-pillar
-   model. §5–§6 superseded by 020; lojix-schema proposal
-   superseded by 021.
-6. [reports/017](../reports/017-architecture-refinements.md) —
-   Opus/Derivation shapes, schema-bound patterns, no-Launch,
-   no-kind-bytes, tokens. Opus/Derivation type-home reverts
-   to nexus-schema per 021.
-7. [reports/013](../reports/013-nexus-syntax-proposal.md) —
+1. **This file** — canonical shape.
+2. [reports/054](../reports/054-request-based-editing-and-no-ingester.md)
+   — the three invariants (A/B/C), ratified.
+3. [reports/026](../reports/026-sema-is-code-as-logic.md) —
+   sema holds code as logic; the pivot document.
+4. [reports/021](../reports/021-criomed-evaluates-lojixd-executes.md)
+   — criomed is sema's engine; lojixd is the thin executor.
+5. [reports/020](../reports/020-lojix-single-daemon.md) — one
+   lojix daemon; one contract.
+6. [reports/019](../reports/019-lojix-as-pillar.md) — lojix as
+   the artifacts pillar; three-pillar model.
+7. [reports/017](../reports/017-architecture-refinements.md) —
+   Opus/Derivation shapes; schema-bound patterns; capability
+   tokens.
+8. [reports/013](../reports/013-nexus-syntax-proposal.md) —
    delimiter-family matrix (grammar canon).
-8. [reports/004](../reports/004-sema-types-for-rust.md) — the
-   original (and still correct) framing of sema records for
-   Rust code: Fn, Struct, Expr, Type, …. Read with 026 for
-   the corrected picture.
-9. [reports/022](../reports/022-records-as-evaluation-prior-art.md)
-   — prior art for records-as-evaluation (Datomic, DBSP, Salsa,
-   Unison, Eve, Prolog).
-10. [reports/033](../reports/033-record-catalogue-and-cascade-consolidated.md)
-    — consolidated record-kind catalogue + cascade walkthrough
-    under the corrected framing (sema = logic, lojix-store =
-    content-addressed filesystem). Replaces deleted 023/024/025.
-11. [reports/032](../reports/032-lojix-store-correction-audit.md)
-    — lojix-store terminology audit after Li's correction from
-    "blob DB" to "nix-store-like filesystem". Records the
-    delete/sharpen verdicts applied this session.
-12. [reports/027](../reports/027-adversarial-review-of-026.md)
-    — adversarial critique of 026; the shaky specifics
-    surfaced (hash-vs-name refs, ingester scope, edit UX,
-    diagnostic spans, cascade cost).
-13. [reports/028](../reports/028-doc-propagation-inventory.md)
-    — per-repo doc-alignment inventory; items actioned this
-    session.
-14. [reports/029](../reports/029-ra-chalk-polonius-structural-lessons.md)
-    — rust-analyzer / chalk / polonius structural lessons
-    stripped of text-layer framing.
-15. [reports/030](../reports/030-lojix-transition-plan.md) —
-    **critical**: lojix repo is a working monolith today, not
-    a spec-only README. Transition plan preserves the
-    production CLI while routing toward lojixd.
-16. [reports/031](../reports/031-uncertainties-and-open-questions.md)
-    — session-close uncertainties list; prioritised decisions.
+9. [reports/004](../reports/004-sema-types-for-rust.md) —
+   the Rust-code record kinds (Fn, Struct, Expr, Type).
+10. [reports/022](../reports/022-records-as-evaluation-prior-art.md)
+    — prior art for records-as-evaluation.
+11. [reports/033](../reports/033-record-catalogue-and-cascade-consolidated.md)
+    — MVP record-kind catalogue + cascade walkthrough.
+12. [reports/050](../reports/050-slot-index-refinement-synthesis.md)
+    — slot-refs, per-kind change log, global scope,
+    subscription cascade. Detail in
+    [reports/047](../reports/047-slot-id-design-research.md),
+    [reports/048](../reports/048-change-log-design-research.md),
+    [reports/049](../reports/049-global-slot-scope-research.md).
+13. [reports/051](../reports/051-self-hosting-under-nexus-only.md)
+    — self-hosting without an ingester; crate-by-crate
+    gradient.
+14. [reports/057](../reports/057-edit-ux-freshly-reconsidered.md)
+    — edit UX under request-only invariants; humans and LLMs.
+15. [reports/056](../reports/056-nexus-grammar-under-request-lens.md)
+    — grammar refinements under the request-only lens.
+16. [reports/030](../reports/030-lojix-transition-plan.md) —
+    lojix transition plan (lojix repo is a working monolith
+    today).
 17. [reports/034](../reports/034-sema-multi-category-framing.md),
     [reports/035](../reports/035-bls-quorum-authz-as-records.md),
     [reports/036](../reports/036-world-model-as-sema-records.md)
-    — multi-category sema framing (all criomed state in sema),
-    BLS-quorum authz as records (post-MVP), world-model data as
-    records (post-MVP).
-18. [reports/037](../reports/037-workspace-inclusion-and-archive-system.md),
+    — post-MVP: multi-category sema, BLS quorum authz, world-
+    model data.
+18. [reports/044](../reports/044-priority-2-decisions-research.md),
+    [reports/045](../reports/045-priority-3-decisions-research.md)
+    — P2 ergonomics research (diagnostics, semachk, migration);
+    P3 lojix-transition sub-decisions.
+19. [reports/029](../reports/029-ra-chalk-polonius-structural-lessons.md)
+    — rust-analyzer / chalk / polonius structural lessons.
+20. [reports/037](../reports/037-workspace-inclusion-and-archive-system.md),
     [reports/038](../reports/038-deep-audit-code-repos.md),
     [reports/039](../reports/039-deep-audit-mentci-next.md),
     [reports/040](../reports/040-criomos-cluster-audit.md),
     [reports/041](../reports/041-deep-audit-final.md) —
-    workspace inclusion/exclusion manifest; deep audit passes
-    across code repos, mentci-next, and CriomOS cluster; final
-    synthesis.
-19. [reports/046](../reports/046-decisions-synthesis.md) —
-    **decisions synthesis**. Unified recommendations across
-    all 14 P0–P3 decisions from report 031 with ordered action
-    plan. Detailed per-tier research in
-    [reports/042](../reports/042-priority-0-decisions-research.md)
-    (P0 foundational),
-    [reports/043](../reports/043-priority-1-decisions-research.md)
-    (P1 MVP),
-    [reports/044](../reports/044-priority-2-decisions-research.md)
-    (P2 post-MVP),
-    [reports/045](../reports/045-priority-3-decisions-research.md)
-    (P3 lojix transition).
-20. [reports/047](../reports/047-slot-id-design-research.md),
-    [reports/048](../reports/048-change-log-design-research.md),
-    [reports/049](../reports/049-global-slot-scope-research.md),
-    [reports/050](../reports/050-slot-index-refinement-synthesis.md)
-    — slot/index refinement: ratifies `Slot(u64)` counter,
-    global scope, per-kind change logs, subscription-on-slot
-    cascade trigger; ingester owns composite names;
-    rsc-generated per-opus enum for Rust projection.
-17. [reports/016](../reports/016-tier-b-decisions.md) — open
-    questions (most answered by 017).
-18. `reports/014` — serde-refactor history.
-19. `reports/009-binds-and-patterns` — technical reference.
+    workspace manifest + deep audit passes.
+21. [reports/053](../reports/053-ingester-contamination-audit.md),
+    [reports/055](../reports/055-framing-audit-post-invariants.md)
+    — ingester-contamination and framing-invariants audits.
+22. [reports/058](../reports/058-canonical-state-after-sweep.md)
+    — session-close snapshot after the sweep; full list of
+    deletions + what remains canonical.
+22. [reports/016](../reports/016-tier-b-decisions.md),
+    [reports/014](../reports/014-serde-refactor-review.md),
+    [reports/009-binds-and-patterns.md](../reports/009-binds-and-patterns.md),
+    [reports/032](../reports/032-lojix-store-correction-audit.md),
+    [reports/028](../reports/028-doc-propagation-inventory.md)
+    — historical / narrow-scope references.
 
-Deleted reports (wrong per Li's "delete wrong reports, don't
-banner them" rule):
-- **015** (architecture-landscape v4) — superseded by
-  017/020/021/026; four-daemon topology and kind-byte registry
-  were wrong.
-- **023** (sema-as-rust-checker) — text-layer contamination
-  (SourceRecord/TokenStream/Ast records in sema). Useful bits
-  consolidated into 033.
-- **024** (self-hosting-cascade-walkthrough) — same
-  contamination. Useful bits in 033.
-- **025** (sema-schema-inventory) — same contamination
-  (ModulePath as source-path). Useful bits in 033.
+### Deleted reports
 
-Older reports have been deleted to prevent context poisoning.
+Per the "delete wrong reports" rule, these are gone:
+
+- **015** (architecture-landscape v4) — superseded.
+- **018** (never committed).
+- **023/024/025** (text-layer contamination).
+- **027** (adversarial review of 026 — served its purpose;
+  §3+§5 were ingester-dependent).
+- **031** (uncertainties list — substantially resolved; any
+  remaining open items absorbed into other reports).
+- **042/043/046** (P0+P1 decision research + synthesis — had
+  load-bearing ingester contamination; surviving recommendations
+  absorbed into 050/054/057).
 
 ---
 
-## 10 · Update policy
+## 12 · Update policy
 
 When architecture changes:
 
 1. Update this file first. Keep it prose + diagrams only.
-2. Write a new report (`reports/NNN-whatever.md`) describing
-   the decision, the alternatives considered, and any concrete
-   shapes (types, enums).
+2. Write a new report describing the change, alternatives
+   considered, and any concrete shapes.
 3. Update implementation in the affected repos.
-
-If an old report is superseded, **don't edit it** — it stays
-as a decision-journey record. The current shape is wherever
-this file points.
+4. If a report is superseded, **delete it**. Don't add
+   "this is wrong now" banners — the report tree stays
+   tight.
 
 ---
 
