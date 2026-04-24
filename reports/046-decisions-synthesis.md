@@ -66,22 +66,26 @@ on top of immutable content-addressed records. Record hashes
 stay stable under content edits of referents; the index moves.
 This is Datomic's `eid` pattern + Git's ref-table, unified.
 
-**Clarifying sub-questions still open**:
+**Decisions ratified 2026-04-24** (via Li's follow-up; full
+analysis in reports/047–049; synthesis in
+[reports/050](050-slot-index-refinement-synthesis.md)):
 
-1. **What IS the slot-id?** Candidates: birth-hash
-   (content hash at creation, immutable thereafter);
-   auto-assigned UUID; Datomic-style monotonic integer. Lean:
-   **birth-hash** — keeps the "identity is derived from
-   content" spirit even though current-hash may diverge from
-   birth-hash as content evolves.
-2. **Slot scope**: opus-scoped or global? Lean opus-scoped —
-   matches crate-boundary semantics in Rust and avoids
-   global-namespace collisions.
-3. **History**: slot→hash map moves over time. Is past-state
-   queryable at an earlier sema-rev? Lean yes — sema's
-   revision log captures every index write.
-4. **Cascade trigger**: subscription on the index-entry's
-   current-hash drives dependent re-derivation.
+1. **Slot-id is `Slot(u64)`** — monotonic counter minted by
+   criomed, freelist-reused, with a reserved seed range
+   `[0, 1024)`. Post-MVP migration path to `Slot(Blake3)`
+   birth-hash for federation.
+2. **Scope is global**. Opus-local names live in each opus's
+   `Vec<MemberEntry>` (`{ slot, local_name, visibility, kind }`).
+3. **History is per-kind change logs** (one redb table per
+   record-kind; key `(Slot, seq)`). Global `rev_index`
+   auxiliary table for cross-kind queries. Per-kind log is
+   ground truth; `index::K` + `rev_index` are derivable views.
+4. **Cascade trigger** is subscription on `Slot → dependents`;
+   fires on `SlotBinding.content_hash` changes; coalesced at
+   Revision commit.
+5. **Enum mapping is rsc-generated per-opus**, not stored in
+   sema. Composite display-names computed by the ingester at
+   slot-creation.
 
 **Migration**: refactor `nexus-schema` to kill
 `Type::Named(TypeName)` etc.; add the slot-ref type; criomed

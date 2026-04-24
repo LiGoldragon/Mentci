@@ -539,6 +539,14 @@ Foundational rules observed across sessions.
     (P2 post-MVP),
     [reports/045](../reports/045-priority-3-decisions-research.md)
     (P3 lojix transition).
+20. [reports/047](../reports/047-slot-id-design-research.md),
+    [reports/048](../reports/048-change-log-design-research.md),
+    [reports/049](../reports/049-global-slot-scope-research.md),
+    [reports/050](../reports/050-slot-index-refinement-synthesis.md)
+    — slot/index refinement: ratifies `Slot(u64)` counter,
+    global scope, per-kind change logs, subscription-on-slot
+    cascade trigger; ingester owns composite names;
+    rsc-generated per-opus enum for Rust projection.
 17. [reports/016](../reports/016-tier-b-decisions.md) — open
     questions (most answered by 017).
 18. `reports/014` — serde-refactor history.
