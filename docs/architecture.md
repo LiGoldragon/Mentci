@@ -215,18 +215,19 @@ schema-invalid shapes, unauthorised actions all fail here.
 - **Owner**: criomed.
 - **Backend**: redb-backed, content-addressed records keyed
   by blake3 of their canonical rkyv encoding.
-- **Reference model** (per reports/050/054): records store
-  **slot-refs** (`Slot(u64)`), not content hashes. Sema's
-  index maps `slot → { current_content_hash, display_name,
-  valid_from, valid_to }` as `SlotBinding` records. Content
-  edits update the slot's current-hash (no ripple-rehash of
-  dependents). Renames update the slot's display-name (no
-  record rewrites anywhere).
+- **Reference model**: records store **slot-refs** (`Slot(u64)`),
+  not content hashes. Sema's index maps `slot → {
+  current_content_hash, display_name, valid_from, valid_to }`
+  as `SlotBinding` records. Content edits update the slot's
+  current-hash (no ripple-rehash of dependents). Renames
+  update the slot's display-name (no record rewrites
+  anywhere). Display-name is global — one name per slot; rsc
+  projections pick it up everywhere.
 - **Change log**: per-kind. Each record-kind has its own redb
   table keyed `(Slot, seq)` carrying `ChangeLogEntry { rev,
   op, new/old hash, principal, sig_proof }`. Per-kind is
   ground truth; `index::K` + global `rev_index` are derivable
-  views.
+  views. Concrete schema in [reports/048](../reports/048-change-log-design-research.md).
 - **Scope**: slots are **global** (not opus-scoped); one name
   per slot, globally consistent.
 
@@ -485,6 +486,20 @@ Foundational rules. Every session follows these.
   crates. Our code-gen patterns are sema rules. We freely
   **call** third-party macros (derive, attribute, function-
   like) and rsc emits the invocations.
+- **Skeleton-as-design.** New concrete design starts as
+  compiled skeleton code (types + trait signatures + `todo!()`
+  bodies) in the relevant repo. Reports are for WHY
+  (philosophy, invariants, decision-journey); skeleton code
+  is for WHAT (types, traits, enums, verbs). rustc checks
+  consistency; prose can't drift. Example: `lojix-store/src/`.
+- **AGENTS.md/CLAUDE.md shim.** In every canonical repo:
+  `AGENTS.md` holds real content; `CLAUDE.md` is a one-line
+  shim (`See [AGENTS.md](AGENTS.md).`). Codex reads
+  AGENTS.md; Claude Code reads CLAUDE.md; both converge.
+- **Delete wrong reports; don't banner.** When a report's
+  thesis is wrong or the content is absorbed elsewhere,
+  delete it. Banners invite agents to relitigate. Keep the
+  report tree small.
 - **Nexus is a request language.** Sema is rkyv. There are no
   "nexus records."
 - **Sema is all we are concerned with.** Everything else
@@ -507,8 +522,6 @@ Foundational rules. Every session follows these.
   move, restructure freely until Li declares a compatibility
   boundary.
 - **No ETAs.** Describe the work; don't schedule it.
-- **Delete wrong reports, don't banner them.** Keep the report
-  tree tight.
 - **Sigils as last resort.** New features are delimiter-matrix
   slots or Pascal-named records.
 - **One artifact per repo** (per rust/style.md rule 1).
@@ -517,92 +530,48 @@ Foundational rules. Every session follows these.
 
 ## 11 · Reading order for a new session
 
+This file first. Then the minimal canonical report set (12):
+
 1. **This file** — canonical shape.
-2. [reports/054](../reports/054-request-based-editing-and-no-ingester.md)
-   — the three invariants (A/B/C), ratified.
-3. [reports/026](../reports/026-sema-is-code-as-logic.md) —
-   sema holds code as logic; the pivot document.
-4. [reports/021](../reports/021-criomed-evaluates-lojixd-executes.md)
-   — criomed is sema's engine; lojixd is the thin executor.
-5. [reports/020](../reports/020-lojix-single-daemon.md) — one
-   lojix daemon; one contract.
-6. [reports/019](../reports/019-lojix-as-pillar.md) — lojix as
-   the artifacts pillar; three-pillar model.
-7. [reports/017](../reports/017-architecture-refinements.md) —
-   Opus/Derivation shapes; schema-bound patterns; capability
-   tokens.
-8. [reports/013](../reports/013-nexus-syntax-proposal.md) —
-   delimiter-family matrix (grammar canon).
-9. [reports/004](../reports/004-sema-types-for-rust.md) —
-   the Rust-code record kinds (Fn, Struct, Expr, Type).
-10. [reports/022](../reports/022-records-as-evaluation-prior-art.md)
-    — prior art for records-as-evaluation.
-11. [reports/033](../reports/033-record-catalogue-and-cascade-consolidated.md)
-    — MVP record-kind catalogue + cascade walkthrough.
-12. [reports/050](../reports/050-slot-index-refinement-synthesis.md)
-    — slot-refs, per-kind change log, global scope,
-    subscription cascade. Detail in
-    [reports/047](../reports/047-slot-id-design-research.md),
-    [reports/048](../reports/048-change-log-design-research.md),
-    [reports/049](../reports/049-global-slot-scope-research.md).
-13. [reports/051](../reports/051-self-hosting-under-nexus-only.md)
-    — self-hosting without an ingester; crate-by-crate
-    gradient.
-14. [reports/057](../reports/057-edit-ux-freshly-reconsidered.md)
-    — edit UX under request-only invariants; humans and LLMs.
-15. [reports/056](../reports/056-nexus-grammar-under-request-lens.md)
-    — grammar refinements under the request-only lens.
-16. [reports/030](../reports/030-lojix-transition-plan.md) —
-    lojix transition plan (lojix repo is a working monolith
-    today).
-17. [reports/034](../reports/034-sema-multi-category-framing.md),
-    [reports/035](../reports/035-bls-quorum-authz-as-records.md),
-    [reports/036](../reports/036-world-model-as-sema-records.md)
-    — post-MVP: multi-category sema, BLS quorum authz, world-
-    model data.
-18. [reports/044](../reports/044-priority-2-decisions-research.md),
-    [reports/045](../reports/045-priority-3-decisions-research.md)
-    — P2 ergonomics research (diagnostics, semachk, migration);
-    P3 lojix-transition sub-decisions.
-19. [reports/029](../reports/029-ra-chalk-polonius-structural-lessons.md)
-    — rust-analyzer / chalk / polonius structural lessons.
-20. [reports/037](../reports/037-workspace-inclusion-and-archive-system.md),
-    [reports/038](../reports/038-deep-audit-code-repos.md),
-    [reports/039](../reports/039-deep-audit-mentci-next.md),
-    [reports/040](../reports/040-criomos-cluster-audit.md),
-    [reports/041](../reports/041-deep-audit-final.md) —
-    workspace manifest + deep audit passes.
-21. [reports/053](../reports/053-ingester-contamination-audit.md),
-    [reports/055](../reports/055-framing-audit-post-invariants.md)
-    — ingester-contamination and framing-invariants audits.
-22. [reports/058](../reports/058-canonical-state-after-sweep.md)
-    — session-close snapshot after the sweep; full list of
-    deletions + what remains canonical.
-23. [reports/059](../reports/059-nix-as-build-backend-and-macro-philosophy.md)
-    — nix (crane + fenix) is the build backend during the
-    bootstrap era; we author no macros but freely call
-    third-party ones.
-22. [reports/016](../reports/016-tier-b-decisions.md),
-    [reports/014](../reports/014-serde-refactor-review.md),
-    [reports/009-binds-and-patterns.md](../reports/009-binds-and-patterns.md),
-    [reports/032](../reports/032-lojix-store-correction-audit.md),
-    [reports/028](../reports/028-doc-propagation-inventory.md)
-    — historical / narrow-scope references.
+2. [reports/030](../reports/030-lojix-transition-plan.md) —
+   **read early**: the `lojix/` repo is a working CriomOS
+   deploy orchestrator today, not a spec-only README. Agents
+   must not rewrite it.
+3. [reports/004](../reports/004-sema-types-for-rust.md) —
+   Rust-code record kinds (Fn, Struct, Expr, Type).
+4. [reports/013](../reports/013-nexus-syntax-proposal.md) —
+   delimiter-family grammar matrix.
+5. [reports/017](../reports/017-architecture-refinements.md) —
+   Opus/Derivation shapes; capability tokens.
+6. [reports/019](../reports/019-lojix-as-pillar.md) — three-
+   pillar framing; 11 nix problems lojix fixes; wrap→replace
+   migration phases.
+7. [reports/033](../reports/033-record-catalogue-and-cascade-consolidated.md)
+   — MVP record-kind catalogue + cascade walkthrough.
+8. [reports/048](../reports/048-change-log-design-research.md)
+   — per-kind change log schema + stress-tests.
+9. [reports/051](../reports/051-self-hosting-under-nexus-only.md)
+   — self-hosting as a crate-by-crate gradient; bootstrap order.
+10. [reports/057](../reports/057-edit-ux-freshly-reconsidered.md)
+    — edit UX under request-only invariants.
+11. [reports/059](../reports/059-nix-as-build-backend-and-macro-philosophy.md)
+    — nix (crane + fenix) is the build backend; we author no
+    macros but freely call third-party ones.
+12. [reports/060](../reports/060-post-mvp-directions.md) —
+    post-MVP directions (multi-category sema, BLS quorum authz,
+    world-model data, semachk, migration, change-log mechanics).
+13. [reports/009](../reports/009-binds-and-patterns.md) —
+    narrow CS reference on binds + unification.
 
-### Deleted reports
+**Skeleton code** (design-as-types, co-resident with the reports):
+- [`lojix-store/src/`](../../lojix-store/src/) — content-
+  addressed filesystem: `StoreEntryHash`, `StoreReader`,
+  `StoreWriter`, `BundleFromNix`, `IndexReader/Writer`,
+  `BundlePolicy`.
 
-Per the "delete wrong reports" rule, these are gone:
-
-- **015** (architecture-landscape v4) — superseded.
-- **018** (never committed).
-- **023/024/025** (text-layer contamination).
-- **027** (adversarial review of 026 — served its purpose;
-  §3+§5 were ingester-dependent).
-- **031** (uncertainties list — substantially resolved; any
-  remaining open items absorbed into other reports).
-- **042/043/046** (P0+P1 decision research + synthesis — had
-  load-bearing ingester contamination; surviving recommendations
-  absorbed into 050/054/057).
+Reports before this list have been deleted over successive
+consolidation sweeps (2026-04-24, 2026-04-25) — their content
+lives here, in surviving reports, or in skeleton code.
 
 ---
 
@@ -611,12 +580,17 @@ Per the "delete wrong reports" rule, these are gone:
 When architecture changes:
 
 1. Update this file first. Keep it prose + diagrams only.
-2. Write a new report describing the change, alternatives
-   considered, and any concrete shapes.
-3. Update implementation in the affected repos.
-4. If a report is superseded, **delete it**. Don't add
-   "this is wrong now" banners — the report tree stays
-   tight.
+2. Prefer **skeleton code** (types, trait signatures, enums)
+   in the relevant repo over prose. Skeleton code is compiler-
+   checked; prose drifts.
+3. Write a report only when the decision carries a journey
+   worth recording, or cross-cutting philosophy that doesn't
+   fit in one repo. Reports are for WHY; skeleton code is for
+   WHAT.
+4. Update implementation in the affected repos.
+5. If a report is superseded, **delete it**. Don't banner.
+   The report tree stays small so future sessions can read it
+   in one pass.
 
 ---
 
