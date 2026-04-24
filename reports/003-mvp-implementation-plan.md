@@ -24,7 +24,8 @@ nota ↔ nexus layering rationale:
 | Repo | Kind | Role |
 |---|---|---|
 | [`nota`](https://github.com/LiGoldragon/nota) | spec-only | Grammar spec for the data-layer format (JSON/TOML class) |
-| [`nota-serde`](https://github.com/LiGoldragon/nota-serde) | library | `serde::Serializer` + `Deserializer` for nota syntax |
+| [`nota-serde-core`](https://github.com/LiGoldragon/nota-serde-core) | library | Shared kernel — Lexer, Token, Error, Serializer, Deserializer; consumed by both serde crates |
+| [`nota-serde`](https://github.com/LiGoldragon/nota-serde) | library | Public façade — `to_string` / `from_str` re-exporting from nota-serde-core |
 | [`nexus`](https://github.com/LiGoldragon/nexus) | spec-only | Messaging-layer grammar — superset of nota; adds sigils + pattern/constrain/shape delimiters |
 | [`nexus-serde`](https://github.com/LiGoldragon/nexus-serde) | library | `serde::Serializer` + `Deserializer` for nexus — depends on nota-serde |
 | [`nexus-schema`](https://github.com/LiGoldragon/nexus-schema) | library | Rust types that shape database records; ports per [report 004](004-sema-types-for-rust.md) |

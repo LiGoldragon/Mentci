@@ -8,7 +8,7 @@ Start there for: cross-project rules (jj workflow, always-push, Rust style — s
 
 Design docs live in [`reports/`](reports/). Read in order: [001 orientation](reports/001-migration-doc-reading.md), [002 database](reports/002-sema-db-architecture.md), [003 MVP plan](reports/003-mvp-implementation-plan.md), [004 Rust types](reports/004-sema-types-for-rust.md), [007 nota/nexus split](reports/007-nota-nexus-layer-split.md).
 
-Nine repos for the MVP, one artifact per repo (rule 1): `nota` (spec — data-layer format), `nota-serde` (Rust impl), `nexus` (spec — messaging superset of nota), `nexus-serde`, `nexus-schema`, `sema` (the database), `nexusd`, `nexus-cli`, `rsc`. All symlinked into [`repos/`](repos/) via `devshell.nix`.
+Ten repos for the MVP, one artifact per repo (rule 1): `nota` (spec — data-layer format), `nota-serde-core` (shared kernel for the two serde impls), `nota-serde` (nota's public API), `nexus` (spec — messaging superset of nota), `nexus-serde`, `nexus-schema`, `sema` (the database), `nexusd`, `nexus-cli`, `rsc`. All symlinked into [`repos/`](repos/) via `devshell.nix`.
 
 MVP goal: **self-hosting** — write the system's own source as records in the sema database; rsc projects those records to `.rs` files; rustc compiles them; the new binary reads and extends its own database.
 

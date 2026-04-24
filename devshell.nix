@@ -5,6 +5,7 @@ let
   linkedRepos = [
     "tools-documentation"
     "nota"
+    "nota-serde-core"
     "nota-serde"
     "nexus"
     "nexus-serde"
