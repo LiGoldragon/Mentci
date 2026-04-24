@@ -526,6 +526,57 @@ Foundational rules. Every session follows these.
   slots or Pascal-named records.
 - **One artifact per repo** (per rust/style.md rule 1).
 
+### Rejected framings (reject-loud)
+
+Agents repeatedly rediscover wrong framings when the docs
+say only what is true. These explicit rejections block
+recurrence. Add to this list when Li rejects a new framing.
+
+- **Aski is retired.** mentci-next / sema-ecosystem does not
+  treat aski as a design input. Do not reason from aski
+  axioms (II-L, v0.21 syntax, synth.md, compile-pipeline
+  framing) to current sema architecture. Shared surface
+  features (delimiter-family matrix, case rules) are
+  coincidence, not lineage.
+- **Scope is world-supersession, not personal-scale.** CriomOS
+  aims to supersede proprietary operating systems and
+  computing stacks globally. Framings like "personal-scale,"
+  "craftsperson workshop," or "self-hosted-self" underestimate
+  the project.
+- **Sema is local; reality is subjective.** There is no global
+  sema, no federated-global database, no single logical truth.
+  Each criomed holds a subjective view; instances communicate,
+  agree, disagree, and negotiate to reach agreement. "Global
+  database," "global blockchain," and "federated global sema"
+  are wrong framings.
+- **Categories are intrinsic.** Code records and world-fact
+  records cannot share a category — the separation is a fact
+  of reality, not a schema choice. The code category is named
+  **machina** (the subset of sema that compiles to Rust in
+  v1). The native checker over machina records is
+  **machina-chk** (not "semachk" — the check is not over all
+  of sema). Names for world-fact, operational, and authz
+  categories are still open.
+- **Self-hosting close is normal software engineering.** The
+  engine works correctly, canonical crates authored as
+  records. Bit-for-bit identity with the bootstrap version is
+  not a bar — new rustc versions aren't byte-identical to
+  predecessors either.
+- **Nexus is the agent interface.** "Legibility to agents" is
+  not a separate design axis. Nexus is how agents (LLMs,
+  humans, scripts) interact with criome; text in, criomed-
+  validated records out.
+
+### Reject-loud rule
+
+When a framing is considered and rejected, state the
+rejection here — not just the acceptance elsewhere. Past
+recurring wrong frames: aski-as-input, personal-scale,
+global-database, federation, boundary-as-tension,
+bit-for-bit-identity, legibility-axis, sema-as-data-store,
+four-daemon topology, ingester-for-Rust, lojix-store-as-
+blob-DB, banner-wrong-reports.
+
 ---
 
 ## 11 · Reading order for a new session
