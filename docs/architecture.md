@@ -28,23 +28,32 @@ they're decision-journey records.
 
 ## 1 · The engine in one paragraph
 
-The engine is a **runtime (criome)** hosting two pillars — a
-**records database (sema)** and an **artifacts family (lojix,
-Li's expanded-and-more-correct nix)**. Three daemons run it:
-**nexusd** (the translator — nexus text ↔ rkyv), **criomed**
-(the brain — owns sema, runs an incremental evaluator that
-re-resolves dependent state on every record mutation, resolves
-schema-bound patterns, dispatches concrete work to lojixd), and
-**lojixd** (the hands — receives concrete "do this" plans and
-executes: runs cargo/nix subprocesses, materialises files,
-writes blobs into lojix-store, runs deploys). All the thinking
-is criomed's; lojixd is a thin executor. `nexus` is the
-communication skin spanning all of criome: text at the human
-boundary, rkyv internally. The MVP target is **self-hosting**:
-the engine's own source lives as records in sema; criomed
-incrementally evaluates what to build; lojixd executes the
-resulting plan to produce a Rust binary that can re-edit the
-same records.
+**sema is the truth.** At any instant, the records in sema are
+the current, evaluated, canonical state — there is no separate
+layer above sema that holds "computed values" apart from what
+sema already contains. Every message that reaches the engine
+can potentially edit sema; rules and derivations are themselves
+records in sema; when an edit cascades, the cascade settles as
+more sema records. This is the whole point of the design: one
+store of truth, one way to change it, full introspection.
+
+Three daemons work around that invariant:
+
+- **nexusd** — the translator: nexus text ↔ rkyv at the human
+  boundary.
+- **criomed** — sema's engine: receives every message, applies
+  mutations, lets rules cascade, maintains invariants,
+  dispatches concrete work to lojixd.
+- **lojixd** — the hands: does what sema can't (spawns cargo /
+  nix / nixos-rebuild subprocesses; reads and writes the
+  lojix-store blob directory; materialises files). Its inputs
+  are plan records read from sema; its outputs become outcome
+  records written back.
+
+The MVP target is **self-hosting**: the engine's own source
+lives as records in sema; editing those records cascades through
+sema into concrete plan records; lojixd executes the plans;
+resulting binaries can re-edit the same records.
 
 ---
 
@@ -63,17 +72,18 @@ same records.
           │ rkyv (criome-msg contract)
           ▼
      ┌─────────┐
-     │ criomed │ the brain — guardian of sema; overlord of lojix.
-     │         │ • owns the records database
-     │         │ • runs an incremental evaluator — every mutation
-     │         │   re-plans dependent derived state (compile
-     │         │   plans, pattern bindings, dep closures)
+     │ criomed │ sema's engine — maintains the single truth.
+     │         │ • receives every message; applies mutations
+     │         │ • rules and derivations in sema cascade as
+     │         │   records update; the cascade is how "evaluation"
+     │         │   happens (nothing sits outside sema)
      │         │ • resolves RawPattern → PatternExpr (hallucination
      │         │   wall)
      │         │ • fires subscriptions on commits
-     │         │ • dispatches concrete plans to lojixd
-     │         │ • signs capability tokens; tracks reachability for
-     │         │   lojix-store GC
+     │         │ • reads concrete plan records from sema and
+     │         │   dispatches them to lojixd
+     │         │ • signs capability tokens; tracks reachability
+     │         │   for lojix-store GC (also via records)
      │         │ • never touches binary bytes itself
      └────┬────┘
           │ rkyv (lojix-msg — concrete "do this" verbs)
@@ -284,29 +294,29 @@ its report (or write a new one); don't inline the shape here.
 
 ### Compile + self-host loop (edit-time + run-time)
 
-**Edit-time** (heavy work; incremental):
+**Edit-time** (mutations cascade through sema):
 ```
  human: (Mutate (Opus nexusd …))
         ▼
  nexusd → criomed
         ▼
- criomed:
-   • writes new Opus record to sema
-   • incremental evaluator fires:
-     - resolves toolchain derivation hashes
-     - plans cargo invocation (args, env, fetch list)
-     - caches the concrete plan keyed by opus content hash
-   • fires subscriptions
-        ▼ (no lojixd involvement yet)
+ criomed applies the mutation to sema:
+   • Opus record updates
+   • rules/derivations in sema reference it; the cascade
+     settles as updated plan records, dependency records,
+     pattern rebindings — all IN sema
+   • subscriptions fire
+        ▼ (no lojixd yet; sema is the evaluation)
 ```
 
-**Run-time** (thin work; one cargo invocation):
+**Run-time** (dispatch a plan record):
 ```
  human: (Compile nexusd)
         ▼
  nexusd → criomed
         ▼
- criomed: concrete plan is already cached; issue it
+ criomed reads the relevant plan record from sema and
+ issues the concrete verb to lojixd:
         ▼ rkyv RunCargo { workdir, args, env, fetch_files, … }
  lojixd:
    • materialises fetch_files from lojix-store into workdir
@@ -314,7 +324,8 @@ its report (or write a new one); don't inline the shape here.
    • hashes binary; writes into lojix-store (in-process)
    • replies { output-hash, warnings, wall_ms }
         ▼
- criomed asserts CompiledBinary record
+ criomed writes the outcome back as a sema record
+ (e.g. CompiledBinary pointing at the blob hash)
         ▼
  reply flows back to human
 ```
@@ -359,11 +370,17 @@ Foundational rules observed across sessions.
   message is rkyv.
 - **Schema is the documentation.** Patterns and types resolve
   against sema; hallucinated names are rejected early.
-- **criomed owns all evaluation.** lojixd is a worker — receives
-  concrete "do this" plans. Schema resolution, build planning,
-  toolchain pinning, dep-closure computation all happen in
-  criomed's incremental evaluator (fires on every sema
-  mutation). lojixd never sees an Opus record directly.
+- **sema is the truth.** Not a store that an evaluator sits
+  above — sema's current contents ARE the evaluated state.
+  Rules and derivations are themselves records; mutation
+  cascades happen inside sema. criomed is the engine that
+  applies mutations and maintains invariants; it doesn't hold a
+  separate cache of "derived values."
+- **lojixd is for effects sema can't do** — spawn processes,
+  touch the filesystem, invoke external tools. Its inputs are
+  plan records read from sema; its outputs are outcome records
+  written back. It never sees an Opus directly; it receives
+  concrete execution verbs.
 - **Criomed is the overlord** of lojix-store. Tracks
   reachability; signs tokens; directs GC.
 - **A binary is just a path.** No `Launch` message;

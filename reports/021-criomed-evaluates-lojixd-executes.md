@@ -1,5 +1,21 @@
 # 021 — criomed evaluates (incrementally); lojixd executes
 
+> **⚠ Framing correction — 2026-04-24**: Li then clarified:
+> "sema *is* the evaluation. every message to criomed can
+> potentially edit sema, and sema is the truth, as it is right
+> now. That is the whole point of all this."
+>
+> Replace "criomed has an incremental evaluator subsystem" with
+> "sema is the truth; criomed is sema's engine — it applies
+> mutations and lets rules/derivations cascade through sema;
+> there is no evaluator sitting above sema." Derived values are
+> records; plans are records; cascades settle inside sema.
+> lojixd remains an executor of effects (processes, filesystem)
+> that sema can't do natively. The rest of this report's
+> lojix-as-executor framing stands.
+>
+> Canonical live doc: [docs/architecture.md](../docs/architecture.md).
+
 *Claude Opus 4.7 / 2026-04-24 · important clarification from Li
 near end-of-session, supersedes framing in reports/020 §6–§7
 about lojixd-as-evaluator.*
