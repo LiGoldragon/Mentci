@@ -1,0 +1,150 @@
+# Workspace manifest
+
+*Authoritative inventory of which repos under `~/git/` are part of
+the sema-ecosystem MVP and which are not. Agents consult this
+file to decide what to touch.*
+
+**Rule for agents**: if a repo isn't listed here as **CANON** or
+**TRANSITIONAL**, don't edit its source or docs without explicit
+instruction. `devshell.nix`'s `linkedRepos` list mirrors this
+manifest's CANON + TRANSITIONAL entries.
+
+Last reviewed: 2026-04-24.
+
+---
+
+## Status vocabulary
+
+| Status | Meaning |
+|---|---|
+| **CANON** | Currently canonical; symlinked in `repos/`; agents freely operate. |
+| **TRANSITIONAL** | Canonical today but in a migration; read the linked report first. |
+| **CANON-MISSING** | Belongs in canonical but the repo doesn't exist yet. Create when needed per the linked report. |
+| **RETIRED** | Superseded; about to move to `~/git/archive/`. Don't edit. |
+| **ARCHIVED** | Historical; banner-marked; don't edit. May still live in `~/git/` until physical archive pass. |
+| **SHELVED** | Design-valid but post-MVP. Keep around; not in canonical. |
+| **OFF-SCOPE** | Not part of sema-ecosystem MVP. Ignore. |
+
+---
+
+## CANON
+
+The repos that make the sema-ecosystem MVP exist. Agents expect
+to find them at `~/git/<name>/` and symlinked at
+`mentci-next/repos/<name>/`.
+
+| Repo | Role | Pointer |
+|---|---|---|
+| `tools-documentation` | Cross-project rules, daily-use tool docs. | `repos/tools-documentation/AGENTS.md` |
+| `criome` | Spec repo — runtime pillar; three-pillar framing. | `docs/architecture.md §4` |
+| `nota` | Spec repo — data grammar (nota ⊂ nexus). | `reports/013` |
+| `nota-serde-core` | Shared lexer + ser/de kernel for both dialects. | `reports/014` |
+| `nota-serde` | nota's public façade. | `reports/014` |
+| `nexus` | Spec repo — messaging grammar (superset of nota). | `reports/013` |
+| `nexus-serde` | nexus's public façade. | `reports/014` |
+| `nexus-schema` | Record-kind vocabulary (Fn, Struct, Opus, Derivation, …). | `reports/004`, `reports/033` |
+| `sema` | Records DB (redb-backed). | `docs/architecture.md §3` |
+| `nexusd` | Messenger daemon (text ↔ rkyv). | `docs/architecture.md §2` |
+| `nexus-cli` | Text client. | `docs/architecture.md §4` |
+| `rsc` | Records → Rust source projector. | `reports/004`, `reports/033` |
+
+## TRANSITIONAL
+
+Canonical today, structure changes per a plan.
+
+| Repo | Current role | Target | Pointer |
+|---|---|---|---|
+| `lojix` | Li's working CriomOS deploy orchestrator (CLI + ractor actors + horizon-lib + nixos-rebuild). | Spec-only README once lojixd exists and takes over. Agents must NOT rewrite this repo. | `reports/030` |
+
+## CANON-MISSING
+
+Belongs in canonical per architecture but the repo doesn't
+exist yet. Create when we reach the corresponding work.
+
+| Repo | Purpose | When |
+|---|---|---|
+| `criomed` | sema's engine daemon. | Needed for anything beyond nexusd scaffolding. |
+| `criome-msg` | nexusd↔criomed contract (rkyv). | Alongside criomed scaffold. |
+| `lojix-msg` | criomed↔lojixd contract (rkyv). | `reports/030` Phase B. |
+| `lojixd` | lojix daemon (forge + store + deploy actors inside). | `reports/030` Phase C. |
+| `lojix-store` | Content-addressed filesystem (nix-store analogue) + index DB. | After lojixd scaffolds. |
+
+Once each is created, add its entry to CANON and to
+`devshell.nix`'s `linkedRepos` list.
+
+## RETIRED (targets for `~/git/archive/`)
+
+Superseded; physical archive pending.
+
+| Repo | Supersession reason | Pointer |
+|---|---|---|
+| `criome-store` | "Universal blob store" concept split into `sema` (records DB) + `lojix-store` (CA filesystem); prototype code doesn't match either target architecture. | `docs/architecture.md §3`, `reports/037 §3` |
+
+## ARCHIVED (banner-marked; physical move optional)
+
+| Repo | Archival reason | Pointer |
+|---|---|---|
+| `lojix-archive` | Pre-2026-04-24 "lojix-as-aski-dialect" vision; superseded by "lojix is the artifacts-pillar namespace, Li's take on an expanded nix". | `lojix-archive/CLAUDE.md`, `reports/019` |
+
+## SHELVED (post-MVP but not retired)
+
+| Repo | Reason | Revisit |
+|---|---|---|
+| `arbor` | Prolly-tree versioning over records; post-MVP optimisation. | After self-hosting closes. |
+
+## OFF-SCOPE
+
+Not part of the sema-ecosystem MVP. Agents should not touch
+these except when explicitly directed.
+
+Grouped for readability; not exhaustive — assume any repo in
+`~/git/` that isn't listed above is OFF-SCOPE until proven
+otherwise.
+
+- **Old aski / synth family** (superseded language-family
+  vision): `aski`, `askic`, `aski-cc`, `aski-core`,
+  `aski-core-bootstrap`, `aski-macro`, `ply-aski`,
+  `astro-aski`, `synth-core`, `semac`, `sema-codegen`.
+- **CriomOS** (OS-level, related but separate project):
+  `CriomOS`, `CriomOS-emacs`, `CriomOS-home`, `criomos-archive`,
+  `horizon-rs`.
+- **Noesis / veri / etc.** (old experiments): `noesis`,
+  `noesis-schema`, `veri-core`, `veric`, `corec`.
+- **Web / book / non-technical**: `AnaSeahawk-website`,
+  `BookMaker`, `BookOfLuna`, `caraka-samhita`, `clavifaber`,
+  `maisiliym`, `MotherSpirit-webpage`, `phoenixWebsite`,
+  `seahawkWebsite`, `TheBookOfGoldragon`, `TheBookOfSol`,
+  `webpage`, `WebPublish`, `wiki`, `world`, `criomeWebsite`,
+  `awesome`, `bibliography`, `bibliotheca`, `goldragon`,
+  `helloWorld`, `hob`, `kibord`, `lib`, `ndi`, `pi-delegate`,
+  `pi-mentci`, `pkdjz`, `private`, `registry`, `rkyv`,
+  `rust-atom`, `seahawk`, `shen-sources`, `skrips`, `SonyUtils`,
+  `substack-cli`, `system`, `brightness-ctl`, `devenv-atom`,
+  `nixpkgs-atom`, `qmkBinaries`, `mkHorizon-atom`, `mkSkrip`,
+  `pi-mentci`, `aedifico`, `annas-mcp`, `Armbian-RockPi4B-NixOS`,
+  `ArtificialIntelligence`, `vscode-aski`,
+  `Mentci`, `mentci-tools`, `domainc`, `criosphere`, etc.
+- `beads`, `home-manager` — tooling, not sema-ecosystem.
+
+---
+
+## Update protocol
+
+When the architecture changes or a repo's status changes:
+
+1. Update this manifest (change the status row and `last-reviewed`).
+2. Update `devshell.nix` `linkedRepos` if a CANON row was added or removed.
+3. Update `docs/architecture.md §4` if the layer layout changed.
+4. Write a report (`reports/NNN-*.md`) describing the change.
+5. Commit + push.
+
+When a repo goes RETIRED and we do a physical archive pass:
+
+1. Move `~/git/<name>/` → `~/git/archive/<name>/`.
+2. Remove from `devshell.nix` if it was there.
+3. Update this manifest's row (RETIRED → ARCHIVED).
+4. Run `nix develop` to refresh symlinks (cleanup stale ones).
+
+---
+
+*End workspace-manifest.*
