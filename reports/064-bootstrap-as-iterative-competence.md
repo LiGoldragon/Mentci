@@ -170,9 +170,10 @@ grew.**
 
 Ordered roughly; explicit dependencies named:
 
-1. **Decide seed delivery.** Baked-in (reports/051 §Q2 option
-   A) vs `genesis.nexus` text-on-disk (option C). Open
-   question Q1 below. Blocks everything until decided.
+1. **Author `genesis.nexus`.** Seed records as nexus text
+   shipped with the criomed binary; criomed dispatches them
+   through nexusd at first boot. Per architecture.md §10
+   "Bootstrap rung by rung."
 2. **Lock the Stage A kind set in `nexus-schema`.** Minimum:
    schema-of-schema + `KindDecl` + `SlotBinding` + supporting
    types. Subject to §3 detail-research.
@@ -189,8 +190,9 @@ Ordered roughly; explicit dependencies named:
    client to criomed, reply serialisation. *← 3.*
 6. **Build nexus-cli thin client.** Argv/stdin → nexusd UDS
    → reply text. *← 5.*
-7. **Author the seed** (whichever delivery decision lands in
-   Q1). Schema-of-schema + KindDecl + SlotBinding records.
+7. **Author `genesis.nexus`** with schema-of-schema +
+   KindDecl + SlotBinding records (and the bootstrap
+   Principal/Quorum/Policy + the SemaGenesis marker).
    *← 1, 2.*
 8. **Smoke test: Stage A success criterion (§2.2).** *← 4, 5,
    6, 7.*
@@ -224,9 +226,11 @@ for follow-up agent rounds when these become near-term:
 - **`nexus-schema` v0.0.1 lock.** What goes in (seed kinds,
   contract types) vs what's left to user-authored extensions
   (most code records).
-- **Genesis marker mechanics** (per reports/051 §Q4): if seed
-  is delivered via baked-in self-assert, criomed needs an
-  empty-sema detection step + `SemaGenesis` marker record.
+- **Genesis marker mechanics**: criomed needs an empty-sema
+  detection step at boot (read the well-known `SemaGenesis`
+  slot; absent → first boot → dispatch `genesis.nexus`;
+  present → second boot → verify in-sema seed kinds match
+  the binary's built-in Rust types).
 
 ---
 
@@ -295,47 +299,9 @@ the right framing. This report does:
   the seed's purpose is criomed's decision-making, not rsc
   testing; rsc doesn't enter the picture for many stages.
 
-Reports 062 and 063 are preserved as historical artifacts of
-where the framing went wrong (per Li's instruction to use
-them as teaching examples). Whether to delete or merge them
-later is open question Q3 in 063 §6.
-
----
-
-## 6 · Open questions for Li
-
-Two near-term decisions; deeper-stage questions surface later.
-
-### Q1 · Seed delivery: baked-in or `genesis.nexus`?
-
-Reports/051 §Q2 lists three options; the corpus leans (A) but
-flags (C) as cleaner once self-hosted. Which for Stage A?
-
-(A) **Baked-in.** Seed records are rkyv data baked into
-  criomed's binary; on empty-sema detection, criomed asserts
-  them through the validator pipeline from internal data.
-
-(C) **`genesis.nexus`.** Seed records are stored as nexus text
-  shipped with the criomed distribution; on empty-sema
-  detection, criomed dispatches to nexusd to parse + forward
-  this file as the first batch of nexus messages. One path
-  into sema; no internal special-case.
-
-(C) is more architecturally coherent. (A) is simpler. The
-choice affects whether nexusd must run *before* criomed's
-seed assertion completes (only for option C) — small but
-real ordering implication.
-
-### Q2 · Stage A target kind set
-
-Beyond schema-of-schema and `KindDecl`, what's the minimum
-kind set for Stage A to be operational? Candidates from
-reports/051 §Q2 and 033: `SlotBinding`, `FieldSpec`,
-`TypeRef`, `ChangeLogEntry`, `AuditEntry`. The actual
-fixed-point depends on what criomed must validate to handle
-"user authors a new KindDecl" at Stage B. Worth verifying
-concretely (a follow-up agent round, or Li's direct
-specification) before locking.
+Open question on Stage A's exact kind set is in
+[reports/067](067-what-to-implement-next.md) §Q-α — the
+~15-kind v0.0.1 list awaiting Li's confirmation.
 
 ---
 

@@ -38,30 +38,10 @@ and receives back the seed `KindDecl`-of-`KindDecl` record.
 
 ## 2 · Three blocking Li decisions
 
-Open-questions inventory across reports 061, 064, 065
-identified 16 questions. Most are directional. Three are
-**blocking** for the next concrete piece of work:
+Two open questions are **blocking** for the next concrete
+piece of work. Everything else is directional.
 
-### Q-α · Seed delivery (was [reports/064 Q1](repos/mentci-next/reports/064-bootstrap-as-iterative-competence.md))
-
-Two options canvased:
-- (A) Seed records as rkyv data baked into criomed's
-  binary; criomed asserts them at first boot through the
-  validator pipeline.
-- (C) Seed records as nexus text in a `genesis.nexus`
-  file shipping with criomed; criomed dispatches the file
-  to nexusd at first boot; everything goes through the
-  normal request flow.
-
-Li 2026-04-25 ratified the *principle* "bootstrap rung by
-rung; populate via nexus messages." Option (A) violates
-that principle by introducing a parallel input path. **(C)
-is the only option consistent with Li's standing rules.**
-This is effectively answered by the rung-by-rung rule, but
-worth ratifying explicitly so the implementing agent
-doesn't backslide.
-
-### Q-β · Stage A kind set (was [reports/064 Q2](repos/mentci-next/reports/064-bootstrap-as-iterative-competence.md))
+### Q-α · Stage A kind set
 
 Beyond schema-of-schema (`KindDecl`, `FieldSpec`,
 `TypeRef`), what's the minimum kind set for criomed to
@@ -80,24 +60,13 @@ Research-agent recommendation (~15 kinds for v0.0.1):
   `CollectionKind`, `StabilityTag`, `FieldVisibility`,
   `ChangeOp`, `Op`
 
-Explicitly **deferred** to later rungs: `Capability`,
-`CapabilityToken`, `MutationProposal`, `ProposalSignature`,
-`CommittedMutation`, `RuntimeIdentity`, `PrincipalKey`,
-`Rule`, `RulePremise`, `RuleHead`, `Invariant`,
-`DerivedFrom`, `Diagnostic` (yes — reply-only, not a sema
-kind yet), `Outcome`, `CompilesCleanly`,
-`CompileDiagnostic`, `SubscriptionIntent`, `Subscriber`,
-`Pattern` (the kind), `Query` (the kind),
-`ConstraintDecl::ForeignKey/Range/Regex`,
-`RevisionRecord`, `AuditEntry`, `DiagnosticSuggestion`.
-
 Li to confirm or revise the ~15-kind list.
 
-### Q-γ · Genesis principal mechanism (was [reports/065 Q2](repos/mentci-next/reports/065-criome-schema-design.md))
+### Q-β · Genesis principal mechanism
 
 During the genesis stream, before any `Principal` record
 exists in sema, criomed needs a principal for permission-
-check on each genesis assertion. Two options:
+check on each genesis assertion. Two live candidates:
 
 - (a) Hardcoded **bootstrap-principal-id** in criomed's
   binary, used for every assertion in the genesis stream.
@@ -109,13 +78,13 @@ check on each genesis assertion. Two options:
 (a) names the special case clearly and keeps the validator
 state-free during genesis. (b) reduces specialness slightly
 but introduces a "first-message-special" rule. Research-
-agent lean: (a). Li to confirm or override.
+agent lean: (a).
 
 ---
 
 ## 3 · The rung-1 design lock (what to land as design)
 
-Once Q-α, Q-β, Q-γ are answered, the design content lands
+Once Q-α and Q-β are answered, the design content lands
 as **skeleton-as-design code** (per the architecture.md
 rule: "compiler-checked types beat prose"). Five repos
 become the design surface, each in parallel:
@@ -288,7 +257,7 @@ record construction.
 ## 4 · Sequencing
 
 ```
-Step 0: Li answers Q-α + Q-β + Q-γ.
+Step 0: Li answers Q-α + Q-β.
 
 Step 1: criome-schema (CREATE; ~250-400 LoC types)
         ── lock the ~15 kinds; rkyv + serde derives.
@@ -351,29 +320,22 @@ explicitly **not** in rung 1:
 
 ---
 
-## 6 · Three concrete questions for Li
+## 6 · Two concrete questions for Li
 
-These are the Q-α/β/γ from §2, restated for clarity:
+Restated from §2:
 
-### Q1 · Confirm seed delivery is `genesis.nexus` (not baked-in)
+### Q1 · Confirm or revise the ~15-kind v0.0.1 set
 
-Per the rung-by-rung rule and Li's standing correction
-("we would just abandon the bottom-rung layer, nexus?")
-this is effectively settled. Confirming explicitly stops
-future agents from rediscovering the baked-in option.
-
-### Q2 · Confirm or revise the ~15-kind v0.0.1 set
-
-Listed in §2 Q-β. Two ways Li might revise: (a) trim
+Listed in §2 Q-α. Two ways Li might revise: (a) trim
 further (e.g., merge `Quorum` into `Policy.required_quorum
 = List<Slot<Principal>>`, dropping a kind); (b) add (e.g.,
 include `Diagnostic` from day one if you want
 machine-readable rejection records right away).
 
-### Q3 · Confirm hardcoded bootstrap-principal-id (option a)
+### Q2 · Genesis principal mechanism — (a) or (b)?
 
-Versus first-record-as-self bypass (option b). Research-
-agent lean is (a) for cleanliness. Li override welcome.
+Listed in §2 Q-β. Research-agent lean (a). Li to confirm
+or override.
 
 ---
 

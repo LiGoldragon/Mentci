@@ -38,6 +38,14 @@ An **opus** is the database's compilation-unit term — one opus compiles to one
 
 Write discoveries in [`reports/`](reports/) or in tools-documentation as topic files, don't scatter them across the repo root.
 
+## Report hygiene — don't restate-to-refute
+
+When a frame has been **decisively rejected** (architecture.md §10 "Rejected framings", a bd memory, or a chat correction): do not re-present it as a candidate in subsequent reports just to refute it. State only the correct frame.
+
+When a previous report's premise is **wrong**: delete it and write a clean successor that states only the correct view. Do not append corrections, do not banner, do not restate-to-refute.
+
+The rejected-framings list in [`docs/architecture.md`](docs/architecture.md) §10 is the *only* place wrong frames are named, and only as one-line entries. Forensic narratives ("here's how this contamination crept in") are not reports — their lessons land in §10 as one-liners and in bd memories; the forensic narrative itself goes too.
+
 ## Session-response style — substance goes in reports
 
 If the agent's final-session response would be more than very minimal (a few lines), write the substance as a report (in [`reports/`](reports/)) and keep the chat reply minimal — a one-line pointer at the report. Two reasons: (1) the Claude Code UI is a poor reading interface; files are easier; (2) the author reviews responses asynchronously while the agent moves to next work, so the substance must be in a stable, scrollable, file-backed place.
