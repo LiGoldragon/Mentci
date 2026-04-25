@@ -42,7 +42,8 @@ to find them at `~/git/<name>/` and symlinked at
 | `nota-serde` | nota's public façade. | `reports/014` |
 | `nexus` | Spec repo — messaging grammar (superset of nota). | `reports/013` |
 | `nexus-serde` | nexus's public façade. | `reports/014` |
-| `nexus-schema` | Record-kind vocabulary (Fn, Struct, Opus, Derivation, …). | `reports/004`, `reports/033` |
+| `nexus-schema` | Record-kind vocabulary (Fn, Struct, Opus, Derivation, …) + nexus language IR (RawPattern, RawOp, RawRecord, edit verbs, diagnostics). | `reports/004`, `reports/033`, `reports/070 §6.6`, `reports/077` |
+| `signal` | nexusd↔criomed messaging schema — rkyv envelope (Frame), handshake protocol (ProtocolVersion 0.1.0), edit/query/validate verbs, subscription stream. Imports IR payloads from nexus-schema. | `reports/077`, `reports/070 §6` |
 | `sema` | Records DB (redb-backed). | `docs/architecture.md §3` |
 | `lojix-store` | Content-addressed filesystem + index DB (nix-store analogue). **MVP-required alongside lojixd** (report 030 Phase C). nix builds into `/nix/store`; lojixd's `BundleIntoLojixStore` copies the closure into `~/.lojix/store/<blake3>/` with RPATH rewrite; sema records reference lojix-store hashes as canonical identity. Skeleton types + traits in `lojix-store/src/`. | `docs/architecture.md §5`, `reports/030`, `lojix-store/AGENTS.md` |
 | `nexusd` | Messenger daemon (text ↔ rkyv). | `docs/architecture.md §2` |
@@ -78,7 +79,6 @@ exist yet. Create when we reach the corresponding work.
 | Repo | Purpose | When |
 |---|---|---|
 | `criomed` | sema's engine daemon. | Needed for anything beyond nexusd scaffolding. |
-| `signal` | nexusd↔criomed contract (rkyv). | Alongside criomed scaffold. |
 | `lojix-msg` | criomed↔lojixd contract (rkyv). | `reports/030` Phase B. |
 | `lojixd` | lojix daemon (forge + store + deploy actors inside). | `reports/030` Phase C. |
 

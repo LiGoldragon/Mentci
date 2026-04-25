@@ -13,7 +13,8 @@ let
     "nota-serde"      # nota's public API
     "nexus"           # spec repo — messaging grammar
     "nexus-serde"     # nexus's public API
-    "nexus-schema"    # record-kind vocabulary
+    "nexus-schema"    # record-kind vocabulary + nexus language IR
+    "signal"          # nexusd↔criomed messaging schema (rkyv)
     "sema"            # records DB (redb-backed)
     "nexusd"          # messenger daemon
     "nexus-cli"       # text client
@@ -27,7 +28,6 @@ let
     "CriomOS-home"    # home-manager config as CriomOS module
     # --- CANON-MISSING (repos don't exist yet; uncomment when scaffolded) ---
     # "criomed"       # sema's engine daemon
-    # "signal"    # nexusd↔criomed contract
     # "lojix-msg"     # criomed↔lojixd contract (report 030 Phase B)
     # "lojixd"        # lojix daemon (report 030 Phase C)
   ];
