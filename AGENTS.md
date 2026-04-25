@@ -6,9 +6,23 @@ Start there for: cross-project rules (jj workflow, always-push, Rust style — s
 
 ## Architecture
 
-Canonical architecture: [`docs/architecture.md`](docs/architecture.md). Read it first; everything downstream is in [`reports/`](reports/) (see the reading order at the bottom of architecture.md).
+Canonical architecture: [`docs/architecture.md`](docs/architecture.md). Read it first. Design history and decision records are in [`reports/`](reports/).
 
 **Workspace manifest**: [`docs/workspace-manifest.md`](docs/workspace-manifest.md) lists every repo under `~/git/` with its status. `devshell.nix`'s `linkedRepos` mirrors the CANON + TRANSITIONAL entries.
+
+### Documentation layers — strict separation
+
+| Where | What | Example |
+|---|---|---|
+| [`docs/architecture.md`](docs/architecture.md) | **Prose + diagrams only.** No code. High-level shape, invariants, relationships, rules. | "criomed owns sema; lojixd owns lojix-store; text crosses only at nexusd" |
+| [`reports/NNN-*.md`](reports/) | **Concrete shapes + decision records.** Type sketches, record definitions, message enums, research syntheses, historical context. | `Opus { … }` full rkyv sketch |
+| the repos themselves | **Implementation.** Rust code, tests, flakes, Cargo.toml. | `nexus-schema/src/opus.rs` |
+
+If a layer rule is violated, rewrite: move type sketches out of `docs/architecture.md` into a report; move runnable code out of reports into the appropriate repo. The architecture stays slim so it remains readable in one pass.
+
+**No report links inside `docs/architecture.md`.** Cross-references go *into* architecture from reports, not *out of* architecture to reports. Reading lists, decision histories, type-spec details all live in reports or in `docs/workspace-manifest.md` — never inline in architecture.
+
+When architecture changes, update `docs/architecture.md` first, then update the affected repos, then write a report only if the decision carries a journey worth recording. Per the project rule "delete wrong reports, don't banner them," superseded reports are deleted — they do not stay as banner-wrapped relics.
 
 ### Inclusion/exclusion rule — HARD
 

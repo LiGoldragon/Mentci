@@ -4,29 +4,6 @@
 
 ---
 
-## Scope rule (READ FIRST)
-
-This file is **high-level concepts only**. Three layers of
-documentation, strictly separated:
-
-| Where | What | Example |
-|---|---|---|
-| `docs/architecture.md` | **Prose + diagrams only.** No code. High-level shape, invariants, relationships, rules. | "criomed owns sema; lojixd owns lojix-store; text crosses only at nexusd" |
-| `reports/NNN-*.md` | **Concrete shapes + decision records.** Type sketches, record definitions, message enums, research syntheses, historical context. | `Opus { … }` full rkyv sketch |
-| the repos themselves | **Implementation.** Rust code, tests, flakes, Cargo.toml. | `nexus-schema/src/opus.rs` |
-
-If a doc-layer rule is violated, rewrite: move type sketches
-out of `docs/architecture.md` into a report; move runnable code
-out of reports into the appropriate repo. This file stays slim
-so it remains readable in one pass.
-
-When architecture changes, update this file first, then write a
-new report describing the change. Per Li's rule ("delete wrong
-reports, don't banner them"), superseded reports are deleted —
-they do not stay as banner-wrapped relics.
-
----
-
 ## 1 · The engine in one paragraph
 
 **Sema is all we are concerned with.** Sema is the records —
