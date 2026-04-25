@@ -23,6 +23,11 @@ Li 2026-04-25:
 >
 > criomed (response) → signal message → nexusd (translates) →
 > nexus (text)
+>
+> *(Quote from before the 2026-04-25 nexusd → nexus repo
+> rename. The daemon is now called `nexus`; the local dir is
+> still `~/git/nexusd/`. The architectural meaning is
+> unchanged — text in, signal out, on the criomed-facing leg.)*
 
 The previously-planned name *criome-msg* is replaced by **signal**.
 This is not a cosmetic rename. It sharpens the conceptual model
@@ -35,11 +40,11 @@ surfaces a small number of new open questions.
 
 The old name suggested the rkyv messaging layer belongs to
 criome — that messages are "what criome receives." But the
-emitter of those messages is **nexusd**, the translator. The
+emitter of those messages is **nexus**, the translator. The
 receiver doesn't own the wire format.
 
-*signal* says it correctly: nexusd emits signals. A signal is the
-rkyv encoding of *what nexusd parsed from nexus text*. Signal is
+*signal* says it correctly: nexus emits signals. A signal is the
+rkyv encoding of *what nexus parsed from nexus text*. Signal is
 nexus's structured form, not criome's. criomed is a consumer of
 signal, not its author.
 
@@ -58,7 +63,7 @@ The language *nexus* now has two faces:
 
 The translation between the two faces is mechanical per 070 §7:
 every nexus text construct has exactly one signal form, and vice
-versa. This gives nexusd a clean, testable contract: parse text →
+versa. This gives nexus a clean, testable contract: parse text →
 emit signal, and (on the reply path) decode signal → render text.
 
 ### 2.3 — signal is a peer to nexus (architecturally; not yet practically for LLMs)
@@ -69,7 +74,7 @@ text entirely — is doing a legitimate thing. A deterministic
 programmatic tool (a Rust client, a script) generating a
 transactional batch from program structure may compose
 `AssertOp`/`MutateOp`/`TxnBatch` records in rkyv directly, send
-those to nexusd, and skip the parse step.
+those to nexus, and skip the parse step.
 
 But for **LLM agents today**: this is *not* the practical
 interface. Today's LLMs are trained on text and can author nexus
@@ -77,7 +82,7 @@ text fluently; they cannot author rkyv binary structures
 directly. Direct LLM signal authoring is a future capability —
 it will land when LLM models are trained against binary signal
 formats. Until then, the practical client-side interface for
-LLMs is nexus text, parsed into signal by nexusd. Per Li's
+LLMs is nexus text, parsed into signal by nexus. Per Li's
 correction 2026-04-25 ("not yet, not until llm models are trained
 using binary signal data").
 
@@ -95,8 +100,8 @@ could carry a signal frame directly. See **Q-S2** in §6.
 
 | Layer | From → To | Form | Crate / module |
 |---|---|---|---|
-| **client-msg** | client (nexus-cli, agent, editor) → nexusd | rkyv envelope around nexus text + control verbs | [nexusd::client_msg](../../nexusd/src/client_msg/) (lib half exposed for clients) |
-| **signal** | nexusd → criomed (and reply path) | rkyv envelope around language IR | future `signal` crate (was *criome-msg*) |
+| **client-msg** | client (nexus-cli, agent, editor) → nexus | rkyv envelope around nexus text + control verbs | [nexus::client_msg](../../nexus/src/client_msg/) (lib half exposed for clients) |
+| **signal** | nexus → criomed (and reply path) | rkyv envelope around language IR | future `signal` crate (was *criome-msg*) |
 | **criome-net** *(post-MVP)* | criomed ↔ criomed (peer-to-peer) | rkyv envelope around shared facts + signed proposals | future, sketched in [reports/070 §2.5 + §6.1](070-nexus-language-and-contract.md) |
 
 All three are rkyv with the canonical pinned feature set per
@@ -135,8 +140,8 @@ inside a client-msg `Send` payload.
   QueryHitReply, ValidateOp, ExecutionPlan). Skeleton-as-design
   per the project pattern. Imports payload types from
   nexus-schema.
-- **nexusd::client_msg** — name unchanged. Its job is the
-  client↔nexusd leg.
+- **nexus::client_msg** — name unchanged. Its job is the
+  client↔nexus leg.
 - **criomed** — when scaffolded, takes signal frames over UDS
   and dispatches them through the validator pipeline.
 
@@ -152,7 +157,7 @@ reading memories will see the convention and apply it.
 
 > The messaging layer is named in two pieces: **nexus** is the
 > text language for humans and agents; **signal** is the rkyv
-> format that nexusd emits to criomed and reads on the reply
+> format that nexus emits to criomed and reads on the reply
 > path. nexus and signal are two faces of one language — text and
 > rkyv — and the translation between them is mechanical.
 
@@ -162,9 +167,9 @@ The current Invariant B says *"Nexus is a request language; sema
 is rkyv."* Refine to:
 
 > Nexus is the text request language. Signal is the rkyv form of
-> nexus that travels between nexusd and criomed. nexus text is
+> nexus that travels between nexus and criomed. nexus text is
 > never persisted as records; signal is never rendered to text
-> outside nexusd. There are no "nexus records." There is sema
+> outside nexus. There are no "nexus records." There is sema
 > (rkyv records described by KindDecl), and there are signal
 > messages (rkyv envelopes carrying language IR).
 

@@ -119,7 +119,7 @@ fixed-size arrays.
 Some don't, and need adapters or our own newtypes:
 
 - **`PathBuf` / `OsString`** — bytes on Unix; UTF-16-ish on
-  Windows. We use [`WirePath(Vec<u8>)`](repos/nexusd/src/client_msg/path.rs)
+  Windows. We use [`WirePath(Vec<u8>)`](repos/nexus/src/client_msg/path.rs)
   per Li 2026-04-25 ("paths are deterministic; no string
   round-trip"). The newtype lives in `client_msg` for now;
   moves to `criome-types` when that crate lands.

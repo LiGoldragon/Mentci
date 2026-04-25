@@ -21,7 +21,7 @@ quoting Li 2026-04-25:
 > first we need the logic that will make nexus the greatest
 > database edit-and-query language ever made … and we need the
 > contract that will create this logic in rkyv messages
-> into/from nexus (nexusd role), to criomed.
+> into/from nexus (nexus role), to criomed.
 
 Everything that follows — the signal contract, the validator
 pipeline, the schema-of-schema, the slot/index machinery — exists
@@ -43,7 +43,7 @@ research reports that produced them.
 | Nexus language semantics — edit verbs, query operators, signal contract | [reports/070](070-nexus-language-and-contract.md) |
 | Signal naming decision and three-layer messaging story | [reports/077](077-nexus-and-signal.md) |
 | Rkyv discipline — pinned 0.8 portable feature set, derive pattern, encode/decode API | [reports/074](074-portable-rkyv-discipline.md) |
-| Lojix transition phases A-G | [`lojix/ARCHITECTURE.md`](https://github.com/LiGoldragon/lojix/blob/main/ARCHITECTURE.md) |
+| Lojix transition phases A-G | [`lojix-cli/ARCHITECTURE.md`](https://github.com/LiGoldragon/lojix-cli/blob/main/ARCHITECTURE.md) |
 | Edit-UX shape, request-composing shell, four write verbs, diagnostics-as-iteration | [`nexus-cli/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus-cli/blob/main/ARCHITECTURE.md) |
 | Pattern-matching theory + delimiter-family matrix + position-defines-meaning | [`nexus/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md) |
 | Schema-of-schema framing, genesis-via-nexus, validator pipeline | [reports/065](065-criome-schema-design.md) |
@@ -67,7 +67,7 @@ question about a pre-specified kind taxonomy.
   beyond a cycle bound, do we emit `E9999` and keep the
   originating mutation, or reject the whole batch?
 - **L4 — Cross-instance scope.** Does signal cover only
-  local nexusd↔criomed, with a separate `criome-net` for
+  local nexus↔criomed, with a separate `criome-net` for
   peer-to-peer criomed↔criomed? Or one envelope for both?
 
 ### 3.2 Genesis and bootstrap (criomed, blocking Stage A — 067, 064)
@@ -147,7 +147,7 @@ specified before signal can land.
 | **059-nix-as-build-backend-and-macro-philosophy.md** | Canonised in architecture.md §1 + §10. |
 | **066-architecture-md-audit.md** | Operational audit; work landed. |
 | **067-what-to-implement-next.md** | Q-α (15-kind set) supplanted by the 070 query+edit-language framing. G1 (genesis principal) carried into §3.2. |
-| **071-cli-protocol-and-implementation-order.md** | Client-msg policies live in [nexusd code](../../nexusd/src/client_msg/). |
+| **071-cli-protocol-and-implementation-order.md** | Client-msg policies live in [nexus code](../../nexus/src/client_msg/). |
 | **072-multi-angle-audit-and-path-forward.md** | Decisions landed; carried supplanted Q-α framing. |
 | **073-rkyv-derives-criome-types-and-tests.md** | Bridging audit between Track A landing and Track B/C; both shipped. |
 | **075-next-step-multi-angle-with-skeptical-view.md** | Carried supplanted Q-α framing; Tier-1/2/3 reproduced in §4 above. |
@@ -173,7 +173,7 @@ Per Li 2026-04-25 *"let's extract and/or delete anything before 65 - let's keep 
 |---|---|
 | **009-binds-and-patterns.md** | Pattern-matching theory + datalog-style semi-naive eval extracted into [`nexus/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md) "Pattern semantics". |
 | **013-nexus-syntax-proposal.md** | Delimiter-family matrix + position-defines-meaning + records-as-operators extracted into [`nexus/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md) "Three structural choices that compound". |
-| **030-lojix-transition-plan.md** | Phases A-G + add-before-subtract rule extracted into [`lojix/ARCHITECTURE.md`](https://github.com/LiGoldragon/lojix/blob/main/ARCHITECTURE.md) "Migration phases". |
+| **030-lojix-transition-plan.md** | Phases A-G + add-before-subtract rule extracted into [`lojix-cli/ARCHITECTURE.md`](https://github.com/LiGoldragon/lojix-cli/blob/main/ARCHITECTURE.md) "Migration phases". |
 | **057-edit-ux-freshly-reconsidered.md** | Request-composing shell + two read surfaces + diagnostics-as-iteration substrate extracted into [`nexus-cli/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus-cli/blob/main/ARCHITECTURE.md) "Edit UX" + "Diagnostics as iteration substrate". |
 
 ### 5.4 Reports that survived all three trim passes (6)

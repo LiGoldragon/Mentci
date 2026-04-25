@@ -7,7 +7,7 @@ agents covered (A) schema-of-schema + index + audit and (B)
 authorization + correctness + diagnostics + subscriptions.
 Synthesis below corrects both agents' slip-back into "internal
 assert" framing for genesis (Li 2026-04-25 standing rule:
-records enter sema only via nexus → nexusd → signal →
+records enter sema only via nexus → nexus → signal →
 criomed; no baked-in rkyv assert path) and presents the
 record catalogue plus the genesis-via-nexus bootstrap
 mechanics.*
@@ -135,9 +135,9 @@ expressions in nexus syntax:
    absent).
 2. criomed reads the well-known `SemaGenesis` slot. Absent →
    first boot.
-3. criomed dispatches `genesis.nexus` text to **nexusd over
+3. criomed dispatches `genesis.nexus` text to **nexus over
    the normal UDS channel** — same wire as user requests.
-4. nexusd parses each `(Assert ...)` via nota-serde-core at
+4. nexus parses each `(Assert ...)` via nota-serde-core at
    `Dialect::Nexus`, builds signal envelopes, sends each
    to criomed.
 5. criomed runs each through the **normal validator
@@ -183,7 +183,7 @@ expressions in nexus syntax:
   validator step 5 (write), the same as for any other
   record.
 - **No** special private input port. genesis.nexus enters
-  through nexusd → signal → criomed.
+  through nexus → signal → criomed.
 
 The only "specialness" is what's *not yet in sema* during
 the genesis stream: built-in Rust types substitute for
@@ -674,7 +674,7 @@ After Q1-Q6 land:
    above — types only, no runtime logic.
 2. Author `genesis.nexus` — the actual nexus text that
    will ship with the criomed binary; ~60-120 records.
-3. Build the Stage A path (per reports/064 §2): nexusd
+3. Build the Stage A path (per reports/064 §2): nexus
    parses genesis.nexus, criomed validates against built-
    in Rust types, sema accumulates seed records, second-
    boot verifies parity.

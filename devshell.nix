@@ -11,19 +11,18 @@ let
     "nota"            # spec repo — data grammar
     "nota-serde-core" # shared lexer + ser/de kernel
     "nota-serde"      # nota's public API
-    "nexus"           # spec repo — messaging grammar
+    "nexus"           # the nexus language — spec + translator daemon (renamed from nexusd 2026-04-25; absorbed former nexus spec repo into spec/)
     "nexus-serde"     # nexus's public API
     "nexus-schema"    # record-kind vocabulary + nexus language IR
-    "signal"          # nexusd↔criomed messaging schema (rkyv)
+    "signal"          # nexus↔criomed messaging schema (rkyv)
     "sema"            # records DB (redb-backed)
-    "nexusd"          # messenger daemon
     "nexus-cli"       # text client
     "rsc"             # records → Rust source projector
     "lojix-store"     # content-addressed filesystem (renamed from criome-store 2026-04-24)
-    "lojix"           # TRANSITIONAL — Li's working deploy CLI (report 030)
+    "lojix-cli"       # TRANSITIONAL — Li's working deploy CLI (renamed from lojix 2026-04-25)
     # --- CriomOS host (criome engine runs on criomos) ---
     "CriomOS"         # NixOS-based host OS for the sema ecosystem
-    "horizon-rs"      # horizon projection library (lojix's deploy path links it)
+    "horizon-rs"      # horizon projection library (lojix-cli's deploy path links it)
     "CriomOS-emacs"   # emacs config as CriomOS module
     "CriomOS-home"    # home-manager config as CriomOS module
     # --- CANON-MISSING (repos don't exist yet; uncomment when scaffolded) ---

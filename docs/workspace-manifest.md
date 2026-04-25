@@ -42,14 +42,13 @@ change).
 | `nota` | Spec repo — data grammar (nota ⊂ nexus). | `reports/013` |
 | `nota-serde-core` | Shared lexer + ser/de kernel for both dialects. | `reports/014` |
 | `nota-serde` | nota's public façade. | `reports/014` |
-| `nexus` | Spec repo — messaging grammar (superset of nota). | `reports/013` |
+| `nexus` | The nexus language — grammar spec under `spec/` + translator daemon (text ↔ signal rkyv). Renamed from `nexusd` 2026-04-25; absorbed the former `nexus` spec repo (now archived as `nexus-spec-archive`). Local dir is still `~/git/nexusd/`. | [`nexus/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md), `criome/ARCHITECTURE.md §3+§4` |
 | `nexus-serde` | nexus's public façade. | `reports/014` |
-| `nexus-schema` | Record-kind vocabulary (Fn, Struct, Opus, Derivation, …) + nexus language IR (RawPattern, RawOp, RawRecord, edit verbs, diagnostics). | `reports/070 §6.6`, `reports/077`, `architecture.md §6` |
-| `signal` | nexusd↔criomed messaging schema — rkyv envelope (Frame), handshake protocol (ProtocolVersion 0.1.0), edit/query/validate verbs, subscription stream. Imports IR payloads from nexus-schema. | `reports/077`, `reports/070 §6` |
-| `sema` | Records DB (redb-backed). | `docs/architecture.md §3` |
-| `lojix-store` | Content-addressed filesystem + index DB (nix-store analogue). **MVP-required alongside lojixd** (report 030 Phase C). nix builds into `/nix/store`; lojixd's `BundleIntoLojixStore` copies the closure into `~/.lojix/store/<blake3>/` with RPATH rewrite; sema records reference lojix-store hashes as canonical identity. Skeleton types + traits in `lojix-store/src/`. | `docs/architecture.md §5`, `reports/030`, `lojix-store/AGENTS.md` |
-| `nexusd` | Messenger daemon (text ↔ rkyv). | `docs/architecture.md §2` |
-| `nexus-cli` | Text client. | `docs/architecture.md §4` |
+| `nexus-schema` | Record-kind vocabulary (Fn, Struct, Opus, Derivation, …) + nexus language IR (RawPattern, RawOp, RawRecord, edit verbs, diagnostics). | `reports/070 §6.6`, `reports/077`, `criome/ARCHITECTURE.md §6` |
+| `signal` | nexus↔criomed messaging schema — rkyv envelope (Frame), handshake protocol (ProtocolVersion 0.1.0), edit/query/validate verbs, subscription stream. Imports IR payloads from nexus-schema. | `reports/077`, `reports/070 §6` |
+| `sema` | Records DB (redb-backed). | `criome/ARCHITECTURE.md §3` |
+| `lojix-store` | Content-addressed filesystem + index DB (nix-store analogue). **MVP-required alongside lojixd**. nix builds into `/nix/store`; lojixd's `BundleIntoLojixStore` copies the closure into `~/.lojix/store/<blake3>/` with RPATH rewrite; sema records reference lojix-store hashes as canonical identity. Skeleton types + traits in `lojix-store/src/`. | `criome/ARCHITECTURE.md §5`, `lojix-store/ARCHITECTURE.md`, `lojix-store/AGENTS.md` |
+| `nexus-cli` | Text client. | `criome/ARCHITECTURE.md §4`, `nexus-cli/ARCHITECTURE.md` |
 | `rsc` | Records → Rust source projector. | `architecture.md §1` |
 
 ### CriomOS cluster
@@ -61,7 +60,7 @@ alongside it.
 | Repo | Role | Pointer |
 |---|---|---|
 | `CriomOS` | NixOS-based host OS for the sema ecosystem. | `CriomOS/AGENTS.md` |
-| `horizon-rs` | Horizon projection library; lojix's deploy path links it in-process. | `horizon-rs/AGENTS.md` |
+| `horizon-rs` | Horizon projection library; lojix-cli's deploy path links it in-process. | `horizon-rs/AGENTS.md` |
 | `CriomOS-emacs` | Emacs configuration as a CriomOS module. | `CriomOS-emacs/AGENTS.md` |
 | `CriomOS-home` | Home-manager configuration as a CriomOS module. | `CriomOS-home/AGENTS.md` |
 
@@ -71,7 +70,7 @@ Canonical today, structure changes per a plan.
 
 | Repo | Current role | Target | Pointer |
 |---|---|---|---|
-| `lojix` | Li's working CriomOS deploy orchestrator (CLI + ractor actors + horizon-lib + nixos-rebuild). | Spec-only README once lojixd exists and takes over. Agents must NOT rewrite this repo. | `reports/030` |
+| `lojix-cli` | Li's working CriomOS deploy orchestrator (CLI + ractor actors + horizon-lib + nixos-rebuild). Renamed from `lojix` 2026-04-25; `lojix` namespace reserved for the family. Local dir is still `~/git/lojix/`. | Thin transport for `lojix-msg` requests once `lojixd` exists. Agents must NOT rewrite this repo. | `lojix-cli/ARCHITECTURE.md` |
 
 ## CANON-MISSING
 
@@ -80,7 +79,7 @@ exist yet. Create when we reach the corresponding work.
 
 | Repo | Purpose | When |
 |---|---|---|
-| `criomed` | sema's engine daemon. | Needed for anything beyond nexusd scaffolding. |
+| `criomed` | sema's engine daemon. | Needed for anything beyond nexus scaffolding. |
 | `lojix-msg` | criomed↔lojixd contract (rkyv). | `reports/030` Phase B. |
 | `lojixd` | lojix daemon (forge + store + deploy actors inside). | `reports/030` Phase C. |
 
@@ -97,8 +96,12 @@ All session-initial RETIRED/ARCHIVED entries were actioned on
 - `lojix-archive` was **deleted** (GitHub + local). Pre-2026-04-24
   "lojix-as-aski-dialect" vision was obsolete; no surviving
   content worth preserving. Reference trace lives in commit
-  history; lojix's three-pillar role lives in `architecture.md`
-  §1 + §4 + §8.
+  history; the lojix family's three-pillar role lives in
+  [criome/ARCHITECTURE.md §1 + §4 + §8](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md).
+- `lojix` was **renamed to `lojix-cli`** (GitHub rename;
+  redirects). Frees the `lojix` name for the family namespace
+  (lojix-store, lojix-cli, lojix-msg, lojixd). Local dir
+  `~/git/lojix/` unchanged for now (Li to rename later).
 
 There are currently no entries in RETIRED or ARCHIVED.
 

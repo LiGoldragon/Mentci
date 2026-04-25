@@ -3,11 +3,11 @@
 *Claude Opus 4.7 · 2026-04-25 · synthesis of four parallel
 research agents (edit semantics, query semantics, correctness/
 static-checks, prior-art-and-differentiators) plus the
-signal contract that bridges nexusd ↔ criomed and carries
+signal contract that bridges nexus ↔ criomed and carries
 the full language. Per Li 2026-04-25: "first we need the logic
 that will make nexus the greatest database edit-and-query
 language ever made … and we need the contract that will create
-this logic in rkyv messages into/from nexus (nexusd role), to
+this logic in rkyv messages into/from nexus (nexus role), to
 criomed."*
 
 *This is a language-design exercise. The full eventual surface
@@ -73,7 +73,7 @@ Five core verbs:
   Revision; one redb transaction.
 
 The `~` sigil is shorthand for `Mutate` at the syntax layer
-(parsed by nexusd into `MutateOp`). The `!` sigil at top-level
+(parsed by nexus into `MutateOp`). The `!` sigil at top-level
 record position is shorthand for `Retract`. Inside a pattern,
 `!` is negation. Same character; position-defines-meaning.
 
@@ -131,7 +131,7 @@ break causality. Temporal queries are read-only.
 
 Sema is local. Nexus targets one criomed at a time. Asserting
 to a remote criomed is a transport-layer concern (the client
-dials a different nexusd). Cross-instance *coordination*
+dials a different nexus). Cross-instance *coordination*
 (quorum-signed proposals, federated agreement) is part of
 the architecture (Phase 3+), but it's not a nexus syntax
 concern — it lives in signal as separate verbs that the
@@ -260,7 +260,7 @@ Returns a stream of `{customer: ..., {Sum: ..., Count: ...}}`.
 
 | Layer | Where | What's caught | Failure mode |
 |---|---|---|---|
-| Parse | nota-serde-core in nexusd | syntax (delimiter balance, sigil budget, identifier shape, literal form) | `Reply::Rejected` (transient) |
+| Parse | nota-serde-core in nexus | syntax (delimiter balance, sigil budget, identifier shape, literal form) | `Reply::Rejected` (transient) |
 | Validation | criomed's six-step pipeline | schema-mismatch, unresolved slot-refs, invariant violations, unauthorised actions, type errors | `Diagnostic` record in sema (durable) + `Reply::Rejected` summary |
 | Execution | criomed's pattern matcher + cascade engine + rsc/rustc | non-linear pattern unification failures, cascade non-termination, rsc/rustc errors | `Diagnostic` record (durable); cascade-failure is diagnostic-only and does not reject the originating mutation |
 
@@ -367,7 +367,7 @@ Five distinguishing-by-design properties:
 
 5. **Genesis-via-self.** The language can describe its own
    schema in itself (`KindDecl` records describe `KindDecl`).
-   Bootstrap uses the same nexus-via-nexusd-via-criomed flow
+   Bootstrap uses the same nexus-via-nexus-via-criomed flow
    as any other input. No baked-in-rkyv shortcut, no internal-
    assert path. (Datomic's transaction-fn semantics are
    coded outside the database; SQL's system catalog is a
@@ -379,13 +379,13 @@ Five distinguishing-by-design properties:
 
 > *Naming note (2026-04-25).* This contract was originally
 > drafted as *criome-msg*. Per Li's later naming decision, the
-> rkyv-format messaging layer between nexusd and criomed is
+> rkyv-format messaging layer between nexus and criomed is
 > called **signal**. References are renamed throughout; the
 > §6 type catalogue is the **signal envelope and payloads**.
 > See [reports/077](077-nexus-and-signal.md) for the deep
 > analysis.
 
-The wire format that crosses nexusd ↔ criomed (and within
+The wire format that crosses nexus ↔ criomed (and within
 criomed → criomed cluster, sketched). The wire carries a stream
 of `Frame` archives; both parties know the `Frame` rkyv schema,
 so framing is intrinsic to the schema — the universal handshake
@@ -771,7 +771,7 @@ operator and adds `QuorumProof` to `AuthProof`. The bigger
 cross-criomed protocol (signed proposals, hash-shared
 records, federated subscriptions) is intentionally not in
 this contract — it belongs in a peer-to-peer criome-net
-contract. Confirm scope: signal = local nexusd↔criomed
+contract. Confirm scope: signal = local nexus↔criomed
 only; criome-net = criomed↔criomed peer.
 
 ### Q6 · Validate-verb's ExecutionPlan shape
