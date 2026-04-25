@@ -4,7 +4,6 @@
     { "name": "criome", "path": "/home/li/git/criome" },
     { "name": "nexus", "path": "/home/li/git/nexus" },
     { "name": "nexus-cli", "path": "/home/li/git/nexus-cli" },
-    { "name": "nexus-schema", "path": "/home/li/git/nexus-schema" },
     { "name": "nexus-serde", "path": "/home/li/git/nexus-serde" },
     { "name": "signal", "path": "/home/li/git/signal" },
     { "name": "lojix", "path": "/home/li/git/lojix" },
