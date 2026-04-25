@@ -507,6 +507,17 @@ Foundational rules. Every session follows these.
 - **Text only crosses nexusd.** All internal traffic is rkyv.
 - **Every edit is a request.** criomed validates; requests can
   be rejected; this is the hallucination wall.
+- **Bootstrap rung by rung.** The engine bootstraps using its
+  own primitives, starting from rung 0. There is no "before
+  the engine runs" mode; criomed runs from the first instant,
+  with sema initially empty. Nexus messages populate the
+  initial versions of the database — including seed records
+  via `genesis.nexus`. Each rung's capability comes from the
+  data already loaded; that capability is what populates the
+  next rung. No internal-assert paths, no baked-in-rkyv
+  shortcuts, no special bootstrap inputs that bypass nexus.
+  If a proposed mechanism cannot be explained step by step,
+  the framing is wrong.
 - **References are slot-refs.** Records store `Slot(u64)`;
   the index resolves slot → current hash + display name.
 - **Content-addressing is non-negotiable.** Record identity is
