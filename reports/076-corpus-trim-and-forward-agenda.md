@@ -39,16 +39,16 @@ research reports that produced them.
 |---|---|
 | The 10-repo architecture, invariants A-D, project-wide rules, rejected framings, rung-by-rung bootstrap | [architecture.md](../docs/architecture.md) |
 | Workspace inventory, last-reviewed date | [docs/workspace-manifest.md](../docs/workspace-manifest.md) |
-| Project-wide agent conventions (restate-to-refute rule, etc.) | [AGENTS.md](../AGENTS.md) |
+| Project-wide agent conventions (restate-to-refute rule, report-rollover, ARCHITECTURE.md convention, etc.) | [AGENTS.md](../AGENTS.md) |
 | Nexus language semantics — edit verbs, query operators, signal contract | [reports/070](070-nexus-language-and-contract.md) |
 | Signal naming decision and three-layer messaging story | [reports/077](077-nexus-and-signal.md) |
 | Rkyv discipline — pinned 0.8 portable feature set, derive pattern, encode/decode API | [reports/074](074-portable-rkyv-discipline.md) |
-| Lojix transition phases A-G, day-one skeleton | [reports/030](030-lojix-transition-plan.md) |
-| Edit-UX shape, request-composing shell, four write verbs | [reports/057](057-edit-ux-freshly-reconsidered.md) |
+| Lojix transition phases A-G | [`lojix/ARCHITECTURE.md`](https://github.com/LiGoldragon/lojix/blob/main/ARCHITECTURE.md) |
+| Edit-UX shape, request-composing shell, four write verbs, diagnostics-as-iteration | [`nexus-cli/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus-cli/blob/main/ARCHITECTURE.md) |
+| Pattern-matching theory + delimiter-family matrix + position-defines-meaning | [`nexus/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md) |
 | Schema-of-schema framing, genesis-via-nexus, validator pipeline | [reports/065](065-criome-schema-design.md) |
-| Pattern-matching theory, datalog-style semi-naive eval | [reports/009](009-binds-and-patterns.md) |
-| Delimiter-family matrix, position-defines-meaning | [reports/013](013-nexus-syntax-proposal.md) |
 | Tree-sitter grammar recommendation for editor integration | [reports/068](068-tree-sitter-grammars-for-nota-and-nexus.md) |
+| Per-repo internals (each canonical repo's `ARCHITECTURE.md`) | each repo at root |
 
 ## 3. Live open questions
 
@@ -165,23 +165,44 @@ specified before signal can land.
 | **064-bootstrap-as-iterative-competence.md** | Rung-by-rung philosophy is in [architecture.md §10 "Bootstrap rung by rung"](../docs/architecture.md); Stage A/B detail is implementation-roadmap territory, not architecture. |
 | **069-restate-to-refute-rule-and-cleanup.md** | Rule lives in [AGENTS.md](../AGENTS.md) "Report hygiene"; cleanup work is done. |
 
-### 5.3 Reports that survived both trim passes (10)
+### 5.3 Deleted in pass 3 (2026-04-25 evening, 4 reports)
 
-009, 013, 030, 057, 065, 068, 070, 074, 076, 077.
+Per Li 2026-04-25 *"let's extract and/or delete anything before 65 - let's keep a minimal number of reports at a time"* combined with the new per-repo ARCHITECTURE.md convention (matklad pattern; see [AGENTS.md "Per-repo `ARCHITECTURE.md` at root"](../AGENTS.md)). Each report's substance was extracted into the per-repo ARCHITECTURE.md that owns the concept, then the report was deleted.
 
-Each is either canonical for a non-duplicated insight (009 pattern theory; 013 delimiter matrix; 057 edit UX; 065 schema groups; 068 tree-sitter; 070 language design; 074 rkyv discipline) or a living document (030 lojix transition; 076 this entry-point; 077 nexus/signal naming).
+| Report | Reason |
+|---|---|
+| **009-binds-and-patterns.md** | Pattern-matching theory + datalog-style semi-naive eval extracted into [`nexus/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md) "Pattern semantics". |
+| **013-nexus-syntax-proposal.md** | Delimiter-family matrix + position-defines-meaning + records-as-operators extracted into [`nexus/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus/blob/main/ARCHITECTURE.md) "Three structural choices that compound". |
+| **030-lojix-transition-plan.md** | Phases A-G + add-before-subtract rule extracted into [`lojix/ARCHITECTURE.md`](https://github.com/LiGoldragon/lojix/blob/main/ARCHITECTURE.md) "Migration phases". |
+| **057-edit-ux-freshly-reconsidered.md** | Request-composing shell + two read surfaces + diagnostics-as-iteration substrate extracted into [`nexus-cli/ARCHITECTURE.md`](https://github.com/LiGoldragon/nexus-cli/blob/main/ARCHITECTURE.md) "Edit UX" + "Diagnostics as iteration substrate". |
+
+### 5.4 Reports that survived all three trim passes (6)
+
+065, 068, 070, 074, 076, 077.
+
+Comfortably under the ~12 soft cap from [AGENTS.md "Report rollover at the soft cap"](../AGENTS.md).
+
+Each survives because:
+- **065** schema-of-schema design — too detailed for `architecture.md`; lands when `criome-schema` scaffolds.
+- **068** tree-sitter grammars — concrete editor-integration research; not yet acted on.
+- **070** nexus language + signal contract — canonical language-design reference.
+- **074** rkyv discipline — canonical wire-format reference.
+- **076** this report — living entry-point + trim ledger.
+- **077** nexus/signal naming — living decision record.
 
 ## 6. Conventions for future agents
 
 - Check this report (076) before reading older reports. The trim
   ledger §5 names where to find what.
 - When opening a new report, ask: does the insight have a
-  canonical home in [architecture.md](../docs/architecture.md), [AGENTS.md](../AGENTS.md), a kept reports/ entry, or
-  in code? If yes, edit the canonical home; do not write a new
-  report.
-- The "restate-to-refute" rule lives in [AGENTS.md](../AGENTS.md). State
-  positively; silently omit excluded options; lead with the
-  thing being decided.
+  canonical home in [architecture.md](../docs/architecture.md),
+  a per-repo `ARCHITECTURE.md`, [AGENTS.md](../AGENTS.md), a
+  kept reports/ entry, or in code? If yes, edit the canonical
+  home; do not write a new report.
+- The "restate-to-refute" rule and the report-rollover procedure
+  live in [AGENTS.md](../AGENTS.md). State positively; silently
+  omit excluded options; lead with the thing being decided. When
+  the report count tips above ~12, run a rollover pass.
 - The query+edit-language framing (§1 above) is the anchor.
   Recommendations that frame the project as validator-infra-first
   miss the beginning.
