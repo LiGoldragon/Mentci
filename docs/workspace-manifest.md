@@ -31,7 +31,9 @@ Last reviewed: 2026-04-25.
 
 The repos that make the sema-ecosystem MVP exist. Agents expect
 to find them at `~/git/<name>/` and symlinked at
-`mentci-next/repos/<name>/`.
+`mentci/repos/<name>/` (local directory is `~/git/mentci-next/`
+during the in-progress rename; the symlink target paths do not
+change).
 
 | Repo | Role | Pointer |
 |---|---|---|

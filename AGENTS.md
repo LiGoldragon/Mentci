@@ -6,7 +6,12 @@ Start there for: cross-project rules (jj workflow, always-push, Rust style — s
 
 ## Architecture
 
-Canonical architecture: [`docs/architecture.md`](docs/architecture.md). Read it first. Design history and decision records are in [`reports/`](reports/).
+This repo (mentci) is the **dev environment**. The project being built is **criome**.
+
+1. Read [`ARCHITECTURE.md`](ARCHITECTURE.md) at this repo's root for the dev-environment shape.
+2. Then read [criome's `ARCHITECTURE.md`](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md) — the canonical reference for the engine being built (sema, nexus, lojix, criomed, nexusd, lojixd, rsc, lojix-store, signal, …).
+
+Design history and decision records are in [`reports/`](reports/).
 
 **Workspace manifest**: [`docs/workspace-manifest.md`](docs/workspace-manifest.md) lists every repo under `~/git/` with its status. `devshell.nix`'s `linkedRepos` mirrors the CANON + TRANSITIONAL entries.
 
@@ -14,16 +19,17 @@ Canonical architecture: [`docs/architecture.md`](docs/architecture.md). Read it 
 
 | Where | What | Example |
 |---|---|---|
-| [`docs/architecture.md`](docs/architecture.md) | **Prose + diagrams only.** No code. High-level shape, invariants, relationships, rules. | "criomed owns sema; lojixd owns lojix-store; text crosses only at nexusd" |
-| `<repo>/ARCHITECTURE.md` | **Per-repo bird's-eye view.** This repo's role, boundaries (owns / does not own), code map, status. Points at `mentci-next/docs/architecture.md` for cross-cutting context — does *not* duplicate it. Per the matklad ARCHITECTURE.md convention. | `lojix-store/ARCHITECTURE.md` "owns the `~/.lojix/store/` layout + index DB" |
+| [`criome/ARCHITECTURE.md`](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md) | **Project-wide canonical.** Prose + diagrams only. No code. High-level shape, invariants, relationships, rules of the engine being built. | "criomed owns sema; lojixd owns lojix-store; text crosses only at nexusd" |
+| [`mentci/ARCHITECTURE.md`](ARCHITECTURE.md) | **This dev environment.** Workspace conventions, role, layout. Points at criome for the project itself. | "mentci is the dev workshop; long-term it becomes the universal UI" |
+| `<repo>/ARCHITECTURE.md` | **Per-repo bird's-eye view.** This repo's role, boundaries (owns / does not own), code map, status. Points at criome for cross-cutting context — does *not* duplicate it. Per the matklad ARCHITECTURE.md convention. | `lojix-store/ARCHITECTURE.md` "owns the `~/.lojix/store/` layout + index DB" |
 | [`reports/NNN-*.md`](reports/) | **Concrete shapes + decision records.** Type sketches, record definitions, message enums, research syntheses, historical context. | `Opus { … }` full rkyv sketch |
 | the repos themselves | **Implementation.** Rust code, tests, flakes, Cargo.toml. | `nexus-schema/src/opus.rs` |
 
-If a layer rule is violated, rewrite: move type sketches out of `docs/architecture.md` into a report; move runnable code out of reports into the appropriate repo. The architecture stays slim so it remains readable in one pass.
+If a layer rule is violated, rewrite: move type sketches out of `criome/ARCHITECTURE.md` into a report or skeleton code; move runnable code out of reports into the appropriate repo. The architecture stays slim so it remains readable in one pass.
 
-**No report links inside `docs/architecture.md`.** Cross-references go *into* architecture from reports, not *out of* architecture to reports. Reading lists, decision histories, type-spec details all live in reports or in `docs/workspace-manifest.md` — never inline in architecture.
+**No report links inside `criome/ARCHITECTURE.md`.** Cross-references go *into* architecture from reports, not *out of* architecture to reports. Reading lists, decision histories, type-spec details all live in reports or in `docs/workspace-manifest.md` — never inline in criome's architecture.
 
-When architecture changes, update `docs/architecture.md` first, then update the affected repos, then write a report only if the decision carries a journey worth recording. Per the project rule "delete wrong reports, don't banner them," superseded reports are deleted — they do not stay as banner-wrapped relics.
+When architecture changes, update `criome/ARCHITECTURE.md` first, then update the affected repos, then write a report only if the decision carries a journey worth recording. Per the project rule "delete wrong reports, don't banner them," superseded reports are deleted — they do not stay as banner-wrapped relics.
 
 ### Inclusion/exclusion rule — HARD
 
@@ -35,9 +41,9 @@ Across all canonical repos we follow: **`AGENTS.md` holds the real content; `CLA
 
 ### Per-repo `ARCHITECTURE.md` at root
 
-Every canonical repo carries an `ARCHITECTURE.md` at its root (matklad convention). The file is short — typically 50-150 lines — and answers: *what does this repo do, where do things live in it, and how does it fit into the wider sema-ecosystem.* Standard sections: role, boundaries (owns / does not own), code map, invariants, status, cross-cutting context (link to `mentci-next/docs/architecture.md` and any relevant report).
+Every canonical repo carries an `ARCHITECTURE.md` at its root (matklad convention). The file is short — typically 50-150 lines — and answers: *what does this repo do, where do things live in it, and how does it fit into the wider sema-ecosystem.* Standard sections: role, boundaries (owns / does not own), code map, invariants, status, cross-cutting context (link to [criome's `ARCHITECTURE.md`](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md) and any relevant report).
 
-Per-repo `ARCHITECTURE.md` does **not** duplicate `docs/architecture.md`. It points. Project-wide invariants live once, in `docs/architecture.md`; per-repo files describe their own niche only. When a repo's role changes, edit that repo's `ARCHITECTURE.md` and (if the change is system-level) `docs/architecture.md`.
+Per-repo `ARCHITECTURE.md` does **not** duplicate criome's `ARCHITECTURE.md`. It points. Project-wide invariants live once, in criome; per-repo files describe their own niche only. When a repo's role changes, edit that repo's `ARCHITECTURE.md` and (if the change is system-level) criome's `ARCHITECTURE.md`.
 
 When creating a new canonical repo: write `ARCHITECTURE.md` at root before the first commit.
 
@@ -53,7 +59,7 @@ When a frame has been **decisively rejected** (architecture.md §10 "Rejected fr
 
 When a previous report's premise is **wrong**: delete it and write a clean successor that states only the correct view. Do not append corrections, do not banner, do not restate-to-refute.
 
-The rejected-framings list in [`docs/architecture.md`](docs/architecture.md) §10 is the *only* place wrong frames are named, and only as one-line entries. Forensic narratives ("here's how this contamination crept in") are not reports — their lessons land in §10 as one-liners and in bd memories; the forensic narrative itself goes too.
+The rejected-framings list in [criome's `ARCHITECTURE.md`](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md) §10 is the *only* place wrong frames are named, and only as one-line entries. Forensic narratives ("here's how this contamination crept in") are not reports — their lessons land in §10 as one-liners and in bd memories; the forensic narrative itself goes too.
 
 ## Report rollover at the soft cap
 
@@ -61,7 +67,7 @@ The rejected-framings list in [`docs/architecture.md`](docs/architecture.md) §1
 
 1. **Roll into a new consolidated report.** Multiple reports covering the same evolving thread fold into a single forward-pointing successor. The successor supersedes the old reports; the old ones are deleted (no banner).
 
-2. **Implement.** If the report's substance can be expressed as architecture (`docs/architecture.md`), as a per-repo `ARCHITECTURE.md`, as code (skeleton-as-design in the relevant repo), or as an `AGENTS.md` rule, move it to the right home and delete the report.
+2. **Implement.** If the report's substance can be expressed as architecture ([criome's `ARCHITECTURE.md`](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md)), as a per-repo `ARCHITECTURE.md`, as code (skeleton-as-design in the relevant repo), or as an `AGENTS.md` rule, move it to the right home and delete the report.
 
 3. **Delete.** If the report's content is already absorbed elsewhere or its premise has been refuted, delete it.
 

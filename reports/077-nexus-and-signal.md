@@ -106,7 +106,7 @@ inside a client-msg `Send` payload.
 
 ## 4. Naming sweep
 
-### 4.1 — In the corpus (mentci-next)
+### 4.1 — In the corpus (mentci)
 
 - [reports/070](070-nexus-language-and-contract.md) — title is
   fine; §6 *"the criome-msg contract"* should read *"the signal

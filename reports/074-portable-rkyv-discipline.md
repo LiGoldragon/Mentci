@@ -139,7 +139,7 @@ fields changes the archive bytes. Two consequences:
 1. **No silent backward compatibility.** Old binaries can't
    read new archives or vice versa. Schema changes are
    coordinated upgrades.
-2. **The `VersionSkewGuard` record** ([reports/065 §3.4](repos/mentci-next/reports/065-criome-schema-design.md))
+2. **The `VersionSkewGuard` record** ([reports/065 §3.4](065-criome-schema-design.md))
    sits at a known slot and stores the schema-version /
    wire-format-version. criomed checks at boot; hard-fails on
    mismatch. This is the architectural answer to schema

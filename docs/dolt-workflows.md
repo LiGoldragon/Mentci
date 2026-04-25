@@ -5,7 +5,7 @@ Dolt is a MySQL-compatible SQL database with Git semantics: you can `clone`,
 DoltHub is the hosted index (like GitHub); DoltLab is the self-hosted option;
 Hosted Dolt runs Dolt as a server for you. Licensed Apache 2.0.
 
-This doc captures the workflows that matter for `mentci-next`: using Dolt as
+This doc captures the workflows that matter for `mentci`: using Dolt as
 versioned data / agent memory alongside source code in the same jj + git tree.
 
 ## Identity
@@ -147,7 +147,7 @@ Pull is plain CLI:
 dolt pull origin main
 ```
 
-**Implication for us:** the `mentci-next` GitHub repo can host both the
+**Implication for us:** the `mentci` GitHub repo can host both the
 nix/source tree (pushed via `jj git push`) and a Dolt database (pushed via
 `dolt push`) on the same remote URL, on separate refs.
 

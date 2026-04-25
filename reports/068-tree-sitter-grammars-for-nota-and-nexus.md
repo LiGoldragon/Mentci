@@ -52,7 +52,7 @@ Built-in tree-sitter (Neovim ≥0.11, also via `nvim-treesitter`). Auto-discover
 
 ## Recommendation
 
-Two new sibling repos, following sema-ecosystem conventions (one repo per concern, lowercase-hyphenated, cloned under `~/git/`, symlinked into `mentci-next/repos/`, listed in `docs/workspace-manifest.md`):
+Two new sibling repos, following sema-ecosystem conventions (one repo per concern, lowercase-hyphenated, cloned under `~/git/`, symlinked into `mentci/repos/`, listed in `docs/workspace-manifest.md`):
 
 ### Grammar repos — separate
 
