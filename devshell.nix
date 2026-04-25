@@ -7,7 +7,7 @@ let
   linkedRepos = [
     "tools-documentation"
     # --- sema-ecosystem CANON ---
-    "criome"          # spec repo — runtime pillar
+    "criome"          # spec + criome daemon (sema's engine; six-step validator pipeline)
     "nota"            # spec repo — data grammar
     "nota-serde-core" # shared lexer + ser/de kernel
     "nota-serde"      # nota's public API
@@ -20,15 +20,14 @@ let
     "rsc"             # records → Rust source projector
     "lojix-store"     # content-addressed filesystem (renamed from criome-store 2026-04-24)
     "lojix-cli"       # TRANSITIONAL — Li's working deploy CLI (renamed from lojix 2026-04-25)
+    "lojix"           # the lojix daemon (forge + store + deploy actors)
+    "lojix-schema"    # criome↔lojix contract types (verbs + spec/outcome shapes)
     # --- CriomOS host (criome engine runs on criomos) ---
     "CriomOS"         # NixOS-based host OS for the sema ecosystem
     "horizon-rs"      # horizon projection library (lojix-cli's deploy path links it)
     "CriomOS-emacs"   # emacs config as CriomOS module
     "CriomOS-home"    # home-manager config as CriomOS module
-    # --- CANON-MISSING (repos don't exist yet; uncomment when scaffolded) ---
-    # "criome"       # sema's engine daemon
-    # "lojix-schema"     # criome↔lojix contract (report 030 Phase B)
-    # "lojix"        # lojix daemon (report 030 Phase C)
+    # --- CANON-MISSING (none currently; all 2026-04-25 scaffolds landed) ---
   ];
 
   linkSiblingRepos = ''

@@ -38,7 +38,7 @@ change).
 | Repo | Role | Pointer |
 |---|---|---|
 | `tools-documentation` | Cross-project rules, daily-use tool docs. | `repos/tools-documentation/AGENTS.md` |
-| `criome` | Spec repo — runtime pillar; three-pillar framing. | `docs/architecture.md §4` |
+| `criome` | Project-wide architecture + criome daemon (sema's engine). Six-step validator pipeline scaffolded; mirrors nexus pattern (architecture spec + daemon code in one repo). | `criome/ARCHITECTURE.md` |
 | `nota` | Spec repo — data grammar (nota ⊂ nexus). | `reports/013` |
 | `nota-serde-core` | Shared lexer + ser/de kernel for both dialects. | `reports/014` |
 | `nota-serde` | nota's public façade. | `reports/014` |
@@ -49,7 +49,9 @@ change).
 | `sema` | Records DB (redb-backed). | `criome/ARCHITECTURE.md §3` |
 | `lojix-store` | Content-addressed filesystem + index DB (nix-store analogue). **MVP-required alongside lojix**. nix builds into `/nix/store`; lojix's `BundleIntoLojixStore` copies the closure into `~/.lojix/store/<blake3>/` with RPATH rewrite; sema records reference lojix-store hashes as canonical identity. Skeleton types + traits in `lojix-store/src/`. | `criome/ARCHITECTURE.md §5`, `lojix-store/ARCHITECTURE.md`, `lojix-store/AGENTS.md` |
 | `nexus-cli` | Text client. | `criome/ARCHITECTURE.md §4`, `nexus-cli/ARCHITECTURE.md` |
-| `rsc` | Records → Rust source projector. | `architecture.md §1` |
+| `rsc` | Records → Rust source projector. | `criome/ARCHITECTURE.md §1`, `rsc/ARCHITECTURE.md` |
+| `lojix` | The lojix daemon — forge + store + deploy actors. Receives `lojix-schema` requests over UDS from criome; runs nix; bundles into lojix-store. The bare `lojix` name doubles as the family namespace. | `lojix/ARCHITECTURE.md`, `criome/ARCHITECTURE.md §4` |
+| `lojix-schema` | Rust types for lojix-domain payloads — `LojixRequest`/`LojixReply` verbs (RunNix, BundleIntoLojixStore, RunNixosRebuild) + spec/outcome shapes. Counterpart to nexus-schema for the lojix family. | `lojix-schema/ARCHITECTURE.md` |
 
 ### CriomOS cluster
 
@@ -77,14 +79,11 @@ Canonical today, structure changes per a plan.
 Belongs in canonical per architecture but the repo doesn't
 exist yet. Create when we reach the corresponding work.
 
-| Repo | Purpose | When |
-|---|---|---|
-| `criome` | sema's engine daemon. | Needed for anything beyond nexus scaffolding. |
-| `lojix-schema` | criome↔lojix contract (rkyv). | `reports/030` Phase B. |
-| `lojix` | lojix daemon (forge + store + deploy actors inside). | `reports/030` Phase C. |
+*(Currently empty — the criome daemon, lojix, and lojix-schema
+were scaffolded 2026-04-25 and promoted to CANON above.)*
 
-Once each is created, add its entry to CANON and to
-`devshell.nix`'s `linkedRepos` list.
+When a new canonical repo is needed, add it here, then promote
+to CANON + `devshell.nix`'s `linkedRepos` once scaffolded.
 
 ## RETIRED / ARCHIVED
 
