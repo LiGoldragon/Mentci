@@ -142,6 +142,80 @@ Examples (bad → good):
 
 When generating new code: **spell identifiers as full English words by default.** When the surrounding code uses cryptic identifiers: do not propagate them into new code. Either rename (if rename is in scope) or use the full form for new identifiers and flag the inconsistency as a follow-up. Pattern-matching the local dialect is exactly the failure mode this rule exists to break.
 
+## Design-doc hygiene — state criteria positively
+
+Avoid polluting design context with "do not use X" patterns. When a candidate is excluded — by constraint, preference, or past decision — **omit it silently** from forward-going context. Don't leave "X is bad because Y," "we ruled out X," or "not X" breadcrumbs across files.
+
+**Why:** design docs and these instructions get loaded into every future agent's context. Every negative statement ("don't use X") costs context budget forever for zero ongoing value — X isn't going to be used; naming it just keeps it alive as a dead option. The accumulated negatives make docs unreadable and teach agents to think about what's excluded instead of what's being built.
+
+Failure mode this closes: agent discovers a constraint ("must be Rust"), accumulates an elimination list ("so not Dolt, not Datomic, not XTDB, not …"), and every future doc re-states the elimination list. Within a few sessions the design context is mostly gravestones.
+
+**How to apply:**
+- State criteria **positively**: "must be Rust," not "Go is excluded because …"
+- List candidates that **satisfy** the criteria. Silently drop the rest.
+- When correcting an earlier wrong direction, the retraction is a one-time edit. Do not leave the retracted direction in the doc "for historical record" — git/jj log preserves it.
+- If an excluded option keeps getting re-proposed by agents, that's a signal to **add a positive criterion that silently excludes it**, not to add a rule naming it.
+- Applies to: reports, design docs, README-style docs, ARCHITECTURE.md files, AGENTS.md, CLAUDE.md.
+
+The **rejected-framings** list in [criome/ARCHITECTURE.md §10](repos/criome/ARCHITECTURE.md) is the *only* place wrong frames are named, and only as one-line entries. Forensic narratives ("here's how this contamination crept in") do not become reports — their lessons land in §10 as one-liners.
+
+## No version history in vision / design / architecture docs
+
+Vision, design, and architecture docs describe what the system IS and what it's heading toward. They do NOT narrate prior abandoned approaches, scaffold history, or "why we restarted." That framing is a self-deprecation reflex that pollutes the doc and dates poorly.
+
+A doc that opens with "this is the third try" is already weaker than a doc that just describes the system. Future readers don't need the lineage; current readers don't either. If a piece of context truly matters (e.g. "the validator pipeline is Datomic-inspired"), state the fact and cite the inspiration — don't frame it as "we abandoned X to get here."
+
+How to apply:
+- When rewriting a stale doc, extract the durable ideas + recast in current terms. Drop *all* meta-commentary about the rewrite itself.
+- The same rule applies to commit messages of substance — describe the change, not the history of failed attempts.
+- Project framing inside docs is "criome" — there is no `criomev3` / `v1` / `v2` distinction in published docs. Version markers are bookkeeping for agents, never for readers.
+
+## Verify each parallel-tool result
+
+When batching tool calls (parallel `Write`, `Edit`, `Bash`), scan each result block for errors **before** any follow-up step that depends on the results. The bundle returning is not the same as the bundle succeeding.
+
+Failure mode: failed `Write` calls (typically the "must Read first" guard) don't show up in subsequent state until something else reads the file. By then the failure has cascaded — a wrong commit, a misled subagent, a published doc that doesn't match what the code reflects.
+
+How to apply:
+- After any parallel batch, look at every `<result>` block. If any says "File has not been read yet" or "Exit code N" or `<tool_use_error>`, fix that *before* moving on.
+- Double-check by reading the file or running `git status` / `ls` if a write was meant to land.
+- Especially load-bearing when the next step is committing, pushing, or spawning an agent that consumes the written file.
+- When a `Write` fails on the must-Read-first guard, do the Read then redo the Write before continuing.
+
+## Commit message style — S-expression
+
+Commit messages across all repos under `~/git/` follow a single nested-parenthesis S-expression style.
+
+**Shape:**
+- Single line. No blank-line body. Everything fits in the subject.
+- First token = repo name (lowercase, as it appears in the filesystem).
+- Nested parens group scope → subsystem → notes.
+- `[...]` enumerates discrete bullets within a scope.
+- `—` (em dash, not `--` or `-`) introduces a rationale or explanation.
+- Compound commits wrap the whole thing in an outer pair of parens; simple commits skip the outer pair.
+- `((double parens))` mark direct quotes from Li in the message.
+
+**Templates:**
+
+Simple (one concern):
+```
+(<repo> <short verb-or-label>) (<what changed> — <why>)
+```
+
+Compound (multiple concerns):
+```
+((<repo> <header>) (<scope-A> [<note>] [<note>]) (<scope-B> [<note> — <why>]))
+```
+
+**Examples:**
+- `(signal edit) (slot.rs — added #[serde(transparent)] to Slot and Revision per Li 2026-04-27 ((2)) for reports/087 §5 Q4)`
+- `(mentci report add) (reports/093 — project-wide style review plan per Li 2026-04-27 — prepare for project-wide review)`
+- `((mentci edit) (AGENTS.md + reports/092 — naming rule per Li 2026-04-27 ((I would like to point out…))) (research synthesis…))`
+
+**Common scope labels:** `add`, `edit`, `cull`, `del`, `fix`, `init`, `rename`, `audit`, `arch edit`, `cleanup`, `impl`, `rewrite`.
+
+The parens do the grouping; em-dashes distinguish explanation from enumeration. Keep it on one line even if long — `jj commit -m '<msg>'` takes arbitrarily long single-line messages. Use double quotes around the message when it contains apostrophes (single quotes terminate the shell string).
+
 ## Tooling
 
 `bd` (beads) tracks short items (issues, tasks, workflow). Designs and reports go in files. See [reference_bd_vs_files](repos/tools-documentation/bd/basic-usage.md#bd-vs-files--when-each-is-the-right-home).
