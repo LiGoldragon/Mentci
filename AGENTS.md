@@ -83,6 +83,12 @@ Small reports are fine — the report doesn't have to be large. Acknowledgements
 
 **Use relative paths in reports.** When a report references files in sibling repos, link via [`../repos/<name>/...`](../repos/) (the workspace symlinks), not via GitHub URLs. The author reads in Codium and clicks links to open files locally; GitHub URLs break that flow. Absolute paths to `~/git/` also don't open in the editor.
 
+## Beauty is the criterion
+
+Read [`repos/tools-documentation/programming/beauty.md`](repos/tools-documentation/programming/beauty.md) before pushing back on any rule below as "verbose" or "ceremonial." Beauty is not a luxury — it is the test of correctness. Ugly code is evidence that the underlying problem is unsolved. The full case (philosophical foundation across two millennia + the explicit defense from Hardy / Hoare / Dijkstra / Brooks / Hickey / Torvalds + the catastrophic record of what happens when ugly engineering ships — Therac-25, Ariane 5, Mars Climate Orbiter, Heartbleed, Boeing MCAS) lives in [`reports/097-beauty-and-elegance-research-2026-04-27.md`](reports/097-beauty-and-elegance-research-2026-04-27.md).
+
+The aesthetic discomfort *is* the diagnostic reading. When something feels ugly, slow down and find the structure that makes it beautiful — that structure is the one you were missing. Per Li (2026-04-27): *"Fuck ugliness and non-conciseness. Who knows how many people were put to death and tortured because someone wasn't concise and explicit enough."*
+
 ## Thinking discipline — every reusable verb belongs to a noun
 
 Read [`repos/tools-documentation/programming/abstractions.md`](repos/tools-documentation/programming/abstractions.md) before writing free functions. The discipline applies to any language with method dispatch: behavior lives on types, not as floating verbs. The rule's purpose is to force the question "what type owns this verb?" — when the answer isn't obvious, the model of the problem isn't fully formed yet, and slowing down to find the noun is the load-bearing cognitive event.
@@ -147,6 +153,24 @@ Examples (bad → good):
 ### How to apply when generating code
 
 When generating new code: **spell identifiers as full English words by default.** When the surrounding code uses cryptic identifiers: do not propagate them into new code. Either rename (if rename is in scope) or use the full form for new identifiers and flag the inconsistency as a follow-up. Pattern-matching the local dialect is exactly the failure mode this rule exists to break.
+
+### The "feels too verbose" anti-pattern
+
+When a spelled-out name (`AssertOperation`, `Deserializer`, `KindDecl`, `PatternField`) "feels needlessly verbose" — that feeling is **not** a signal to shorten the name. It is a signal that the writer (human or agent) has been **taught wrong** by training data drawn from a 60-year-old culture of card-deck and 80-column-line constraints that no longer apply.
+
+The full word reads as English. The abbreviation reads as ceremony to be decoded. The cost of mis-naming is paid every time the name is read; the benefit of saving three keystrokes is paid once. There is no contest.
+
+Per Li (2026-04-27): *"You were taught wrong. We did a research on this, use it to make the docs convincing so agents don't slip back into writing all this fucking slop garbage-naming bullshit. I REALLY FUCKING HATE IT — IT'S SOOO UGLY!"*
+
+When you catch yourself thinking "this name feels too long" or "this is unnecessarily ceremonial":
+
+1. **Question the feeling.** It is almost certainly inherited prejudice, not informed judgment.
+2. **Re-read the name as English.** Does `AssertOperation` read as English? (Yes.) Does `AssertOp` read as English? (No — it requires expansion.)
+3. **Apply the rule.** The full English form wins unless the name falls in one of the six named exception classes above.
+
+There is no exception class for "feels verbose." That feeling is the bug, not the criterion.
+
+Backing research: [`reports/092-naming-research-and-rule.md`](reports/092-naming-research-and-rule.md) (the empirical case for full words) + [`reports/097-beauty-and-elegance-research-2026-04-27.md`](reports/097-beauty-and-elegance-research-2026-04-27.md) (why beauty in identifiers is the criterion, not keystroke-economy).
 
 ## Design-doc hygiene — state criteria positively
 
