@@ -98,26 +98,26 @@ impl Listener {
 
     pub async fn run(self, sema: Arc<Sema>) -> Result<()> {
         loop {
-            let (sock, _) = self.listener.accept().await?;
+            let (socket, _) = self.listener.accept().await?;
             let sema = sema.clone();
             tokio::spawn(async move {
-                let _ = handle_conn(sock, sema).await;
+                let _ = handle_connection(socket, sema).await;
             });
         }
     }
 }
 
-async fn handle_conn(mut sock: UnixStream, sema: Arc<Sema>) -> Result<()> {
+async fn handle_connection(mut socket: UnixStream, sema: Arc<Sema>) -> Result<()> {
     loop {
-        let frame = read_frame(&mut sock).await?;
+        let frame = read_frame(&mut socket).await?;
         let reply = dispatch::handle(frame, &sema);
-        write_frame(&mut sock, reply).await?;
+        write_frame(&mut socket, reply).await?;
     }
 }
 
 // length-prefixed Frame I/O — 4-byte BE u32 + N rkyv bytes
-async fn read_frame(sock: &mut UnixStream) -> Result<Frame> { ... }
-async fn write_frame(sock: &mut UnixStream, frame: Frame) -> Result<()> { ... }
+async fn read_frame(socket: &mut UnixStream) -> Result<Frame> { ... }
+async fn write_frame(socket: &mut UnixStream, frame: Frame) -> Result<()> { ... }
 ```
 
 ```rust
@@ -207,14 +207,14 @@ fn find_nodes(sema: &Sema, q: NodeQuery) -> Result<Vec<Node>> {
     Ok(out)
 }
 
-fn matches_node(n: &Node, q: &NodeQuery) -> bool {
-    matches_pf(&n.name, &q.name)
+fn matches_node(node: &Node, query: &NodeQuery) -> bool {
+    matches_pattern_field(&node.name, &query.name)
 }
 
-fn matches_pf<T: PartialEq>(value: &T, pf: &PatternField<T>) -> bool {
-    match pf {
+fn matches_pattern_field<T: PartialEq>(value: &T, pattern_field: &PatternField<T>) -> bool {
+    match pattern_field {
         PatternField::Wildcard | PatternField::Bind(_) => true,
-        PatternField::Match(v) => value == v,
+        PatternField::Match(literal) => value == literal,
     }
 }
 ```
@@ -283,44 +283,44 @@ position with kind-aware logic:
 
 ```rust
 fn parse_query(input: &str) -> Result<QueryOp> {
-    let mut lex = Lexer::nexus(input);
-    expect(lex, Token::LParenPipe)?;
-    let kind = expect_pascal_ident(&mut lex)?;
-    let q = match kind.as_str() {
+    let mut lexer = Lexer::nexus(input);
+    expect(lexer, Token::LParenPipe)?;
+    let kind_name = expect_pascal_identifier(&mut lexer)?;
+    let query = match kind_name.as_str() {
         "Node"     => QueryOp::Node(NodeQuery {
-            name: parse_pf_string(&mut lex)?,
+            name: parse_pattern_field_string(&mut lexer)?,
         }),
         "Edge"     => QueryOp::Edge(EdgeQuery {
-            from: parse_pf_slot(&mut lex)?,
-            to:   parse_pf_slot(&mut lex)?,
-            kind: parse_pf_relation_kind(&mut lex)?,
+            from: parse_pattern_field_slot(&mut lexer)?,
+            to:   parse_pattern_field_slot(&mut lexer)?,
+            kind: parse_pattern_field_relation_kind(&mut lexer)?,
         }),
         "Graph"    => QueryOp::Graph(GraphQuery {
-            title: parse_pf_string(&mut lex)?,
+            title: parse_pattern_field_string(&mut lexer)?,
         }),
         "KindDecl" => QueryOp::KindDecl(KindDeclQuery {
-            name: parse_pf_string(&mut lex)?,
+            name: parse_pattern_field_string(&mut lexer)?,
         }),
         other => return Err(format!("unknown query kind: {other}")),
     };
-    expect(&mut lex, Token::RParenPipe)?;
-    Ok(q)
+    expect(&mut lexer, Token::RParenPipe)?;
+    Ok(query)
 }
 
-fn parse_pf_string(lex: &mut Lexer) -> Result<PatternField<String>> {
-    match lex.next_token()? {
-        Some(Token::Ident(s)) if s == "_" => Ok(PatternField::Wildcard),
+fn parse_pattern_field_string(lexer: &mut Lexer) -> Result<PatternField<String>> {
+    match lexer.next_token()? {
+        Some(Token::Ident(text)) if text == "_" => Ok(PatternField::Wildcard),
         Some(Token::At) => {
-            let name = expect_lower_ident(lex)?;
-            Ok(PatternField::Bind(name))
+            let bind_name = expect_lowercase_identifier(lexer)?;
+            Ok(PatternField::Bind(bind_name))
         }
-        Some(Token::Ident(s)) => Ok(PatternField::Match(s)),  // bare-ident
-        Some(Token::Str(s))   => Ok(PatternField::Match(s)),  // quoted
+        Some(Token::Ident(text)) => Ok(PatternField::Match(text)),  // bare-identifier
+        Some(Token::Str(text))   => Ok(PatternField::Match(text)),  // quoted
         other => Err(format!("expected pattern field, got {other:?}")),
     }
 }
-// parse_pf_slot: bare integer → Match(Slot(n)), @name → Bind, _ → Wildcard
-// parse_pf_relation_kind: bare PascalCase → Match(variant), @name → Bind, _ → Wildcard
+// parse_pattern_field_slot: bare integer → Match(Slot(n)), @name → Bind, _ → Wildcard
+// parse_pattern_field_relation_kind: bare PascalCase → Match(variant), @name → Bind, _ → Wildcard
 ```
 
 **Recommendation:** path B for M0 (~50 LoC in nexus daemon).
@@ -454,8 +454,8 @@ use std::io::{Read, Write};
 use std::os::unix::net::UnixStream;
 
 fn main() -> Result<()> {
-    let args: Vec<String> = std::env::args().collect();
-    let input = match args.get(1) {
+    let arguments: Vec<String> = std::env::args().collect();
+    let input = match arguments.get(1) {
         Some(file) if file != "-" => std::fs::read_to_string(file)?,
         _ => {
             let mut s = String::new();
@@ -464,12 +464,12 @@ fn main() -> Result<()> {
         }
     };
 
-    let mut sock = UnixStream::connect("/tmp/nexus.sock")?;
-    sock.write_all(input.as_bytes())?;
-    sock.shutdown(std::net::Shutdown::Write)?;
+    let mut socket = UnixStream::connect("/tmp/nexus.sock")?;
+    socket.write_all(input.as_bytes())?;
+    socket.shutdown(std::net::Shutdown::Write)?;
 
     let mut response = String::new();
-    sock.read_to_string(&mut response)?;
+    socket.read_to_string(&mut response)?;
     print!("{response}");
     Ok(())
 }
@@ -533,8 +533,8 @@ async fn maybe_run_genesis(sema: &Sema) -> Result<()> {
     }
     let genesis_text = include_str!("../genesis.nexus");
     // Parse + dispatch each KindDecl through normal Assert path
-    for kd in parse_all_asserts(genesis_text)? {
-        let _ = assert::handle(kd, sema);
+    for kind_decl in parse_all_asserts(genesis_text)? {
+        let _ = assert::handle(kind_decl, sema);
     }
     Ok(())
 }

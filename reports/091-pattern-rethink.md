@@ -156,47 +156,48 @@ pub fn next_top_level(text: &str) -> Result<Option<(Request, usize)>> {
 }
 
 fn parse_query(text: &str) -> Result<(QueryOp, usize)> {
-    let mut lex = Lexer::nexus(text);
-    expect(&mut lex, Token::LParenPipe)?;
-    let kind = expect_pascal_ident(&mut lex)?;
+    let mut lexer = Lexer::nexus(text);
+    expect(&mut lexer, Token::LParenPipe)?;
+    let kind_name = expect_pascal_identifier(&mut lexer)?;
 
-    let q = match kind.as_str() {
+    let query = match kind_name.as_str() {
         "Node" => QueryOp::Node(NodeQuery {
-            name: parse_pf_string(&mut lex)?,
+            name: parse_pattern_field_string(&mut lexer)?,
         }),
         "Edge" => QueryOp::Edge(EdgeQuery {
-            from: parse_pf_slot(&mut lex)?,
-            to:   parse_pf_slot(&mut lex)?,
-            kind: parse_pf_relation_kind(&mut lex)?,
+            from: parse_pattern_field_slot(&mut lexer)?,
+            to:   parse_pattern_field_slot(&mut lexer)?,
+            kind: parse_pattern_field_relation_kind(&mut lexer)?,
         }),
         "Graph" => QueryOp::Graph(GraphQuery {
-            title: parse_pf_string(&mut lex)?,
+            title: parse_pattern_field_string(&mut lexer)?,
         }),
         "KindDecl" => QueryOp::KindDecl(KindDeclQuery {
-            name: parse_pf_string(&mut lex)?,
+            name: parse_pattern_field_string(&mut lexer)?,
         }),
         other => return Err(Error::UnknownKind(other.into())),
     };
 
-    expect(&mut lex, Token::RParenPipe)?;
-    Ok((q, lex.consumed_bytes()))
+    expect(&mut lexer, Token::RParenPipe)?;
+    Ok((query, lexer.consumed_bytes()))
 }
 
-fn parse_pf_string(lex: &mut Lexer) -> Result<PatternField<String>> {
-    match lex.next_token()? {
-        Some(Token::Ident(s)) if s == "_" => Ok(PatternField::Wildcard),
+fn parse_pattern_field_string(lexer: &mut Lexer) -> Result<PatternField<String>> {
+    match lexer.next_token()? {
+        Some(Token::Ident(text)) if text == "_" => Ok(PatternField::Wildcard),
         Some(Token::At) => {
-            let _ident = expect_lower_ident(lex)?;  // M0: ignore name
+            let _bind_name = expect_lowercase_identifier(lexer)?;  // M0: ignore name
             Ok(PatternField::Bind)
         }
-        Some(Token::Ident(s)) => Ok(PatternField::Match(s)),
-        Some(Token::Str(s))   => Ok(PatternField::Match(s)),
+        Some(Token::Ident(text)) => Ok(PatternField::Match(text)),
+        Some(Token::Str(text))   => Ok(PatternField::Match(text)),
         other => Err(Error::ExpectedPatternField(format!("{other:?}"))),
     }
 }
 
-// parse_pf_slot, parse_pf_relation_kind: same shape with the
-// Match case parsing an integer / a PascalCase variant respectively.
+// parse_pattern_field_slot, parse_pattern_field_relation_kind: same
+// shape with the Match case parsing an integer / a PascalCase variant
+// respectively.
 ```
 
 That's it. ~50 LoC including all four kinds and all three
