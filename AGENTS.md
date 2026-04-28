@@ -9,7 +9,7 @@ Start there for: cross-project rules (jj workflow, always-push, Rust style — s
 This repo (mentci) is the **dev environment**. The project being built is **criome**.
 
 1. Read [`ARCHITECTURE.md`](ARCHITECTURE.md) at this repo's root for the dev-environment shape.
-2. Then read [criome's `ARCHITECTURE.md`](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md) — the canonical reference for the engine being built (sema, nexus, lojix, criome, nexus, lojix, rsc, lojix-store, signal, …).
+2. Then read [criome's `ARCHITECTURE.md`](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md) — the canonical reference for the engine being built (sema, nexus, lojix, criome, prism, lojix-store, signal, …).
 
 Design history and decision records are in [`reports/`](reports/).
 
@@ -47,7 +47,7 @@ Per-repo `ARCHITECTURE.md` does **not** duplicate criome's `ARCHITECTURE.md`. It
 
 When creating a new canonical repo: write `ARCHITECTURE.md` at root before the first commit.
 
-MVP goal: **self-hosting** — write the system's own source as records in the sema database; rsc projects those records to `.rs` files; rustc compiles them; the new binary reads and extends its own database.
+MVP goal: **self-hosting** — write the system's own source as records in the sema database; prism projects those records to `.rs` files (one phase of lojix-daemon's runtime-creation pipeline); rustc compiles them; the new binary reads and extends its own database.
 
 An **opus** is the database's compilation-unit term — one opus compiles to one artifact (library or binary). Corresponds to one Rust crate on the filesystem side.
 

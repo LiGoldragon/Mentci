@@ -14,7 +14,7 @@ let
     "signal"
     "sema"
     "nexus-cli"
-    "rsc"
+    "prism"
     "lojix-store"
     "lojix-cli"
     "lojix"

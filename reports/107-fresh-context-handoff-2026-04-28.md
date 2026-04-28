@@ -69,10 +69,9 @@ empty `reports/`.*
 | `mentci-next-7tv` | P2 | M1 — per-kind sema tables (replace 1-byte kind discriminator) |
 | `mentci-next-8ba` | P2 | M3 — sema redb wrapper (database library) |
 | `mentci-next-4jd` | P2 | M2-remainder: method-body layer in nexus-schema |
-| `mentci-next-0tj` | P2 | Implement rsc records-to-Rust projection |
+| `mentci-next-0tj` | P2 | Implement prism records-to-Rust projection |
 | `mentci-next-7dj` | P2 | Cross-repo wiring — flake input pattern for local dev |
-| `mentci-next-zv3` | P2 | M6 — bootstrap demo (DB → rsc → compile → demonstrate) |
-| `mentci-next-dqp` | P3 | Rename rsc to a full English word |
+| `mentci-next-zv3` | P2 | M6 — bootstrap demo (DB → prism → compile → demonstrate) |
 
 ## Lurking dangers (context worth keeping)
 

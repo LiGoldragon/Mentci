@@ -12,9 +12,13 @@ A flow graph is a set of records in criome's sema. The same records
 project into **three surfaces**:
 
 1. **nexus text** — already shipping; the text edit/inspect surface.
-2. **`rsc` macro emission** — projects records into Rust source code that
-   *is* a working ractor-based actor runtime. Not a passive data
-   structure; the emitted code is the running system.
+2. **runtime creation orchestrated by `lojix-daemon`** — the
+   pipeline's code-emission phase is `prism` (records → `.rs` source
+   files); lojix-daemon owns the surrounding work — directory
+   assembly, dependency resolution, compiler invocation via
+   nix-via-crane-and-fenix, artifact landing in lojix-store. The
+   emitted code is a working ractor-based actor runtime; what runs
+   is the system the records describe.
 3. **mentci UI** — renders the graph visually in real time; user
    gestures (click, drag, typing — the keyboard counts) translate into
    signal edit messages, criome validates, the UI reflects the
@@ -32,9 +36,11 @@ pixels and accept gestures. None of the three holds independent state;
 all three round-trip through criome.
 
 The flow graph is also **the first concrete use case for criome's
-self-hosting loop**: `rsc` is the records-to-Rust projector that turns
-the database into an executable. Its first customer is criome itself
-(per `bd mentci-next-0tj`), but the same mechanism handles user-authored
+self-hosting loop**: `lojix-daemon` orchestrates the
+records-to-runtime pipeline, with `prism` emitting the Rust source
+(the daemon assembles the workdir, calls nix-via-crane, lands the
+artifact in lojix-store). Its first customer is criome itself (per
+`bd mentci-next-0tj`), but the same mechanism handles user-authored
 flow graphs that compile to user-authored runtimes.
 
 ## 2 · The substrate — flow graphs as records
@@ -62,7 +68,7 @@ under Path A of the §8 Q12 decision (the original Q12 has been
 resolved). The closed Rust enum in signal is the **authoritative
 type system**. New record kinds land by adding the typed struct +
 the closed-enum variant + propagating through criome's hand-coded
-dispatch. Schema-as-data records will be re-added when `rsc` or
+dispatch. Schema-as-data records will be re-added when `prism` or
 mentci has a real reader for them — until then, the scaffolding
 would have been inert.
 
@@ -82,24 +88,40 @@ applies, replies thread back as text. Verified end-to-end via
 `mentci-integration` in `nix flake check`. **No work pending here for
 this design.**
 
-## 4 · Projection 2 — `rsc`: records → Rust runtime (macro emission)
+## 4 · Projection 2 — runtime creation via `lojix-daemon` (prism emits the source)
 
-`rsc` reads flow-graph records from sema and emits Rust source code.
+The records-to-runtime path is owned by **`lojix-daemon`**, not by
+`prism` alone. lojix-daemon's pipeline runs five phases:
+
+1. **Directory assembly** — set up the scratch workdir layout.
+2. **Code emission via `prism`** — records → `.rs` source files. ←
+   this is prism's job; the rest is the daemon's.
+3. **Dependency resolution** — generate `Cargo.toml` + `flake.nix` +
+   lockfile bumps.
+4. **Compilation** — invoke nix-via-crane-and-fenix; rustc runs
+   inside.
+5. **Artifact landing** — output binary into lojix-store under a
+   blake3-hashed path.
+
+The rest of this section focuses on prism's phase — the code-
+emission shape — since that's where the macro-programming happens.
+
+`prism` reads flow-graph records from sema and emits Rust source code.
 Crucially, this is **macro programming**, not naive code generation:
 
 - The input is **structured records**, not source-text tokens.
 - The emission is **template/pattern substitution per node-kind and
-  edge-kind** — the templates are hand-coded inside `rsc` itself
-  (one template per kind, written in Rust). When `rsc` ships, adding
+  edge-kind** — the templates are hand-coded inside `prism` itself
+  (one template per kind, written in Rust). When `prism` ships, adding
   a new node-kind means adding the typed struct in signal *and* the
-  emission template in rsc.
+  emission template in prism.
 - The output is Rust source that **becomes a running actor system**
   when compiled.
 
 So the analogy is to Rust's proc-macros — pattern in, source out — but
 the input is records-from-sema rather than a `TokenStream`. That input
 form is the load-bearing difference. Each record-kind defines its own
-expansion shape; rsc walks the graph and emits the union.
+expansion shape; prism walks the graph and emits the union.
 
 ### What gets emitted
 
@@ -126,11 +148,13 @@ Message), per-verb typed `RpcReplyPort<T>` messages, supervision via
 ### The bootstrap loop
 
 1. Records describing criome's own request flow live in sema.
-2. `rsc` reads them, emits Rust, compiles via `cargo` / `crane`.
-3. The new criome binary reads from sema (which contains the records
-   that compiled it).
-4. Editing the records → re-emit → recompile → re-deploy → criome runs
-   its new shape.
+2. lojix-daemon's pipeline runs: `prism` emits Rust from the
+   records; the daemon assembles the workdir + calls nix-via-crane;
+   the artifact lands in lojix-store.
+3. The new criome binary reads from sema (which contains the
+   records that compiled it).
+4. Editing the records → re-emit → recompile → re-land → criome
+   runs its new shape.
 
 This is the self-hosting "done" moment (`bd mentci-next-ef3`).
 
@@ -250,12 +274,14 @@ orbits.
                   │                    │                    │
                   │                    │                    │
         ┌───────────────┐    ┌──────────────────┐    ┌─────────────┐
-        │ nexus-daemon  │    │ rsc projects     │    │  mentci     │
-        │ — text edit / │    │ records →        │    │  — visual   │
-        │   inspect     │    │ Rust source via  │    │    render + │
-        │   surface     │    │ macro emission   │    │    edit     │
-        │   (existing)  │    │   (M1 …)         │    │  (M? …)     │
-        └───────────────┘    └──────────────────┘    └─────────────┘
+        │ nexus-daemon  │    │  lojix-daemon    │    │  mentci     │
+        │ — text edit / │    │  pipeline:       │    │  — visual   │
+        │   inspect     │    │  prism emits .rs │    │    render + │
+        │   surface     │    │  daemon compiles │    │    edit     │
+        │   (existing)  │    │  artifact lands  │    │  (M? …)     │
+        └───────────────┘    │  in lojix-store  │    └─────────────┘
+                             │   (M1 …)         │
+                             └──────────────────┘
                                        │
                                        ▼
                               compiled actor system
@@ -269,10 +295,10 @@ Tentative — depends on Li's answers below.
 
 - **M0** — nexus text shuttle, criome+nexus daemons ractor-hosted, demo
   graph operations end-to-end. **Done.**
-- **M1** — `rsc` minimum: emits a known-shape Rust file from a
+- **M1** — `prism` minimum: emits a known-shape Rust file from a
   known-shape record (start small, e.g. one `Node` record →
   one ractor `Actor` skeleton). Per-kind sema tables
-  (`bd mentci-next-7tv`) land here as the storage shape `rsc` reads
+  (`bd mentci-next-7tv`) land here as the storage shape `prism` reads
   from.
 - **M2** — `Subscribe` request shipped on criome side; mentci can
   subscribe to record changes for live updates.
@@ -280,11 +306,11 @@ Tentative — depends on Li's answers below.
   criome.
 - **M4** — mentci UI v1: gesture-driven edit; `Assert` / `Mutate` /
   `Retract` round-trip with diagnostic feedback inline.
-- **M5** — `rsc`'s macro projection extended to emit ractor runtime
+- **M5** — `prism`'s macro projection extended to emit ractor runtime
   actor systems from flow-graph records (the "compile a graph into
   a daemon" milestone).
 - **M6** — bootstrap: criome's own request-flow lives as records in
-  sema; rsc emits criome from them; the loop closes
+  sema; prism emits criome from them; the loop closes
   (`bd mentci-next-zv3`, `bd mentci-next-ef3`).
 
 ## 8 · Open questions
@@ -297,22 +323,22 @@ The deep dive surfaces decisions that gate concrete design work:
    themselves. What are the first concrete kinds — Source /
    Transformer / Sink? Or domain-specific (e.g. validator-stage
    kinds for criome's own request flow)? The choice frames the
-   rest of the design — both signal's new types and rsc's first
+   rest of the design — both signal's new types and prism's first
    emission templates.
 
 2. **Smallest first demo graph.** The minimum viable end-to-end
    demonstration of the macro path. Candidate: encode criome's M0
    request flow (`Frame → Validator → Sema → Reply`) as records, have
-   `rsc` emit a working daemon from them, run it, watch the integration
-   test pass against the rsc-emitted binary instead of the hand-coded
+   `prism` emit a working daemon from them, run it, watch the integration
+   test pass against the prism-emitted binary instead of the hand-coded
    one.
 
-3. **`rsc`'s emission shape — proc-macro, build-script, or standalone
+3. **`prism`'s emission shape — proc-macro, build-script, or standalone
    binary?** Three options:
    - Proc-macro reading from sema at compile time (like `sqlx::query!`
      reads schema). Tightest integration; demands proc-macro access
      to a running criome.
-   - `build.rs` calling out to `rsc` to emit `.rs` files into
+   - `build.rs` calling out to `prism` to emit `.rs` files into
      `OUT_DIR` before the main compile. Decoupled from the runtime;
      the standard cargo path.
    - Standalone CLI that emits `.rs` source into a workdir; `cargo`
@@ -359,7 +385,7 @@ The deep dive surfaces decisions that gate concrete design work:
    is meant to replace the legacy software stack as the universal
    UI"). Confirm or correct.
 
-10. **Recursive rendering — long-term.** Once `rsc` emits a runtime
+10. **Recursive rendering — long-term.** Once `prism` emits a runtime
     from records, can the runtime's own state be rendered as a flow
     graph in mentci? (Self-rendering of the running system.) Worth
     flagging now if it's the long-term direction — it would shape
@@ -380,7 +406,7 @@ The deep dive surfaces decisions that gate concrete design work:
 12. **~~`KindDecl` — naming + role in M0.~~** **RESOLVED** — Li chose
     Path A 2026-04-28. `KindDecl` + `FieldDecl` + `Cardinality` +
     `KindDeclQuery` were dropped from signal in commit 8b101c8d.
-    Schema-as-data records will be re-added when `rsc` or mentci has
+    Schema-as-data records will be re-added when `prism` or mentci has
     a real reader for them. The closed Rust enum in signal is the
     authoritative type system today; new kinds land by adding the
     typed struct and propagating through hand-coded dispatch.
@@ -389,8 +415,8 @@ The deep dive surfaces decisions that gate concrete design work:
 
 After Li answers the open questions, concrete work per layer:
 
-- **`rsc`** — emission templates per node-kind / edge-kind (templates
-  hand-coded in rsc); macro/templating DSL; build-system integration
+- **`prism`** — emission templates per node-kind / edge-kind (templates
+  hand-coded in prism); macro/templating DSL; build-system integration
   choice (per Q3).
 - **`mentci`** — UI tech choice + skeleton; gesture→signal mapping;
   diagnostic surface; criome connection (per Q4–Q8).
@@ -407,9 +433,9 @@ design is encoded in:
 - `criome/ARCHITECTURE.md` (the project-wide architectural update —
   the "flow graphs are the substrate" framing belongs there once
   concretised).
-- per-repo `ARCHITECTURE.md` updates in `rsc` and `mentci` once they
+- per-repo `ARCHITECTURE.md` updates in `prism` and `mentci` once they
   have implementation shape.
-- code in `rsc` + `mentci`.
+- code in `prism` + `mentci`.
 
 When all three exist, this report is deleted. The design is in the
 durable homes.

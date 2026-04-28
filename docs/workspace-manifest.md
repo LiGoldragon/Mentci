@@ -51,7 +51,7 @@ For project-wide architecture, read [`criome/ARCHITECTURE.md`](https://github.co
 | Repo | Note |
 |---|---|
 | `lojix-cli` | Working deploy CLI. To become a thin transport for `lojix-schema` requests once `lojix` lands. Don't rewrite. |
-| `rsc` | Stub today. Will project records to Rust source when criome can supply them. |
+| `prism` | Stub today. Records-to-Rust source projector — code-emission subcomponent of `lojix-daemon`'s runtime-creation pipeline. Renamed from `rsc` 2026-04-28. |
 
 ## SHELVED
 
