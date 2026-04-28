@@ -221,7 +221,7 @@ pub struct MutateOp {
 - Q2 (schema-check rigour) — collapses; rkyv decode IS the
   validation. Wrong shape = decode error
 - Q6 (reply rendering) — typed values render via
-  nota-serde-core directly
+  nota-codec directly
 
 **What replaces it:**
 
