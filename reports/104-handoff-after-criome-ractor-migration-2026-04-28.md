@@ -611,6 +611,19 @@ references the pre-migration shape — update flagged in §10.
 16. **NEW — reader pool size lives in sema's redb meta
     table** via `sema::Sema::reader_count()`. Default 4 if
     unset. `set_reader_count(n)` persists.
+17. **NEW — actor State doesn't drop when handle returns.**
+    Ractor wraps the exiting actor's State in a `BoxedState` and
+    queues it to the supervisor as part of `SupervisionEvent::ActorTerminated`
+    ([actor.rs:762](https://github.com/slawlor/ractor/blob/v0.15.6/ractor/src/actor.rs#L762)).
+    The State doesn't drop until the supervisor's mailbox processes
+    that event — which can be much later if the supervisor is
+    inside an active `await` (mailbox priority only matters
+    *between* iterations, not within an active handle). If the
+    State holds a resource that something *external* is waiting
+    on (a UnixStream the client is reading), close it explicitly
+    inside `handle` before `myself.stop()`. Relying on `Drop`
+    after the actor exits is wrong. Discovered via the nexus
+    deadlock; see [reports/105 §10](105-nexus-ractor-migration-deep-review-2026-04-28.md).
 
 ---
 

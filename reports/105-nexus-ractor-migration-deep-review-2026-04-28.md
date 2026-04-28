@@ -179,19 +179,94 @@ These differences are correct per the design, not gaps:
   trimmed since the plan is executed; the lurking-dangers list
   stays useful.
 
-## 9 · Verdict
+## 9 · Verdict — INITIAL (superseded by §10)
 
-Structurally correct. Plan executed faithfully. Old behavior
-preserved bit-for-bit. Supervision blind-spot closed. Per-crate
-tests green. Integration test pending — that's the load-bearing
-gate; once it passes, the migration is verified end-to-end.
+Structurally correct. Plan executed faithfully. Per-crate tests
+green. Integration test pending. **The "old behavior preserved
+bit-for-bit" claim turned out to be wrong — see §10.**
 
-If the integration test passes: close `mentci-next-rgs`, update both
-ARCHITECTURE.md code maps, optionally trim reports/103 (its design
-is now expressed in code; only the lurking-dangers + Li's seven
-answers retain ongoing value, both of which live in reports/104).
+## 10 · The bug the static review missed
 
-If the integration test fails: read `nix log <drv>` on the failing
-derivation; the failure is almost certainly in the actor wiring or
-a subtle race in the new code path, not in any of the unchanged
-parts (Parser / Renderer / CriomeLink).
+Running the workspace `nix flake check` after the verdict above
+hung on `mentci-integration` for ~75 minutes before Li's "are you
+sure?" prompted a closer look. Root cause:
+
+**Ractor's `Actor::start` ([actor.rs:762](https://github.com/slawlor/ractor/blob/v0.15.6/ractor/src/actor.rs#L762))
+wraps the exiting actor's State in a `BoxedState` and queues it to
+the supervisor as part of the `SupervisionEvent::ActorTerminated`
+event.** The State doesn't drop until the supervisor's mailbox
+processes that event.
+
+In nexus's case, Listener was sitting inside
+`state.listener.accept().await` — a tokio await that yields, but
+ractor's mailbox can't preempt an in-progress `handle` invocation
+(supervision-event priority only matters between mailbox iterations,
+not within an active handle). So the BoxedState — containing the
+client-facing `UnixStream` — sat in Listener's mailbox queue.
+
+Meanwhile `nexus-cli`'s `read_to_string` was blocked waiting for
+EOF on its read side, which would only arrive when the daemon's
+write side closed, which would only happen when the BoxedState
+dropped. Listener's `accept().await` would only return when a new
+client connected. The next client (the bash test's next
+`nexus-cli` invocation) would only run after the current
+`nexus-cli` returned. **Deadlock.**
+
+The criome side does *not* hit this — its lingering BoxedState
+holds a stream that's already fully closed (client EOF'd, daemon
+already replied), so the delayed cleanup affects nothing external.
+Mine held the client-facing stream the test was actively waiting on.
+
+**Fix** ([nexus 7dfdc132](https://github.com/LiGoldragon/nexus/commit/7dfdc132713287d974b4e8c209ae08e7935a3753)):
+
+```rust
+async fn handle(&self, myself: ActorRef<Self::Msg>,
+                _message: Message, state: &mut State)
+    -> std::result::Result<(), ActorProcessingErr>
+{
+    if let Err(error) = state.shuttle().await {
+        eprintln!("nexus-daemon: connection error: {error}");
+    }
+    let _ = state.client.shutdown().await;  // ← added
+    myself.stop(None);
+    Ok(())
+}
+```
+
+Closes the write half eagerly so the client's `read_to_string`
+returns regardless of when the supervisor processes the
+termination event. State drop becomes pure cleanup, not
+load-bearing for the test pipeline.
+
+After the fix: `nix flake check` from mentci passes all 14
+derivations including `mentci-integration`. End-to-end verified.
+
+### Why the static review missed it
+
+The §3 "behavior preservation" claim was framed as "the bodies of
+shuttle and process are byte-for-byte the pre-migration code." That
+was true. What changed and went unanalysed was the **lifetime of
+the State surrounding those bodies** — specifically the gap
+between handle returning and the UnixStream actually closing.
+
+The right diagnostic: any time a held resource needs to be
+externally observed as "closed" before the actor's lifecycle
+completes, the actor must close it explicitly inside `handle`.
+Relying on `Drop` after the actor's task ends is wrong — ractor's
+supervision-event delivery makes State drop happen later than a
+naive reading suggests.
+
+This pattern lives in [reports/104 §7 lurking dangers](104-handoff-after-criome-ractor-migration-2026-04-28.md#7--the-lurking-dangers--what-trips-agents)
+as item #17 and in [`tools-documentation/rust/ractor.md`](https://github.com/LiGoldragon/tools-documentation/blob/main/rust/ractor.md)
+under the supervision section.
+
+## 11 · Final verdict
+
+Migration verified end-to-end. `nix flake check` from mentci passes
+all 14 derivations. Per-crate tests green. The deadlock found in
+the deep review surfaced via running the actual integration test —
+not from static reading. **Static review caught structure; running
+caught dynamics.**
+
+Follow-ups still open: update `nexus/ARCHITECTURE.md` and
+`criome/ARCHITECTURE.md` code maps; close `bd mentci-next-rgs`.
