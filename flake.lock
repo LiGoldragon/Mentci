@@ -69,11 +69,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1777407040,
-        "narHash": "sha256-Lgvf4UXS0sTTPzroeHcSoj4DXRQfqonj6iLiMVTpz+g=",
+        "lastModified": 1777407474,
+        "narHash": "sha256-wXhu/wPtMoHB9BID7pj0gar0LwxK5RV+fcyNDZQ9AhE=",
         "owner": "LiGoldragon",
         "repo": "criome",
-        "rev": "22ccc5c410847e1b1f591754b9e6176b7d8d9c9b",
+        "rev": "2513c3cf9cf432739ac97b0a62403d618547d2f9",
         "type": "github"
       },
       "original": {
@@ -267,11 +267,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1777405671,
-        "narHash": "sha256-mPsO74doHcA0F89fgvpcLxdv8uVokCHaQj5uvSATpOM=",
+        "lastModified": 1777407479,
+        "narHash": "sha256-EiFGURAl3v+6O9mPbu2hatTRCtZPIi4EVrw26Ouj0Fw=",
         "owner": "LiGoldragon",
         "repo": "nexus",
-        "rev": "21e14488ac254204fbe8511ece9e411ca6f3982b",
+        "rev": "69a7583dce2971fc06b56dc16f10b7f6c4099b90",
         "type": "github"
       },
       "original": {
