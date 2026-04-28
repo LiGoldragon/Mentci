@@ -139,10 +139,31 @@ A fresh agent reads, in this order:
 - **Path A on KindDecl** — schema-as-data scaffolding dropped
   entirely until prism or mentci earns it (see §0 + reports/108
   §2 + §8 Q12).
+- **Push, never pull** (2026-04-29). Producers push, consumers
+  subscribe; no polling fallback, ever. Documented in
+  [`tools-documentation/programming/push-not-pull.md`](https://github.com/LiGoldragon/tools-documentation/blob/main/programming/push-not-pull.md).
+  Resolves reports/108 §8 Q6 + sets the design rule for all
+  future change-feeds in the workspace.
+- **`mentci-lib` is its own crate/repo** (2026-04-29). Holds
+  signal-speaking logic (gesture → signal envelope translation,
+  criome-link, reply demux). Consumed by the future GUI repo
+  and any alternative UIs (mobile, etc.). One Rust crate per
+  repo per `tools-documentation/rust/style.md`. Resolves
+  reports/108 §8 Q7.
+- **Composite gestures are atomic** (2026-04-29). The UI wraps
+  multi-mutation gestures in `AtomicBatch([…])`, all-or-nothing.
+  No "atomic mode" toggle. Resolves reports/108 §8 Q11.
+- **Supervisor is a control-plane node kind** (2026-04-29). When
+  the Supervisor variant lands in signal, its edges to children
+  are control-plane relations (`Supervises`, `EscalatesTo`),
+  not data edges. Most graphs won't declare an explicit
+  Supervisor since supervision is recursive in ractor; the kind
+  is for explicit fault-isolation boundaries. Refines reports/108
+  §8 Q1.
 
 ## 5 · bd state
 
-8 open issues, 0 in-progress, 0 blocked — all forward-looking work.
+10 open issues, 0 in-progress, 0 blocked — all forward-looking work.
 
 | ID | P | Title |
 |---|---|---|
@@ -150,51 +171,74 @@ A fresh agent reads, in this order:
 | `mentci-next-d3b` | P2 | M0 step 7 — genesis.nexus + bootstrap glue |
 | `mentci-next-7tv` | P2 | M1 — per-kind sema tables (replace 1-byte kind discriminator) |
 | `mentci-next-8ba` | P2 | M3 — sema redb wrapper (database library) |
-| `mentci-next-4jd` | P2 | M2-remainder: method-body layer in nexus-schema |
+| `mentci-next-4jd` | P2 | M2-remainder: method-body layer in signal |
 | `mentci-next-0tj` | P2 | Implement prism records-to-Rust projection |
 | `mentci-next-7dj` | P2 | Cross-repo wiring — flake input pattern for local dev |
+| `mentci-next-9jv` | P2 | Create mentci-lib repo for signal-speaking logic |
+| `mentci-next-txz` | P2 | Create GUI repo for mentci's flow-graph editor (depends on 9jv) |
 | `mentci-next-zv3` | P2 | M6 — bootstrap demo (DB → prism → compile → demonstrate) |
 
 (`mentci-next-dqp` "Rename rsc to a full English word" was closed
-2026-04-28 with the prism rename.)
+2026-04-28 with the prism rename. `mentci-next-9jv` and
+`mentci-next-txz` were added 2026-04-28 / 2026-04-29 capturing the
+future repos for the gesture→signal library and the GUI editor.)
 
-## 6 · Open work — what's resolved + what remains
+## 6 · Open work — all §8 questions answered
 
-**Resolved 2026-04-28** (see [`reports/108` §8](108-flow-graph-three-projections-2026-04-28.md#8--open-questions)
-for full text + research notes per item):
+The 12 questions in [`reports/108` §8](108-flow-graph-three-projections-2026-04-28.md#8--open-questions)
+are now resolved (11) or deferred (1).
 
-- **Q1** — first node kinds: closed set of 5 = **Source /
+**Resolved 2026-04-28**:
+
+- **Q1** — closed set of 5 first node kinds: **Source /
   Transformer / Sink / Junction / Supervisor** (extending Li's
   tentative trio per Akka-Streams + OTP convergence research).
-- **Q3** — prism shape: **library** (Rust). Not a CLI; possibly a
-  proc-macro entry later as a secondary surface, but lojix-daemon
-  needs library calls.
+- **Q3** — prism shape: **library** (Rust).
 - **Q4** — mentci UI tech: **egui** (top of three; iced #2, gpui
-  #3). Linux desktop only; `egui::Painter` handles arbitrary 2D
-  including rotation transforms (interactive wheels +
-  astrological-chart-grade custom shapes long-term).
+  #3). Linux desktop, arbitrary 2D + rotation transforms for
+  interactive wheels + future astrological charts.
 - **Q5** — mentci ↔ criome: **direct UDS, mentci speaks signal**.
-  criome speaks only signal; nexus is one front-end (text↔signal),
-  mentci will be another (gestures↔signal).
-- **Q9** — main repo name: **mentci**, with the reframing that
-  the current repo is workspace umbrella + concept goalpost; the
-  actual GUI lands in a separate future repo.
+- **Q9** — main repo name: **mentci**, current repo is workspace
+  umbrella + concept goalpost; future GUI is separate repo.
 - **Q12** — Path A on KindDecl (resolved earlier 2026-04-28).
 
-**Remaining open** (tactical; deferrable to M1):
+**Resolved 2026-04-29**:
 
-- **Q2** — smallest first demo graph (encode criome's M0 request
-  flow as records, prism-emit it, run integration test against
-  the prism-emitted binary).
-- **Q6** — subscribe-first vs poll-first for mentci UI live
-  updates.
-- **Q7** — edit-translation library home (inside mentci, or a
-  shared `mentci-edit` crate consumable by alternative UIs).
-- **Q8** — diagnostic UX (inline overlay, side panel, toast).
-- **Q10** — recursive rendering long-term (running runtime's
-  state rendered as a flow graph).
-- **Q11** — composite-gesture atomicity (independent commits vs
-  `AtomicBatch` per gesture).
+- **Q1 refinement** — Supervisor described accurately: control-
+  plane node with child registry + restart strategy; edges to
+  children are control-plane (`Supervises`, `EscalatesTo`), not
+  data edges. Most graphs won't declare an explicit Supervisor
+  since supervision is recursive in ractor (per
+  `tools-documentation/rust/style.md` §Actors); Supervisor as
+  a kind is for explicit fault-isolation boundaries.
+- **Q2** — smallest demo: encode criome's M0 request flow as
+  records, prism-emit it, run `mentci-integration` against the
+  prism-emitted binary (M6 close, `bd mentci-next-zv3`).
+- **Q6** — **push never pull**. No polling, ever. mentci's UI
+  launches after `Subscribe` ships (M2). Principle documented
+  in
+  [`tools-documentation/programming/push-not-pull.md`](https://github.com/LiGoldragon/tools-documentation/blob/main/programming/push-not-pull.md).
+- **Q7** — `mentci-lib` as a **separate crate** (own repo per
+  `tools-documentation/rust/style.md` §"One Rust crate per
+  repo"). Holds gesture→signal translation + criome-link logic.
+  Consumed by the future GUI repo and any alternative UIs
+  (mobile, etc.).
+- **Q8** — visible rejection display; specific styling deferred
+  (post-prototype).
+- **Q11** — **atomic**. Composite gestures wrap in
+  `AtomicBatch([…])`. No "atomic mode" toggle.
+
+**Deferred**:
+
+- **Q10** — recursive rendering long-term. Out of scope until a
+  running prototype exists. Re-open when M3+ mentci UI is
+  working against real graphs.
+
+**Concrete next code work is unblocked**: `bd mentci-next-7tv`
+(per-kind sema tables for the 5 kinds), then `bd mentci-next-0tj`
+(prism's records-to-Rust projection per the resolved taxonomy +
+library shape), then `bd mentci-next-txz` (GUI repo) + the new
+bd for `mentci-lib`. None gated on further design questions.
 
 ## 7 · Lurking dangers (context worth keeping)
 

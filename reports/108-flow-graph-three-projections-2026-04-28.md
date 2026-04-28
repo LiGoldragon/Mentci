@@ -336,8 +336,30 @@ The deep dive surfaces decisions that gate concrete design work:
    - **Sink** — zero fan-out, consumes to external boundary.
    - **Junction** — fan-in>1 or fan-out>1, topology-only (Merge,
      Broadcast, Balance, Zip).
-   - **Supervisor** — owns lifecycle, no data flow; maps directly
-     onto ractor's `spawn_linked`.
+   - **Supervisor** — control-plane node whose explicit job is to
+     host children of a subsystem. Holds child registry, restart
+     strategy (one-for-one / one-for-all / rest-for-one), and
+     restart history per child. Not on the data path; receives
+     `SupervisionEvent`s (not user messages) via ractor's
+     `handle_supervisor_evt`. Edges from a Supervisor to its
+     children are **control-plane relations** — `Supervises`
+     (parent→child) and `EscalatesTo` (child→parent for failure
+     routing) — not data edges like `DependsOn`. Signal's
+     `RelationKind` enum will grow these control-plane variants
+     when the Supervisor kind lands. *Most graphs won't declare
+     an explicit Supervisor*: per
+     [`tools-documentation/rust/style.md` §Actors](https://github.com/LiGoldragon/tools-documentation/blob/main/rust/style.md#actors-logical-units-with-ractor),
+     supervision is recursive — every parent actor supervises its
+     children whether or not it has data-plane responsibilities.
+     Supervisor as an explicit kind is for **fault-isolation
+     boundaries** — when the design wants a node whose whole
+     purpose is hosting children of a subsystem (and `style.md`'s
+     "Use actors for components, not for chores" applies).
+
+   *(Note 2026-04-29 — Li's pushback on the original "no data
+   flow" framing surfaced the data-plane-vs-control-plane
+   distinction. A Supervisor has data; the data is meta about
+   its children, not user messages flowing through.)*
 
    Anti-recommendations (don't adopt): DSP `Filter` (analog
    semantics), Petri `Place` (passive token-holder), separate
@@ -347,12 +369,13 @@ The deep dive surfaces decisions that gate concrete design work:
    `Process` (too generic), `Composite`/`Subnet` (handle as graph
    operation, not as a kind).
 
-2. **Smallest first demo graph.** The minimum viable end-to-end
-   demonstration of the macro path. Candidate: encode criome's M0
-   request flow (`Frame → Validator → Sema → Reply`) as records, have
-   `prism` emit a working daemon from them, run it, watch the integration
-   test pass against the prism-emitted binary instead of the hand-coded
-   one.
+2. **~~Smallest first demo graph.~~** **RESOLVED** — Li 2026-04-29:
+   the candidate is the answer. Encode criome's M0 request flow
+   (`Frame → Validator → Sema → Reply`) as records, have `prism`
+   emit a working daemon from them, run it, watch
+   `mentci-integration` pass against the prism-emitted binary
+   instead of the hand-coded one. This is the M6 bootstrap
+   close (`bd mentci-next-zv3`).
 
 3. **~~`prism`'s emission shape — proc-macro, build-script, or
    standalone binary?~~** **RESOLVED** — Li 2026-04-28: prism is a
@@ -399,22 +422,30 @@ The deep dive surfaces decisions that gate concrete design work:
    client (alternative editor, headless tool, etc.) connects to
    criome the same way — by speaking signal directly.
 
-6. **Subscribe-first vs poll-first.** mentci's UI launches before or
-   after `Subscribe`? If launching pre-subscribe, mentci polls criome
-   for changes (1Hz? on-demand?) and migrates to subscribes when M2
-   ships.
+6. **~~Subscribe-first vs poll-first.~~** **RESOLVED** — Li 2026-04-29:
+   **push never pull**. No polling, ever. mentci's UI launches after
+   `Subscribe` ships (M2). The principle is documented as a workspace
+   design rule in
+   [`tools-documentation/programming/push-not-pull.md`](https://github.com/LiGoldragon/tools-documentation/blob/main/programming/push-not-pull.md)
+   so future agents inherit it. Polling is wrong; producers push,
+   consumers subscribe.
 
-7. **Edit-to-message translation library.** Where does the gesture
-   → signal translation live? Inside mentci? In a new shared crate
-   (`mentci-edit`?) consumed by both mentci and any future
-   alternative UI?
+7. **~~Edit-to-message translation library.~~** **RESOLVED** —
+   Li 2026-04-29: **`mentci-lib` as a separate crate**. Holds the
+   signal-speaking logic (gesture → signal envelope translation,
+   plus the criome-link + reply demux). Consumed by the future GUI
+   repo and by alternative UIs (mobile, etc.) that may follow. Per
+   `tools-documentation/rust/style.md` §"One Rust crate per repo",
+   `mentci-lib` lives in its own dedicated repo. New bd issue
+   filed.
 
-8. **Diagnostic UX.** When criome rejects an edit, the
-   `Diagnostic { code, message, primary_site, suggestions, … }` needs
-   to land somewhere visible. Inline overlay on the rejected element?
-   Side panel with history? Toast? The data model is already rich
-   (machine-applicable suggestions, source spans, severity levels);
-   the UX hasn't been sketched.
+8. **~~Diagnostic UX.~~** **RESOLVED** — Li 2026-04-29: show
+   rejections **visibly** somewhere; the specific shape (inline
+   overlay vs side panel vs toast) is a styling concern that can
+   land later. The data model is already rich enough (code,
+   message, primary_site, suggestions, severity); the UI just
+   needs to surface the diagnostic non-discardably when criome
+   rejects. Specific styling deferred to post-prototype.
 
 9. **~~The "main repository" — confirm `mentci`.~~** **RESOLVED** —
    Li 2026-04-28: yes, `mentci`. Reframing: `mentci` today is two
@@ -428,23 +459,18 @@ The deep dive surfaces decisions that gate concrete design work:
    [`mentci/ARCHITECTURE.md`](../ARCHITECTURE.md) for the long-term
    framing.
 
-10. **Recursive rendering — long-term.** Once `prism` emits a runtime
-    from records, can the runtime's own state be rendered as a flow
-    graph in mentci? (Self-rendering of the running system.) Worth
-    flagging now if it's the long-term direction — it would shape
-    `Subscribe` semantics and the runtime's introspection surface.
+10. **~~Recursive rendering — long-term.~~** **DEFERRED** —
+    Li 2026-04-29: out of scope for the prototype era. "Get a
+    running prototype first." Re-open when the M3+ mentci UI is
+    working against real graphs.
 
-11. **Composite-gesture atomicity.** Some user actions naturally bundle
-    multiple sema mutations: "create a node and wire it to two
-    existing nodes" is conceptually one intent but three signal
-    messages (`Assert(Node)` + 2 × `Assert(Edge)`). Two shapes:
-    - Each sub-action commits independently — the UI accumulates
-      partial results; if one fails, the prior succeeded ones stay.
-    - The whole gesture wraps in `AtomicBatch([…])` — all-or-nothing.
-    The first shape is simpler; the second matches user mental model
-    of "create *this thing*" being one step. Probably both have a
-    place — the UI offers "atomic mode" via a modifier key or a
-    deliberate "begin / end transaction" affordance.
+11. **~~Composite-gesture atomicity.~~** **RESOLVED** — Li 2026-04-29:
+    **atomic** — composite gestures wrap in `AtomicBatch([…])`,
+    all-or-nothing. The all-or-nothing shape matches the user's
+    mental model of "create *this thing*" being one step, and
+    matches the natural elegance criterion (per
+    [`tools-documentation/programming/beauty.md`](https://github.com/LiGoldragon/tools-documentation/blob/main/programming/beauty.md)).
+    No "atomic mode" modifier — atomic is just the rule.
 
 12. **~~`KindDecl` — naming + role in M0.~~** **RESOLVED** — Li chose
     Path A 2026-04-28. `KindDecl` + `FieldDecl` + `Cardinality` +
