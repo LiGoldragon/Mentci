@@ -73,7 +73,7 @@ The rejected-framings list in [criome's `ARCHITECTURE.md`](https://github.com/Li
 
 The choice is made by reading each report against the author's intent — no mechanical rule. When unclear, ask Li.
 
-The cap is **soft** in that it triggers a rollover pass, not an instant rejection; it is **firm** in that the pass must run before the next new report lands. Trim passes have happened on 2026-04-25 (18 → 6 reports across three sub-passes); precedent for what each decision looks like is in `reports/076` §5 trim ledger.
+The cap is **soft** in that it triggers a rollover pass, not an instant rejection; it is **firm** in that the pass must run before the next new report lands. The 2026-04-28 cleanup left `reports/` empty — every active report had been absorbed into `tools-documentation/` topic files, per-repo `ARCHITECTURE.md`s, or code, and the rest were deleted. Default to deletion; extract only when the rationale has no other home.
 
 ## Session-response style — substance goes in reports
 
@@ -289,9 +289,9 @@ Compound (multiple concerns):
 ```
 
 **Examples:**
-- `(signal edit) (slot.rs — added #[serde(transparent)] to Slot and Revision per Li 2026-04-27 ((2)) for reports/087 §5 Q4)`
-- `(mentci report add) (reports/093 — project-wide style review plan per Li 2026-04-27 — prepare for project-wide review)`
-- `((mentci edit) (AGENTS.md + reports/092 — naming rule per Li 2026-04-27 ((I would like to point out…))) (research synthesis…))`
+- `(signal edit) (diagnostic.rs + handshake.rs cleanup pass per Li 2026-04-28 ((free functions are incorrectly specified verbs))) (diagnostic.rs — added Diagnostic::error inherent constructor) (handshake.rs — renamed CriomedInstance → CriomeDaemonInstance per the daemon-suffix convention)`
+- `(criome edit) (src/daemon.rs + src/main.rs — dropped inherent impl Daemon::start per the new §No ZST method holders rule per Li 2026-04-28)`
+- `((mentci edit) (AGENTS.md — added §Style docs are patterns not snapshots above §Adding new docs per Li 2026-04-28 ((links like this dont belong there))) (encodes the rule positively + names the failure mode))`
 
 **Common scope labels:** `add`, `edit`, `cull`, `del`, `fix`, `init`, `rename`, `audit`, `arch edit`, `cleanup`, `impl`, `rewrite`.
 
