@@ -1,34 +1,24 @@
-{ pkgs, inputs, system, ... }@args:
+{ pkgs, inputs, system, ... }:
 
-# Workspace-level aggregator. Depends on every CANON crate's
-# `checks.default` plus two end-to-end test suites:
+# `checks.default` — linkFarm of the seven CANON crate checks.
 #
-#   - [`integration`](./integration.nix) — single-derivation
-#     monolithic shuttle. Fast feedback loop for daemon-graph
-#     iteration.
+# Each crate's `checks.default` lives in its own flake input;
+# this file aggregates them so `nix build .#checks.<sys>.default`
+# builds the whole workspace's unit-test surface as one path.
 #
-#   - [`scenario/chain`](../lib/scenario/chain.nix) — chained
-#     derivations, each step its own content-addressed
-#     derivation passing `state.redb` forward. Forces the
-#     tests to be real: every dependency between steps is
-#     visible in the Nix graph; failures localise to the step
-#     that broke; intermediate state is reproducible.
-#
-# `nix flake check` from mentci runs the entire workspace plus
-# both end-to-end suites in a single sandboxed parallel pass.
+# The other checks in this directory ([`integration.nix`](./integration.nix),
+# [`scenario-assert-node.nix`](./scenario-assert-node.nix),
+# [`scenario-query-nodes.nix`](./scenario-query-nodes.nix),
+# [`scenario-chain.nix`](./scenario-chain.nix)) are
+# blueprint-discovered as their own top-level checks and run
+# independently under `nix flake check`.
 
-let
-  integration   = import ./integration.nix args;
-  scenarioChain = import ../lib/scenario/chain.nix args;
-in
-pkgs.linkFarm "mentci-workspace-checks" [
-  { name = "nota-derive";    path = inputs.nota-derive.checks.${system}.default; }
-  { name = "nota-codec";     path = inputs.nota-codec.checks.${system}.default; }
-  { name = "signal";         path = inputs.signal.checks.${system}.default; }
-  { name = "sema";           path = inputs.sema.checks.${system}.default; }
-  { name = "criome";         path = inputs.criome.checks.${system}.default; }
-  { name = "nexus";          path = inputs.nexus.checks.${system}.default; }
-  { name = "nexus-cli";      path = inputs.nexus-cli.checks.${system}.default; }
-  { name = "integration";    path = integration; }
-  { name = "scenario-chain"; path = scenarioChain; }
+pkgs.linkFarm "mentci-workspace-crate-checks" [
+  { name = "nota-derive"; path = inputs.nota-derive.checks.${system}.default; }
+  { name = "nota-codec";  path = inputs.nota-codec.checks.${system}.default; }
+  { name = "signal";      path = inputs.signal.checks.${system}.default; }
+  { name = "sema";        path = inputs.sema.checks.${system}.default; }
+  { name = "criome";      path = inputs.criome.checks.${system}.default; }
+  { name = "nexus";       path = inputs.nexus.checks.${system}.default; }
+  { name = "nexus-cli";   path = inputs.nexus-cli.checks.${system}.default; }
 ]

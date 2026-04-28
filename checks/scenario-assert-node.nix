@@ -1,11 +1,10 @@
-{ pkgs, inputs, system, ... }:
+{ pkgs, inputs, system, flake, ... }:
 
 # Step A — assert (Node "User") into a fresh sema database.
-# Captures both the (Ok) reply text and the resulting sema
-# state for the next step in the chain to consume.
+# Captures the (Ok) reply text and the resulting sema state.
 
 let
-  step = import ./lib.nix {
+  step = flake.lib.scenario {
     inherit pkgs;
     criome    = inputs.criome.packages.${system}.default;
     nexus     = inputs.nexus.packages.${system}.default;

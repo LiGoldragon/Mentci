@@ -1,17 +1,14 @@
-{ pkgs, inputs, system, ... }@args:
+{ pkgs, system, flake, ... }:
 
-# Final assertion derivation — runs after each step's reply
-# text is content-addressed in its own derivation. Asserts the
-# canonical text replies the demo from
-# [reports/100 §5](../../reports/100-handoff-after-nota-codec-shipping-2026-04-27.md)
-# expects. If any assertion fails, the failure points at the
-# specific step's `response.txt` so debugging starts at the
-# isolated boundary, not in the middle of an interleaved
-# bash log.
+# Terminal assertion derivation — depends on both step A and
+# step B via `flake.checks.${system}.X` and grep-asserts the
+# canonical text replies. Failures pinpoint the specific
+# step's `response.txt` so debugging starts at the isolated
+# boundary.
 
 let
-  assertNode = import ./assert-node.nix args;
-  queryNodes = import ./query-nodes.nix args;
+  assertNode = flake.checks.${system}.scenario-assert-node;
+  queryNodes = flake.checks.${system}.scenario-query-nodes;
 in
 pkgs.runCommand "scenario-chain" { } ''
   set -euo pipefail
