@@ -126,46 +126,32 @@ This formalizes the deadlock pattern surfaced in [reports/105
 
 These are real findings the audit surfaced but applying them
 this pass would exceed scope or require design decisions Li
-hasn't made.
+hasn't made. ✅ marks items applied in the follow-up pass (§6).
 
-### 3a · horizon-rs nota-serde migration
+### 3a · horizon-rs nota-serde migration ✅ applied in §6
 
-`docs/DESIGN.md:22, 515` and `packages/default.nix:16-19`
-reference `nota-serde` and `nota-serde-core` as Cargo deps.
-horizon-rs is TRANSITIONAL; the migration to `nota-codec` is
-in-flight (per a comment in `cli/src/main.rs:77`) but the
-build derivation still pins the old hashes. **Cleanup is
-multi-step** (Cargo.toml dep swap, `outputHashes` recompute,
-code migration) — outside this audit's scope. Track as bd
-follow-up if/when horizon-rs is touched again.
+`docs/DESIGN.md:22, 484, 515` and `packages/default.nix:16-19`
+referenced `nota-serde` and `nota-serde-core`. The Rust code
+was already migrated; only the docs and dead Nix outputHashes
+remained. Now done.
 
-### 3b · sema/ARCHITECTURE.md reader_count addition
+### 3b · sema/ARCHITECTURE.md reader_count addition ✅ applied in §6
 
-Sema gained `reader_count()` / `set_reader_count()` /
-`DEFAULT_READER_COUNT` on 2026-04-28 (consumed by
-criome-daemon's pre_start). The ARCH doc's Status section still
-describes M0 scope without this addition. **Small ARCH update**;
-landed in the new `sema/AGENTS.md` instead since AGENTS.md is
-the right home for "things to remember when working in this
-repo." If a future agent needs the storage detail in
-ARCH.md too, add it.
+Sema's Status section now lists `reader_count` /
+`set_reader_count` / `iter` / `DEFAULT_READER_COUNT`, with
+test count corrected 7 → 12.
 
-### 3c · criome/AGENTS.md cleanup
+### 3c · criome/AGENTS.md cleanup ✅ applied in §6
 
-The existing `criome/AGENTS.md` contains a "**Earlier framing
-(historical)**" section narrating the older `criome-store`
-single-store framing and an "aski is no longer in the stack"
-note. Both are restate-to-refute violations per [mentci/AGENTS.md
-§"Report hygiene"](../AGENTS.md) — rejected framings should be
-dropped, not re-stated. This is a non-trivial rewrite (the doc
-is also the project-vision page) and warrants Li's input on
-what the file should be, post-cleanup. **Flagged, not touched.**
+Restate-to-refute paragraphs ("aski no longer in the stack",
+"Earlier framing (historical): criome-store") removed. The
+"Shelved for MVP: arbor" note kept (forward-looking, matches
+workspace-manifest).
 
-### 3d · horizon-rs README CANON marker
+### 3d · horizon-rs README CANON marker — N/A
 
-`README.md` has no status line. agent F flagged it as a low
-priority. **Not applied** — touching horizon-rs cosmetics
-without the larger nota-serde migration would create churn.
+There is no `README.md` in horizon-rs (the audit agent's report
+was a false flag). No action needed.
 
 ### 3e · nexus-cli `[lib] name = "nexus_cli"` underscore
 
@@ -218,6 +204,39 @@ phantom-closed candidates.
 - `mentci-next-rgs` — **closed this session** (nexus ractor migration shipped)
 
 ---
+
+## 6 · Follow-up pass — deferred items applied
+
+Per Li 2026-04-28: *"do you feel like you would know how to fix
+the issues that were found in horizon-rs … if so, please go
+ahead and fix them and remove all of the stale mentions and I
+would like you to go over anything you think that you know how
+to fix clearly and fix it."*
+
+Picked up the deferred items I had high confidence on. Each
+landed in its own commit per the audit-trail discipline.
+
+| Item | Repo | What | Verification |
+|---|---|---|---|
+| 3a | horizon-rs | `packages/default.nix` — removed dead outputHashes for `nota-serde` + `nota-serde-core` (Cargo.lock no longer references those crates; nota-codec + nota-derive use the `git+url#rev` form which crane resolves without outputHashes). `docs/DESIGN.md` — replaced 3 stale references with the current shape. | `nix build .#packages.x86_64-linux.default --no-link` exit 0 |
+| 3b | sema | `ARCHITECTURE.md` Status — added `Sema::iter`, `Sema::reader_count`, `Sema::set_reader_count` to the implemented-and-tested list; fixed test count 7 → 12; new paragraph documenting the redb-meta-table reader-count storage. | static — doc-only |
+| 3c | criome | `AGENTS.md` — stripped the restate-to-refute paragraphs ("aski no longer in the stack — its role is now played by `nexus-schema` records" + "Earlier framing (historical)"); replaced with a forward-looking note pointing at signal as the home of `KindDecl` records. | static — doc-only |
+| 3d | horizon-rs | False flag (no `README.md` exists). | n/a |
+
+### Items intentionally left
+
+- **§3e** nexus-cli `[lib] name = "nexus_cli"` underscore — Cargo-mandated; not in our control.
+- **§3f** nexus pin strategy alignment — design choice, not cleanup.
+- **§3g** free function `diagnostic` in criome/engine.rs — would need a signal-side type addition; outside this scope.
+- **§3h** workspace-manifest M0-scope column — Li's discretion.
+
+Side observation while building horizon-rs: its `nix flake
+check` errors with "Path 'lib/default.nix' does not exist"
+because it uses `blueprint` and has a Cargo crate at `lib/`
+which blueprint tries to import as a Nix lib. **Pre-existing
+flake structure issue**, unrelated to this cleanup. Direct
+`nix build` on the package works fine. Flagging for whenever
+horizon-rs is next worked on.
 
 ## 5 · Workspace state at end of pass
 
