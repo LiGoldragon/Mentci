@@ -20,9 +20,11 @@ pkgs.runCommand "scenario-chain" { } ''
     exit 1
   fi
 
-  if ! grep -qE '^\[\(Node "User"\)\]$' ${queryNodes}/response.txt; then
+  # Records-with-slots wire shape — nota-codecs (A,B) tuple
+  # impl renders (Slot, Node) as `(Tuple <slot> (Node ...))`.
+  if ! grep -qE '^\[\(Tuple [0-9]+ \(Node "User"\)\)\]$' ${queryNodes}/response.txt; then
     echo "FAIL scenario-query-nodes:"
-    echo "  expected: [(Node \"User\")]"
+    echo "  expected: [(Tuple <slot> (Node \"User\"))]"
     echo "  got:      $(cat ${queryNodes}/response.txt)"
     exit 1
   fi

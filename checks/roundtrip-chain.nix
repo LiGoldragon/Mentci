@@ -38,9 +38,11 @@ pkgs.runCommand "roundtrip-chain" { } ''
     exit 1
   fi
 
-  if ! grep -qE '^\[\(Node "User"\)\]$' ${queryRender}/output.txt; then
+  # Records-with-slots wire shape — nota-codecs (A,B) tuple
+  # impl renders (Slot, Node) as `(Tuple <slot> (Node ...))`.
+  if ! grep -qE '^\[\(Tuple [0-9]+ \(Node "User"\)\)\]$' ${queryRender}/output.txt; then
     echo "FAIL roundtrip-query-render:"
-    echo "  expected: [(Node \"User\")]"
+    echo "  expected: [(Tuple <slot> (Node \"User\"))]"
     echo "  got:      $(cat ${queryRender}/output.txt)"
     exit 1
   fi

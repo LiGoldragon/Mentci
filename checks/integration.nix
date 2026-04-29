@@ -55,10 +55,12 @@ pkgs.runCommand "mentci-integration" { } ''
   fi
 
   query_reply=$(echo '(| Node @name |)' | NEXUS_SOCKET=$nexus_socket ${nexus-cli}/bin/nexus)
-  if [ "$query_reply" != '[(Node "User")]' ]; then
-    echo "FAIL: expected '[(Node \"User\")]', got: $query_reply"
-    exit 1
-  fi
+  # Records-with-slots wire shape — nota-codecs (A,B) tuple
+  # impl renders (Slot, Node) as `(Tuple <slot> (Node ...))`.
+  case "$query_reply" in
+    '[(Tuple '*' (Node "User"))]') ;;
+    *) echo "FAIL: expected '[(Tuple <slot> (Node \"User\"))]', got: $query_reply"; exit 1 ;;
+  esac
 
   diagnostic_reply=$(echo '~(Node "User")' | NEXUS_SOCKET=$nexus_socket ${nexus-cli}/bin/nexus)
   case "$diagnostic_reply" in
