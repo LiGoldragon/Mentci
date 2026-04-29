@@ -35,7 +35,7 @@ For project-wide architecture, read [`criome/ARCHITECTURE.md`](https://github.co
 | `sema` | The records DB (redb-backed). |
 | `nexus-cli` | Text client. |
 | `forge` | The forge daemon — executor (build, store-write, deploy actors). The bare name doubles as the family namespace. |
-| `arca` | Content-addressed filesystem + index DB. General-purpose; forge is one writer of many. |
+| `arca` | Content-addressed filesystem + index DB. **One library + one daemon.** arca-daemon is the privileged writer (write-only staging, multi-store, capability-token-gated). General-purpose; forge is the most active writer of many. |
 
 ### CriomOS cluster
 

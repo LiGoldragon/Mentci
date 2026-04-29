@@ -101,6 +101,28 @@ repo is `mentci`. The local directory rename is deferred (would
 break editor cwd state mid-session); Li will rename it when no
 agent is running.
 
+## Deployment — nix-based, from this repo
+
+mentci is also where **deployment** is aggregated. The
+sema-ecosystem deploys via nix flakes pinned in this repo:
+each canonical crate is a flake input here; mentci's
+`flake.nix` defines NixOS modules + container/service specs
+that compose the daemons (criome, nexus, forge, arca-daemon)
+and the static binaries (nexus-cli, lojix-cli) into a
+reproducible runtime.
+
+`nix develop` opens the dev shell. `nix build .#packages.<sys>.<crate>`
+builds any individual crate as a flake artifact.
+`nixos-rebuild --flake mentci#<host>` deploys onto a CriomOS
+host (lojix-cli covers this path during the transitional
+phase; eventually criome itself drives deploys via signal-forge
+verbs — see `criome/ARCHITECTURE.md` §10 phases).
+
+The deploy spec lives in mentci because mentci is the meta-
+repo: the place that knows the full set of canonical crates
+and their flake URLs. Individual crates publish their own
+flakes; mentci composes.
+
 ## How agents work here
 
 Per [AGENTS.md](AGENTS.md):
