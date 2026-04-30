@@ -152,7 +152,7 @@ For a flow graph, the emitted Rust includes:
   driven configuration.
 
 The emitted code follows the same patterns documented in
-[`tools-documentation/rust/ractor.md`](../repos/tools-documentation/rust/ractor.md):
+[`lore/rust/ractor.md`](../repos/lore/rust/ractor.md):
 one actor per file, four-piece template (Actor / State / Arguments /
 Message), per-verb typed `RpcReplyPort<T>` messages, supervision via
 `spawn_linked`, sync façade on State where useful.
@@ -183,7 +183,7 @@ visual updates without manual refresh.
 
 The "real-time" requirement implies subscribe-protocol support
 (M2+ on criome's roadmap). Per the workspace rule **push, not
-pull** ([tools-documentation/programming/push-not-pull.md](../repos/tools-documentation/programming/push-not-pull.md)),
+pull** ([lore/programming/push-not-pull.md](../repos/lore/programming/push-not-pull.md)),
 mentci's UI launches *after* `Subscribe` ships — there is no
 poll fallback.
 
@@ -356,7 +356,7 @@ The deep dive surfaces decisions that gate concrete design work:
      `RelationKind` enum will grow these control-plane variants
      when the Supervisor kind lands. *Most graphs won't declare
      an explicit Supervisor*: per
-     [`tools-documentation/rust/style.md` §Actors](https://github.com/LiGoldragon/tools-documentation/blob/main/rust/style.md#actors-logical-units-with-ractor),
+     [`lore/rust/style.md` §Actors](https://github.com/LiGoldragon/lore/blob/main/rust/style.md#actors-logical-units-with-ractor),
      supervision is recursive — every parent actor supervises its
      children whether or not it has data-plane responsibilities.
      Supervisor as an explicit kind is for **fault-isolation
@@ -434,7 +434,7 @@ The deep dive surfaces decisions that gate concrete design work:
    **push never pull**. No polling, ever. mentci's UI launches after
    `Subscribe` ships (M2). The principle is documented as a workspace
    design rule in
-   [`tools-documentation/programming/push-not-pull.md`](https://github.com/LiGoldragon/tools-documentation/blob/main/programming/push-not-pull.md)
+   [`lore/programming/push-not-pull.md`](https://github.com/LiGoldragon/lore/blob/main/programming/push-not-pull.md)
    so future agents inherit it. Polling is wrong; producers push,
    consumers subscribe.
 
@@ -443,7 +443,7 @@ The deep dive surfaces decisions that gate concrete design work:
    signal-speaking logic (gesture → signal envelope translation,
    plus the criome-link + reply demux). Consumed by the future GUI
    repo and by alternative UIs (mobile, etc.) that may follow. Per
-   `tools-documentation/rust/style.md` §"One Rust crate per repo",
+   `lore/rust/style.md` §"One Rust crate per repo",
    `mentci-lib` lives in its own dedicated repo. New bd issue
    filed.
 
@@ -477,7 +477,7 @@ The deep dive surfaces decisions that gate concrete design work:
     all-or-nothing. The all-or-nothing shape matches the user's
     mental model of "create *this thing*" being one step, and
     matches the natural elegance criterion (per
-    [`tools-documentation/programming/beauty.md`](https://github.com/LiGoldragon/tools-documentation/blob/main/programming/beauty.md)).
+    [`lore/programming/beauty.md`](https://github.com/LiGoldragon/lore/blob/main/programming/beauty.md)).
     No "atomic mode" modifier — atomic is just the rule.
 
 12. **~~`KindDecl` — naming + role in M0.~~** **RESOLVED** — Li chose

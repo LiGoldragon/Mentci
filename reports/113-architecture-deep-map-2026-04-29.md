@@ -89,7 +89,7 @@ enforced in practice.
 Length-prefix evidence: [criome/src/connection.rs:78-94](../repos/criome/src/connection.rs#L78-L94)
 reads/writes a 4-byte big-endian length per frame; [mentci-lib/src/connection/driver.rs:282-300](../repos/mentci-lib/src/connection/driver.rs#L282-L300)
 matches. The rkyv schema is the framing *within* a frame's bytes; the
-transport layer slices the stream ([tools-documentation/rust/rkyv.md §"Wire framing"](../repos/tools-documentation/rust/rkyv.md)).
+transport layer slices the stream ([lore/rust/rkyv.md §"Wire framing"](../repos/lore/rust/rkyv.md)).
 
 ---
 
@@ -256,7 +256,7 @@ Listener 1 · Connection 2 ([criome/src/connection.rs:42-51](../repos/criome/src
 Reader 1.
 
 Every Message enum is *closed*: no wrapper, no string-tag fallback. This
-is the `ractor`-shape recommended in [tools-documentation/rust/ractor.md](../repos/tools-documentation/rust/ractor.md).
+is the `ractor`-shape recommended in [lore/rust/ractor.md](../repos/lore/rust/ractor.md).
 
 ### 3.2 The push-on-write loop · [criome/src/engine.rs:93-101](../repos/criome/src/engine.rs#L93-L101)
 
@@ -773,7 +773,7 @@ Total `nix flake check` derivations: 9 crate checks + 5 workspace checks
 
 All four flakes I checked (criome, signal, mentci-lib, mentci-egui) pin
 `rust-toolchain.toml` channel to `"stable"` — uniform across the
-workspace today. Per [tools-documentation/rust/nix-packaging.md](../repos/tools-documentation/rust/nix-packaging.md)
+workspace today. Per [lore/rust/nix-packaging.md](../repos/lore/rust/nix-packaging.md)
 the convention is `channel = "stable"` floating with upstream; pin to an
 explicit version at release time when bit-for-bit reproducibility matters.
 

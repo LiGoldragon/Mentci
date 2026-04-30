@@ -4,7 +4,7 @@ let
   # at devshell entry. Multi-root workspace (mentci.code-workspace)
   # gives editors the same view via additional folders.
   linkedRepos = [
-    "tools-documentation"
+    "lore"
     # sema-ecosystem
     "criome"
     "nota"

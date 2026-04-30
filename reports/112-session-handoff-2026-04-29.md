@@ -219,7 +219,7 @@ iteration)`.
 ### 5.1 mentci-lib `flake.nix`
 
 - crane + fenix per
-  [tools-documentation/rust/nix-packaging.md](https://github.com/LiGoldragon/tools-documentation/blob/main/rust/nix-packaging.md)
+  [lore/rust/nix-packaging.md](https://github.com/LiGoldragon/lore/blob/main/rust/nix-packaging.md)
 - `packages.default` = `craneLib.buildPackage` with
   `cargoArtifacts` for layered cache
 - `checks.default` = `craneLib.cargoTest`
@@ -357,22 +357,22 @@ A fresh agent must read these before doing anything:
 
 ### Tier 3 — programming discipline
 
-5. **`tools-documentation/rust/style.md`** — methods on types,
+5. **`lore/rust/style.md`** — methods on types,
    no ZST method holders, typed Error enum per crate via
    thiserror, full-words naming, `One Rust crate per repo`.
-6. **`tools-documentation/programming/abstractions.md`** —
+6. **`lore/programming/abstractions.md`** —
    every reusable verb belongs to a noun.
-7. **`tools-documentation/programming/push-not-pull.md`** —
+7. **`lore/programming/push-not-pull.md`** —
    producers push; no polling fallback ever.
-8. **`tools-documentation/programming/micro-components.md`** —
+8. **`lore/programming/micro-components.md`** —
    one capability, one crate, one repo.
-9. **`tools-documentation/rust/nix-packaging.md`** — crane +
+9. **`lore/rust/nix-packaging.md`** — crane +
    fenix flake layout (was followed exactly for mentci-lib +
    mentci-egui).
-10. **`tools-documentation/rust/rkyv.md`** — the pinned
+10. **`lore/rust/rkyv.md`** — the pinned
     feature set (`std + bytecheck + little_endian +
     pointer_width_32 + unaligned`); rkyv 0.8.x.
-11. **`tools-documentation/rust/ractor.md`** — the actor
+11. **`lore/rust/ractor.md`** — the actor
     pattern criome uses (4-piece per file).
 
 ### Tier 4 — workbench design (delete-eligible after this
@@ -493,7 +493,7 @@ groups together:
 - `mentci/checks/integration.nix` +
   `roundtrip-chain.nix` + `scenario-chain.nix` (existing
   scenarios; updated for `(Tuple <slot> ...)` text shape)
-- `tools-documentation/rust/nix-packaging.md` (the canonical
+- `lore/rust/nix-packaging.md` (the canonical
   doc)
 
 ### Group F — workspace orchestration

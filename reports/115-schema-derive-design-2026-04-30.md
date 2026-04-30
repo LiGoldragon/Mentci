@@ -446,7 +446,7 @@ Both crates touch the same underlying signal record types, but
 concern*. nota-codec consumes signal records as its input; that
 makes nota-derive *downstream* of signal, not the right noun for
 schema introspection. Schema introspection is signal's concern,
-so it lives in signal-derive — see [`tools-documentation/programming/abstractions.md`](../repos/tools-documentation/programming/abstractions.md) §"The wrong-noun trap."
+so it lives in signal-derive — see [`lore/programming/abstractions.md`](../repos/lore/programming/abstractions.md) §"The wrong-noun trap."
 
 ### 3.1 Sharing logic between proc-macro crates
 

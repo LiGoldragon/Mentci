@@ -142,7 +142,7 @@ store. Both fall back to sensible defaults when unset.
 
 ## 2 · The supervisor crate
 
-Per [tools-documentation/programming/micro-components.md](../repos/tools-documentation/programming/micro-components.md):
+Per [lore/programming/micro-components.md](../repos/lore/programming/micro-components.md):
 adding a feature defaults to a new crate. This *is* a new capability —
 process supervision over the sema-ecosystem daemons — so it lives in
 its own repo with its own `Cargo.toml` + `flake.nix` + tests.
@@ -346,7 +346,7 @@ A small substitution pass before nota-decoding: `${XDG_RUNTIME_DIR}`,
 keeps the config readable and lets the same file work across users.
 
 The `@criome-daemon@` placeholder is filled in by nix at build time
-(per [tools-documentation/rust/nix-packaging.md](../repos/tools-documentation/rust/nix-packaging.md)
+(per [lore/rust/nix-packaging.md](../repos/lore/rust/nix-packaging.md)
 substitution patterns), so the generated config carries fixed-store
 paths.
 
@@ -728,7 +728,7 @@ tool, process-manager is the runtime.
 
 (File-system watching process-manager could grow later — `process-manager watch on` to enable
 auto-rebuild — but not in the first version. Per the
-[push-not-pull discipline](../repos/tools-documentation/programming/push-not-pull.md),
+[push-not-pull discipline](../repos/lore/programming/push-not-pull.md),
 the rebuild trigger is a *user action* arriving on the control socket,
 not a poll of the source tree.)
 
@@ -755,7 +755,7 @@ minimal subset. I'd commit to nota for config and revisit if the
 coupling ever bites.
 
 **Coordinator as a small tool — yes, but it has to be its own crate.**
-This is the [micro-components rule](../repos/tools-documentation/programming/micro-components.md):
+This is the [micro-components rule](../repos/lore/programming/micro-components.md):
 new capability = new crate. Putting supervision into mentci or criome
 is the failure mode the rule closes. Naming it `process-manager` is provisional —
 see §10 Q1.
@@ -831,7 +831,7 @@ loose collection of edge cases, process-manager is missing structure.
 
 Every question raised in earlier drafts has settled — most
 against principles already in the workspace's design canon (per
-[`tools-documentation/programming/`](../repos/tools-documentation/programming/)
+[`lore/programming/`](../repos/lore/programming/)
 + [criome/ARCHITECTURE.md](../repos/criome/ARCHITECTURE.md)),
 the rest by Li's calls during this session.
 
