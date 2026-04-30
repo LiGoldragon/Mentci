@@ -122,6 +122,14 @@ entries to the config and naming two more sockets.
 
    ${XDG_DATA_HOME}/mentci/           # persistent
        sema.redb                      # criome owns
+       criome/                        # criome's capability-signing
+           signing.bls                #   key (chmod 0600); criome
+                                      #   mints on first run
+       principal.bls                  # this user's identity key
+                                      # (chmod 0600); mentci-egui's
+                                      # bootstrap (or a small
+                                      # mentci-keygen one-shot)
+                                      # mints on first run
 
    ${HOME}/.arca/                     # persistent, criome ARCH §5
        _staging/<deposit-id>/         # write-only by writers
@@ -142,15 +150,14 @@ adding a feature defaults to a new crate. This *is* a new capability —
 process supervision over the sema-ecosystem daemons — so it lives in
 its own repo with its own `Cargo.toml` + `flake.nix` + tests.
 
-**Provisional name: `helm`.** Short, reads as English, fits the
-"steers the ship" metaphor that accompanies criome's planetary /
-maritime naming neighborhood (see §10 Q1 for alternatives).
+**Name: `process-manager`.** Reads as English; says directly what the
+crate is.
 
-### 2.1 What helm owns
+### 2.1 What process-manager owns
 
 ```
    ┌────────────────────────────────────────────────────────────────┐
-   │                          helm                                  │
+   │                       process-manager                          │
    ├────────────────────────────────────────────────────────────────┤
    │  reads:    Config (nota text → typed Rust via nota-codec)      │
    │                                                                 │
@@ -177,29 +184,29 @@ maritime naming neighborhood (see §10 Q1 for alternatives).
    └────────────────────────────────────────────────────────────────┘
 ```
 
-### 2.2 What helm explicitly does NOT do
+### 2.2 What process-manager explicitly does NOT do
 
 Per the criome-runs-nothing rule applied analogically:
 
-- **No nix invocations.** helm never calls `nix build`. Upgrades go
+- **No nix invocations.** process-manager never calls `nix build`. Upgrades go
   through `nix run .#reload <name>` which rebuilds with nix and then
-  asks the running helm to swap the path.
-- **No record awareness.** helm does not parse signal frames, does not
+  asks the running process-manager to swap the path.
+- **No record awareness.** process-manager does not parse signal frames, does not
   speak to criome, does not know what's in sema. Its only knowledge of
   the daemons is "this binary path at this socket path with this env."
 - **No log aggregation database.** Lines are passed through to the
   controlling terminal (or to journald when running under systemd).
   Persistent log analysis is a different capability for a different
   crate.
-- **No multi-tenant supervision.** One helm per user session.
+- **No multi-tenant supervision.** One process-manager per user session.
   System-wide criome lives in NixOS service modules
   ([criome/ARCHITECTURE.md §8](../repos/criome/ARCHITECTURE.md)), not
-  in helm.
+  in process-manager.
 
-### 2.3 The shape of helm's types
+### 2.3 The shape of process-manager's types
 
 The nota config deserialises into a closed `Config` record;
-helm's run loop holds a `Supervisor` whose methods own the
+process-manager's run loop holds a `Supervisor` whose methods own the
 verbs. Field-level shape:
 
 ```
@@ -250,7 +257,7 @@ no free functions:
                                                           owns the loop
 ```
 
-Concrete shapes land as skeleton code in helm's repo before the
+Concrete shapes land as skeleton code in process-manager's repo before the
 first commit (per [criome ARCH §13.6 "Skeleton-as-design over
 prose-as-design"](../repos/criome/ARCHITECTURE.md#13--update-policy)) —
 the structure here is the *outline*, not a substitute for the
@@ -266,7 +273,7 @@ eats our own dog food: nota is the typed-text language; using it for
 configuration validates that the language reaches even the lowest-stakes
 surface.
 
-### 3.1 Example shape — ${XDG_CONFIG_HOME}/mentci/helm.nota
+### 3.1 Example shape — ${XDG_CONFIG_HOME}/mentci/process-manager.nota
 
 ```nota
 (Config
@@ -353,7 +360,7 @@ paths.
 ### 4.1 Spawn
 
 ```
-   helm starts
+   process-manager starts
        │
        ▼
    read nota config
@@ -399,7 +406,7 @@ This is already canon — [criome ARCHITECTURE §10 "Bootstrap rung by rung"](..
 > sema starts empty, nexus messages populate it (including seed
 > records via `genesis.nexus`, fed through nexus by the launcher).
 
-helm is "the launcher" in that sentence. Without seeded data,
+process-manager is "the launcher" in that sentence. Without seeded data,
 mentci-egui paints an empty GraphsNav and an empty canvas — technically
 correct but pedagogically useless. Seeding gives the user something to
 click on the first time the workbench opens.
@@ -408,7 +415,7 @@ click on the first time the workbench opens.
 
 ```
    nix-store path:
-       ${self.packages.${system}.helmConfig}/genesis.nexus
+       ${self.packages.${system}.process-managerConfig}/genesis.nexus
 
    user override (read first if present):
        ${XDG_CONFIG_HOME}/mentci/genesis.nexus
@@ -416,12 +423,12 @@ click on the first time the workbench opens.
 
 Two reasons for the override path: a user can edit it without
 rebuilding the flake; and project-specific seeds (a particular Graph
-to demo) can sit alongside the project's `helm.nota`.
+to demo) can sit alongside the project's `process-manager.nota`.
 
 #### 4.2.2 The seed flow
 
 ```
-   helm has just confirmed criome readiness (Handshake round-trip OK)
+   process-manager has just confirmed criome readiness (Handshake round-trip OK)
        │
        ▼
    issue Query(Graph wildcard) over criome.sock
@@ -461,13 +468,13 @@ to demo) can sit alongside the project's `helm.nota`.
 
 #### 4.2.3 Why `nexus-cli`, not direct rkyv asserts
 
-helm could in principle build `signal::Frame` values itself and write
+process-manager could in principle build `signal::Frame` values itself and write
 them to `criome.sock`, skipping nexus entirely. Reasons to go through
 nexus instead:
 
 - **Invariant B as a discipline**, not just a runtime fact: text only
   crosses at the nexus boundary. Even seed data written by an
-  internal tool respects the boundary. helm stays free of any signal
+  internal tool respects the boundary. process-manager stays free of any signal
   schema knowledge.
 - **Editability.** `genesis.nexus` is human-readable and
   human-editable; the same file lives in the user's CONFIG dir as a
@@ -561,7 +568,7 @@ small to add.
        4. await reply
        │
        ▼
-   running helm receives Swap on its control socket:
+   running process-manager receives Swap on its control socket:
        │
        ├── stop dependents in reverse order
        │     (mentci-egui kept alive; its driver re-handshakes
@@ -598,7 +605,7 @@ everything we run speaks length-prefixed rkyv.
        control_msg(msg)      → dispatch (Reload|Swap|Stop|Status);
        fs_event(path)        → if path under watched_src:
                                  emit log "rebuild needed for X";
-                                 (rebuild itself is run by user, not helm)
+                                 (rebuild itself is run by user, not process-manager)
      }
    end:
    shutdown_all(grace = 5s)
@@ -626,7 +633,7 @@ everything we run speaks length-prefixed rkyv.
    remove sockets and the supervisor pid file
        │
        ▼
-   helm exits with code 0 (clean) or 1 (any child needed SIGKILL)
+   process-manager exits with code 0 (clean) or 1 (any child needed SIGKILL)
 ```
 
 ---
@@ -643,48 +650,48 @@ apps.${system} = {
       set -euo pipefail
       mkdir -p "''${XDG_DATA_HOME:-$HOME/.local/share}/mentci"
       mkdir -p "''${XDG_RUNTIME_DIR:-/tmp/$UID}/mentci"
-      exec ${self.packages.${system}.helm}/bin/helm \
-        --config ${self.packages.${system}.helmConfig}/helm.nota
+      exec ${self.packages.${system}.process-manager}/bin/process-manager \
+        --config ${self.packages.${system}.process-managerConfig}/process-manager.nota
     ''}";
   };
 
   down.program = "${pkgs.writeShellScript "mentci-down" ''
-    exec ${self.packages.${system}.helm}/bin/helm-control stop
+    exec ${self.packages.${system}.process-manager}/bin/process-manager-control stop
   ''}";
 
   reload.program = "${pkgs.writeShellScript "mentci-reload" ''
     daemon="''${1:?usage: reload <daemon-name>}"
     new_path=$(nix build --no-link --print-out-paths .#"''${daemon}")
-    exec ${self.packages.${system}.helm}/bin/helm-control \
+    exec ${self.packages.${system}.process-manager}/bin/process-manager-control \
       swap "$daemon" "$new_path/bin/$daemon"
   ''}";
 };
 ```
 
-The `helm` binary supervises; the `helm-control` binary (same crate,
+The `process-manager` binary supervises; the `process-manager-control` binary (same crate,
 `[[bin]]` entry) is the one-shot CLI for the control socket — a thin
 sender of `ControlMessage` rkyv frames.
 
 ### 5.2 The generated config derivation
 
 ```nix
-packages.${system}.helmConfig = pkgs.runCommand "helm-config" { } ''
+packages.${system}.process-managerConfig = pkgs.runCommand "process-manager-config" { } ''
   mkdir -p $out
-  substitute ${./helm.nota.in} $out/helm.nota \
+  substitute ${./process-manager.nota.in} $out/process-manager.nota \
     --replace '@criome-daemon@'  "${self.packages.${system}.criome}/bin/criome-daemon" \
     --replace '@nexus-daemon@'   "${self.packages.${system}.nexus}/bin/nexus-daemon" \
     --replace '@mentci-egui@'    "${self.packages.${system}.mentci-egui}/bin/mentci-egui"
 '';
 ```
 
-All store paths land in the resolved config. helm itself never invokes
-nix; nix produces the binaries and the config; helm runs them.
+All store paths land in the resolved config. process-manager itself never invokes
+nix; nix produces the binaries and the config; process-manager runs them.
 
 ### 5.3 NixOS module (later, when CriomOS deploys this)
 
-The same `Config` shape (typed in `helm`) becomes the input to a NixOS
-module that emits one systemd unit per daemon plus one for `helm`
-itself acting as a plain `Type=notify` service. Until then, helm
+The same `Config` shape (typed in `process-manager`) becomes the input to a NixOS
+module that emits one systemd unit per daemon plus one for `process-manager`
+itself acting as a plain `Type=notify` service. Until then, process-manager
 foreground-runs in the user's shell.
 
 ---
@@ -710,18 +717,18 @@ When iterating on a daemon's Rust source, the loop is:
      │
      ▼  (under the hood)
    nix build .#<daemon>           ← cached; only changed crate rebuilds
-   helm-control swap <name>       ← in-place hot-swap
+   process-manager-control swap <name>       ← in-place hot-swap
      │
      ▼
    workbench shows the new behaviour without losing the running session
 ```
 
-This is why helm is a separate process from nix, and why the swap path
-goes through a control socket rather than helm watching the filesystem
+This is why process-manager is a separate process from nix, and why the swap path
+goes through a control socket rather than process-manager watching the filesystem
 itself: the **user controls when a swap happens**, nix is the build
-tool, helm is the runtime.
+tool, process-manager is the runtime.
 
-(File-system watching helm could grow later — `helm watch on` to enable
+(File-system watching process-manager could grow later — `process-manager watch on` to enable
 auto-rebuild — but not in the first version. Per the
 [push-not-pull discipline](../repos/tools-documentation/programming/push-not-pull.md),
 the rebuild trigger is a *user action* arriving on the control socket,
@@ -743,16 +750,16 @@ ergonomic shim (`mentci` CLI) shows it pulls its weight.
 **Nota for configuration — yes, slightly with a caveat.** Eating our
 own dog food validates the language at a low-stakes surface, and the
 type-checker-as-validator wins are real. The caveat is bootstrapping:
-nota-codec is a sibling crate that helm has to depend on, and changes
-to the codec break helm's parser. Today the codec is small enough that
-this risk is negligible; if it grows complex, helm could vendor a
+nota-codec is a sibling crate that process-manager has to depend on, and changes
+to the codec break process-manager's parser. Today the codec is small enough that
+this risk is negligible; if it grows complex, process-manager could vendor a
 minimal subset. I'd commit to nota for config and revisit if the
 coupling ever bites.
 
 **Coordinator as a small tool — yes, but it has to be its own crate.**
 This is the [micro-components rule](../repos/tools-documentation/programming/micro-components.md):
 new capability = new crate. Putting supervision into mentci or criome
-is the failure mode the rule closes. Naming it `helm` is provisional —
+is the failure mode the rule closes. Naming it `process-manager` is provisional —
 see §10 Q1.
 
 **Respawn on error — yes, with bounded backoff.** The bounded part is
@@ -762,7 +769,7 @@ run) is well-trodden territory.
 
 **Rebuild / reconfigure on upgrade — yes, but the right shape is
 "swap a binary path on the running supervisor"**, not "supervisor
-rebuilds itself." nix builds; helm runs. Keeping that line clean is
+rebuilds itself." nix builds; process-manager runs. Keeping that line clean is
 the same discipline as criome-runs-nothing applied one level out.
 
 **Replace a component with an upgraded version — yes, this is the
@@ -776,7 +783,7 @@ sharpen the framing is "a simple tool that will coordinate this." It
 filesystem state, signals, and IPC — there's load-bearing complexity
 the simplicity has to *contain*, not deny. Beauty test: when the code
 reads as obviously right, the simplicity is real; when it reads as a
-loose collection of edge cases, helm is missing structure.
+loose collection of edge cases, process-manager is missing structure.
 
 ---
 
@@ -784,29 +791,29 @@ loose collection of edge cases, helm is missing structure.
 
 - **Not a NixOS service module.** Production deploys go through
   per-host NixOS modules per [criome ARCH §8](../repos/criome/ARCHITECTURE.md#8--repo-layout).
-  helm is for the dev / single-user / foreground case.
+  process-manager is for the dev / single-user / foreground case.
 - **Not a container orchestrator.** No images, no networks, no
-  multi-host. One user, one host, one helm.
+  multi-host. One user, one host, one process-manager.
 - **Not a log aggregator.** Pass-through to stdout/stderr today;
   structured logging is a separate concern.
-- **Not a build tool.** nix is the build tool; helm runs binaries
+- **Not a build tool.** nix is the build tool; process-manager runs binaries
   nix produced.
 - **Not a process-manager replacement for systemd.** Different
-  domain — helm is for the user-session foreground case. Production
+  domain — process-manager is for the user-session foreground case. Production
   still goes through systemd via NixOS modules.
 
 ---
 
 ## 9 · A small invariant table
 
-| concern | helm's answer |
+| concern | process-manager's answer |
 |---|---|
 | every reusable verb belongs to a noun | `Supervisor::launch_all`, `::shutdown_all`, `::swap` — never free functions |
 | push, not pull | child-exit and control-socket events drive the loop; no polling of process state or filesystem (file-watching is opt-in and on a real `inotify`/`kqueue` notifier, not a poll) |
 | typed-protocol IPC | control socket carries an rkyv-framed `ControlMessage` enum, length-prefixed exactly like signal |
 | typed config | nota record → typed Rust struct via nota-codec |
-| skeleton-as-design | the new `helm` repo opens with the shapes in §2.3 + a `flake.nix`, before the run loop has a body |
-| one capability, one crate, one repo | helm is a new repo; the in-mentci-flake `apps.up/down/reload` is a thin shim |
+| skeleton-as-design | the new `process-manager` repo opens with the shapes in §2.3 + a `flake.nix`, before the run loop has a body |
+| one capability, one crate, one repo | process-manager is a new repo; the in-mentci-flake `apps.up/down/reload` is a thin shim |
 
 ---
 
@@ -841,17 +848,28 @@ not a principle — are a much shorter list.
        │ --data-dir as escape hatch              │   loses sema across
        │                                          │   reboots
    ────┼──────────────────────────────────────────┼─────────────────────────
-   Q7  │ helm's parser knows about forge + arca  │ skeleton-as-design
+   Q7  │ process-manager's parser knows about forge + arca  │ skeleton-as-design
        │ slots from day one; rejects unknown     │   (criome ARCH §13.6)
        │ daemons                                  │
    ────┼──────────────────────────────────────────┼─────────────────────────
-   Q8  │ criome owns the signing key; helm just  │ criome ARCH §10.2
-       │ creates the directory                    │   responsibilities
-       │   ${XDG_DATA_HOME}/mentci/criome/       │   table — "criome
-       │ where criome's first-run logic mints     │   holds the key"
-       │ the keypair                              │
+   Q8  │ TWO keys, two owners. process-manager   │ criome ARCH §10.2
+       │ creates the directories and ensures      │   (criome owns
+       │ permissions; neither key is its to       │   the capability-
+       │ mint or hold:                            │   signing key);
+       │  • criome's capability-signing key —    │ signal/src/auth.rs
+       │    signs tokens forge/arca verify.      │   §AuthProof::
+       │    Lives at ${XDG_DATA_HOME}/mentci/    │   BlsSignature
+       │    criome/signing.bls (chmod 0600);     │   {signer:Slot}
+       │    criome mints on first run.           │   names the per-
+       │  • the user's per-Principal BLS key —   │   Principal signing
+       │    each user signs every Frame's        │   path
+       │    auth_proof with this. Lives at       │
+       │    ${XDG_DATA_HOME}/mentci/principal.   │
+       │    bls (chmod 0600); mentci-egui's      │
+       │    bootstrap (or a small                │
+       │    mentci-keygen one-shot) mints.       │
    ────┼──────────────────────────────────────────┼─────────────────────────
-   Q9  │ ship `helm watch on` from day one as    │ push-not-pull.md:
+   Q9  │ ship `process-manager watch on` from day one as    │ push-not-pull.md:
        │ a small inotify/kqueue-driven actor;    │   watcher must be
        │ off by default; emits "rebuild needed   │   event-driven, never
        │ for X" log lines                         │   a poll loop
@@ -870,16 +888,11 @@ not a principle — are a much shorter list.
 
 ### 10.2 Genuinely open — the calls that need Li
 
-**Q1 — Name.** Provisional: `helm`. Alternates that read as
-English nouns and don't collide with serialisation/marshalling
-jargon: `kiln`, `warden`, `keeper`. This is a ranking, not a
-principle decision; pick one.
-
 **Q5 — Reconnect after intentional swap.** Provisional answer:
-auto-reconnect on a helm-initiated swap (the swap is itself a
+auto-reconnect on a process-manager-initiated swap (the swap is itself a
 user-initiated state replacement, so auto-reconnect is *aligned*
 with intent), keep the chip-click discipline for crashes (where
-the user did not initiate the disconnect). The seam: helm's swap
+the user did not initiate the disconnect). The seam: process-manager's swap
 path emits a control message to mentci-egui's driver flagging
 the disconnect as intentional; the driver flips a one-shot
 "auto-reconnect-on-next-disconnect" hint. Confirm this UX shape?
