@@ -182,7 +182,7 @@ is the answer; a hand-written stop-gap is not.
    src/main.rs:43:                       src/main.rs:
      signal::Slot::from(0u64)            mentci_lib::user_identity::
                                            load_or_mint(${XDG_DATA_HOME}/
-                                                        mentci/principal.bls)
+                                                        workspace/principal.bls)
                                           → returns (Slot<Principal>, BlsKey)
 
    mentci-lib does not sign frames;     mentci-lib signs every Frame
@@ -422,7 +422,7 @@ doesn't get accidentally regressed.
    │           probes + tear-down                                    │
    │                                                                 │
    │  step 2   genesis.nexus written        per reports/116          │
-   │           in mentci/                                            │
+   │           in workspace/                                            │
    │                                                                 │
    │  step 3   process-manager seed step:   §4.1 + 114 §4.2          │
    │           empty-sema check → pipe                                │

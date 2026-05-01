@@ -464,7 +464,7 @@ The deep dive surfaces decisions that gate concrete design work:
    **separate future repo** when work begins; "mentci" is the
    working name for it in design docs until that repo is created
    (and possibly named differently). See
-   [`mentci/ARCHITECTURE.md`](../ARCHITECTURE.md) for the long-term
+   [`workspace/ARCHITECTURE.md`](../ARCHITECTURE.md) for the long-term
    framing.
 
 10. **~~Recursive rendering — long-term.~~** **DEFERRED** —

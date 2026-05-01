@@ -53,9 +53,9 @@ protocol. Everything else is the supervisor's internal concern.
                        │ tokio-runtime + driver │   (user-facing)
                        └─────┬────────────┬─────┘
                              │            │
-                /run/user/$UID/mentci/    │
+                /run/user/$UID/workspace/    │
                        criome.sock        │
-                             │            │  /run/user/$UID/mentci/nexus.sock
+                             │            │  /run/user/$UID/workspace/nexus.sock
                              ▼            ▼
                        ┌──────────┐  ┌──────────┐
                        │ criome-  │  │ nexus-   │   long-running daemons
@@ -63,7 +63,7 @@ protocol. Everything else is the supervisor's internal concern.
                        └────┬─────┘  └──────────┘
                             │
                 ┌───────────▼────────────────┐
-                │  ~/.local/share/mentci/    │   on-disk state
+                │  ~/.local/share/workspace/    │   on-disk state
                 │       sema.redb            │   (criome owns)
                 └────────────────────────────┘
 ```
@@ -109,7 +109,7 @@ entries to the config and naming two more sockets.
 ### 1.3 The directory layout the supervisor creates
 
 ```
-   ${XDG_RUNTIME_DIR}/mentci/         # ephemeral; tmpfs on Linux
+   ${XDG_RUNTIME_DIR}/workspace/         # ephemeral; tmpfs on Linux
        criome.sock                    # signal      (criome's listener)
        nexus.sock                     # signal      (nexus's listener)
        forge.sock                     # signal-forge (forge's listener)
@@ -117,7 +117,7 @@ entries to the config and naming two more sockets.
        supervisor.sock                # supervisor's control socket
        supervisor.pid                 # for `mentci down` from another shell
 
-   ${XDG_DATA_HOME}/mentci/           # persistent
+   ${XDG_DATA_HOME}/workspace/           # persistent
        sema.redb                      # criome owns
        criome/                        # criome's capability-signing
            signing.bls                #   key (chmod 0600); criome
@@ -270,7 +270,7 @@ eats our own dog food: nota is the typed-text language; using it for
 configuration validates that the language reaches even the lowest-stakes
 surface.
 
-### 3.1 Example shape — ${XDG_CONFIG_HOME}/mentci/process-manager.nota
+### 3.1 Example shape — ${XDG_CONFIG_HOME}/workspace/process-manager.nota
 
 ```nota
 (Config
@@ -415,7 +415,7 @@ click on the first time the workbench opens.
        ${self.packages.${system}.process-managerConfig}/genesis.nexus
 
    user override (read first if present):
-       ${XDG_CONFIG_HOME}/mentci/genesis.nexus
+       ${XDG_CONFIG_HOME}/workspace/genesis.nexus
 ```
 
 Two reasons for the override path: a user can edit it without
@@ -638,7 +638,7 @@ everything we run speaks length-prefixed rkyv.
 
 ## 5 · Nix wiring
 
-### 5.1 Flake apps · `mentci/flake.nix`
+### 5.1 Flake apps · `workspace/flake.nix`
 
 ```nix
 apps.${system} = {
@@ -697,7 +697,7 @@ foreground-runs in the user's shell.
 ## 6 · How this composes with the dev shell
 
 The `nix develop` shell (already exists in
-[mentci/devshell.nix](../devshell.nix)) gains three convenience aliases:
+[workspace/devshell.nix](../devshell.nix)) gains three convenience aliases:
 
 ```bash
 alias up='nix run .#up'
@@ -851,8 +851,8 @@ the rest by Li's calls during this session.
        │                                          │   binary
    ────┼──────────────────────────────────────────┼─────────────────────────
    Q4  │ per-user persistent under XDG paths:    │ XDG conventions; per-
-       │   sema.redb at ${XDG_DATA_HOME}/mentci/ │   project couples
-       │   sockets at ${XDG_RUNTIME_DIR}/mentci/ │   state to working
+       │   sema.redb at ${XDG_DATA_HOME}/workspace/ │   project couples
+       │   sockets at ${XDG_RUNTIME_DIR}/workspace/ │   state to working
        │   arca at ${HOME}/.arca/                │   directory; ephemeral
        │ --data-dir as escape hatch              │   loses sema across
        │                                          │   reboots

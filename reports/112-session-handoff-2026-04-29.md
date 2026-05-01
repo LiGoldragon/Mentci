@@ -337,10 +337,10 @@ A fresh agent must read these before doing anything:
 
 ### Tier 1 — intent + ground rules
 
-1. **`mentci/INTENTION.md`** — clarity > correctness >
+1. **`workspace/INTENTION.md`** — clarity > correctness >
    introspection > beauty; no time estimates; no MVP framings
    as design-shaping language; agents propose, Li decides.
-2. **`mentci/AGENTS.md`** — process rules, jj+always-push,
+2. **`workspace/AGENTS.md`** — process rules, jj+always-push,
    document-layer separation. The architecture banner points
    to criome's ARCH.
 
@@ -349,7 +349,7 @@ A fresh agent must read these before doing anything:
 3. **`criome/ARCHITECTURE.md`** (the canonical doc, 945 lines,
    13 visuals, 13 sections). The four invariants A-D in §2
    are non-negotiable.
-4. **`mentci/reports/111-first-mentci-ui-introspection-2026-04-29.md`**
+4. **`workspace/reports/111-first-mentci-ui-introspection-2026-04-29.md`**
    — the design report this implementation tracks against. v4
    covers the deep dive on contract shape + the GUI library
    survey + records-with-slots + identity+Tweaks + theme
@@ -378,9 +378,9 @@ A fresh agent must read these before doing anything:
 ### Tier 4 — workbench design (delete-eligible after this
 session, but high-context until then)
 
-12. **`mentci/reports/108-flow-graph-three-projections-2026-04-28.md`**
+12. **`workspace/reports/108-flow-graph-three-projections-2026-04-28.md`**
     — flow-graph as shared substrate.
-13. **`mentci/reports/112-session-handoff-2026-04-29.md`** —
+13. **`workspace/reports/112-session-handoff-2026-04-29.md`** —
     this report.
 
 ### Tier 5 — sibling-repo niches
@@ -486,11 +486,11 @@ groups together:
 - `mentci-lib/flake.nix` (canonical crane+fenix shape)
 - `mentci-egui/flake.nix` (with eframe native deps +
   postInstall wrapper)
-- `mentci/flake.nix` (workspace inputs, blueprint-driven)
-- `mentci/checks/default.nix` (linkFarm of 9 crate checks)
-- `mentci/checks/scenario-mentci-lib-handshake.nix` (the new
+- `workspace/flake.nix` (workspace inputs, blueprint-driven)
+- `workspace/checks/default.nix` (linkFarm of 9 crate checks)
+- `workspace/checks/scenario-mentci-lib-handshake.nix` (the new
   E2E)
-- `mentci/checks/integration.nix` +
+- `workspace/checks/integration.nix` +
   `roundtrip-chain.nix` + `scenario-chain.nix` (existing
   scenarios; updated for `(Tuple <slot> ...)` text shape)
 - `lore/rust/nix-packaging.md` (the canonical
@@ -498,12 +498,12 @@ groups together:
 
 ### Group F — workspace orchestration
 
-- `mentci/AGENTS.md` (process rules)
-- `mentci/INTENTION.md` (intent — read first)
-- `mentci/ARCHITECTURE.md` (workspace shape)
-- `mentci/devshell.nix` + `mentci.code-workspace` (linkedRepos
+- `workspace/AGENTS.md` (process rules)
+- `workspace/INTENTION.md` (intent — read first)
+- `workspace/ARCHITECTURE.md` (workspace shape)
+- `workspace/devshell.nix` + `mentci.code-workspace` (linkedRepos
   symlinks; both list mentci-lib + mentci-egui)
-- `mentci/docs/workspace-manifest.md` (CANON / TRANSITIONAL /
+- `workspace/docs/workspace-manifest.md` (CANON / TRANSITIONAL /
   SHELVED tables; mentci-lib + mentci-egui added)
 
 ---

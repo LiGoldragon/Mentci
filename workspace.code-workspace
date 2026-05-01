@@ -1,6 +1,6 @@
 {
   "folders": [
-    { "name": "mentci", "path": "." },
+    { "name": "workspace", "path": "." },
     { "name": "criome", "path": "/home/li/git/criome" },
     { "name": "nexus", "path": "/home/li/git/nexus" },
     { "name": "nexus-cli", "path": "/home/li/git/nexus-cli" },

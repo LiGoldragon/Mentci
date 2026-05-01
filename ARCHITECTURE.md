@@ -1,23 +1,21 @@
-# ARCHITECTURE — mentci
+# ARCHITECTURE — workspace
 
-The development environment for building [criome](https://github.com/LiGoldragon/criome).
+The development environment for building criome.
 Holds the workspace conventions, design corpus (`reports/`),
 agent rules, and tooling integrations; symlinks every canonical
 sema-ecosystem repo under `repos/` for unified navigation.
 
-> **Read this file first.** Then read [criome's
-> ARCHITECTURE.md](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md)
+> **Read this file first.** Then read criome's `ARCHITECTURE.md`
 > for the project being built.
 
-## What this repo is, today
+## What this repo is
 
 A development environment. Its concrete responsibilities:
 
 - **Workspace orchestration.** [`devshell.nix`](devshell.nix)'s
   `linkedRepos` symlinks every canonical sema-ecosystem repo
   into [`repos/`](repos/) on `nix develop` / direnv entry.
-  Agents working in mentci see the entire ecosystem at one
-  path.
+  Agents working here see the entire ecosystem at one path.
 - **Design corpus.** [`reports/`](reports/) holds the evolving
   decision-trail (soft cap at ~12 per [AGENTS.md](AGENTS.md)
   "Report rollover").
@@ -26,137 +24,69 @@ A development environment. Its concrete responsibilities:
   TRANSITIONAL, CANON-MISSING, RETIRED, ARCHIVED, SHELVED,
   OFF-SCOPE). `devshell.nix`'s `linkedRepos` mirrors the
   CANON + TRANSITIONAL entries.
-- **Agent conventions.** [`AGENTS.md`](AGENTS.md) is the
-  source of truth for: per-repo `ARCHITECTURE.md` discipline,
-  AGENTS.md/CLAUDE.md shim, restate-to-refute rule, report
-  rollover at the soft cap, jj + always-push workflow,
-  documentation-layers separation.
 - **Tooling integration.** `bd` (issue tracker) state lives
   here; jj is the version-control surface; nix flakes provide
   reproducible toolchains.
-
-## What this repo is meant to become
-
-mentci's name evokes *mind* — the surface where thinking
-happens. Today, that surface is for **agents and Li, building
-criome**. Long-term:
-
-When criome becomes the substrate for the world's data and
-messaging — typed, content-addressed, validated, queryable,
-no-hallucination — the legacy software stack of fragmented UIs
-loses its reason to exist. **mentci is meant to replace it.**
-The interaction surface for working with criome's database
-becomes the interaction surface for everything: code, data,
-communication, knowledge, attention.
-
-This is distant. Today mentci is a workshop. The patterns that
-make it a good workshop for humans + agents (clear
-conventions, deletable reports, skeleton-as-design,
-trim-aggressively) are the same patterns that, scaled, make a
-good universal UI. Build well now; the path forward is
-continuous, not a discontinuous reinvention.
-
-### Note on naming — current repo vs future GUI repo
-
-`mentci` today refers to **two things at once**:
-
-- **The workspace umbrella** — this repo. Dev shell, design
-  corpus (`reports/`), agent rules, workspace manifest, the
-  symlink farm under `repos/`. Where agents work when collaborating
-  on the sema-ecosystem.
-- **The concept goalpost** — the eventual LLM-agent-assisted
-  editor / universal UI described above.
-
-The **actual GUI implementation** will land in a **separate
-future repo** when work begins (per Li 2026-04-28: "we're gonna
-create another repository for the GUI part of it"). In design
-docs (e.g. [reports/108](reports/108-flow-graph-three-projections-2026-04-28.md)),
-`mentci` is the working name for the concept until that GUI repo
-is created — and the GUI repo may be named differently. The
-current repo retains the `mentci` name as the workspace umbrella;
-nothing renames here when the GUI repo is born.
+- **Deployment aggregation.** This repo's `flake.nix` composes
+  the canonical-crate flake inputs into NixOS modules + service
+  specs that deploy the daemons (criome, nexus, forge,
+  arca-daemon) and the static binaries (nexus-cli, lojix-cli)
+  onto a CriomOS host.
 
 ## Layout
 
 ```
-mentci/                        # local dir today is mentci-next/;
-                               # github repo is renamed to mentci
+workspace/
 ├── ARCHITECTURE.md            ← this file
-├── AGENTS.md                  ← agent conventions (source of truth)
+├── AGENTS.md                  ← workspace-repo-specific carve-outs
 ├── CLAUDE.md                  ← Claude Code shim → AGENTS.md
 ├── README.md
 ├── devshell.nix               ← workspace symlinks + tooling
-├── flake.nix
+├── flake.nix                  ← deployment aggregation
 ├── docs/
 │   └── workspace-manifest.md  ← every repo's status
 ├── reports/                   ← decision-trail (soft cap 12)
-├── checks/                    ← workspace-level nix checks (linkFarm + scenario + roundtrip)
-├── lib/                       ← shared nix helpers (flake.lib.scenario)
+├── checks/                    ← workspace-level nix checks
+├── lib/                       ← shared nix helpers
 ├── repos/                     ← symlinks to canonical repos
 └── .beads/                    ← bd issue tracker state
 ```
 
-The local directory is `mentci-next/` for now; the github
-repo is `mentci`. The local directory rename is deferred (would
-break editor cwd state mid-session); Li will rename it when no
-agent is running.
+## Deployment
 
-## Deployment — nix-based, from this repo
-
-mentci is also where **deployment** is aggregated. The
-sema-ecosystem deploys via nix flakes pinned in this repo:
-each canonical crate is a flake input here; mentci's
+The sema-ecosystem deploys via nix flakes pinned in this repo:
+each canonical crate is a flake input here; this repo's
 `flake.nix` defines NixOS modules + container/service specs
-that compose the daemons (criome, nexus, forge, arca-daemon)
-and the static binaries (nexus-cli, lojix-cli) into a
+that compose the daemons and static binaries into a
 reproducible runtime.
 
 `nix develop` opens the dev shell. `nix build .#packages.<sys>.<crate>`
 builds any individual crate as a flake artifact.
-`nixos-rebuild --flake mentci#<host>` deploys onto a CriomOS
+`nixos-rebuild --flake workspace#<host>` deploys onto a CriomOS
 host (lojix-cli covers this path during the transitional
 phase; eventually criome itself drives deploys via signal-forge
-verbs — see `criome/ARCHITECTURE.md` §10 phases).
+verbs — see criome's ARCHITECTURE.md §10 phases).
 
-The deploy spec lives in mentci because mentci is the meta-
-repo: the place that knows the full set of canonical crates
-and their flake URLs. Individual crates publish their own
-flakes; mentci composes.
+The deploy spec lives in this repo because this is the
+meta-repo: the place that knows the full set of canonical
+crates and their flake URLs. Individual crates publish their
+own flakes; this repo composes.
 
 ## How agents work here
 
-Per [AGENTS.md](AGENTS.md):
+Per [AGENTS.md](AGENTS.md) and the workspace-wide contract at
+`github:ligoldragon/lore`:
 
 1. **Read this file** for the dev environment shape.
-2. **Read [criome's
-   ARCHITECTURE.md](https://github.com/LiGoldragon/criome/blob/main/ARCHITECTURE.md)**
-   for the project's design.
+2. **Read criome's `ARCHITECTURE.md`** for the project's design.
 3. Each canonical repo carries its own `ARCHITECTURE.md` at
    root (matklad pattern). Open the relevant one when working
    inside a specific repo.
 4. Decision history lives in `reports/`. Trim aggressively;
    delete don't banner.
 
-## Conventions
-
-(Full list in [AGENTS.md](AGENTS.md). The most load-bearing:)
-
-- **Per-repo `ARCHITECTURE.md`** at root in every canonical
-  repo. Points at criome's ARCHITECTURE.md for cross-cutting
-  context; does not duplicate.
-- **AGENTS.md / CLAUDE.md shim** so Codex and Claude Code
-  converge on one source of truth.
-- **Report rollover at ~12 soft cap.** When the count tips
-  above, run a rollover pass: roll into successor / implement
-  and delete / delete.
-- **restate-to-refute prohibition.** State positively; rejected
-  framings live once, in criome's §10.
-- **jj + always-push.** Every change ships immediately;
-  conversation history is not durable.
-
 ## Status
 
-**Active dev environment.** Long-term direction: universal UI.
-Migration path is co-determined by criome's progress and the
-maturation of LLM tooling against typed data; no fixed
-schedule.
+**Active dev environment.** No fixed schedule for any of its
+components; work proceeds against criome's milestones in
+criome's ARCHITECTURE.md.

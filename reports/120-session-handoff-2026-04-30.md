@@ -158,7 +158,7 @@ graph painted on first launch" — is unchanged. Order:
    │                        Li green-lit creating without        │
    │                        asking)                              │
    │                                                             │
-   │  mentci-next-xpl  P1  Write mentci/seeds/genesis.nexus      │
+   │  mentci-next-xpl  P1  Write workspace/seeds/genesis.nexus      │
    │                       (the design graph per reports/116:    │
    │                        19 component Nodes + ~28 Edges)      │
    │                                                             │
@@ -194,7 +194,7 @@ Subscribe push delta, KindDecl access-control tightening.
 | Process-manager scope | First cut: supervise/respawn/seed. Swap deferred. |
 | Process-manager terminal home | OS-embedded eventually (CriomOS service module). Not a user-facing CLI shim. |
 | Genesis seed contents | The project's own design as a flow-graph (per [116](116-genesis-seed-as-design-graph-2026-04-30.md)). |
-| Genesis.nexus location | `mentci/seeds/genesis.nexus`. |
+| Genesis.nexus location | `workspace/seeds/genesis.nexus`. |
 | Auto-select graph on first paint | No. Keep simple. |
 | Slot<T> shape | Phantom-typed. The kind information lives inside the type. |
 | signal-derive crate location | New crate, not extension of nota-derive (wrong-noun trap). |
@@ -254,7 +254,7 @@ when you reach them:
                                    typed
    mentci-egui/src/main.rs         default_principal returns
                                    Slot<Principal>
-   mentci/AGENTS.md                "No stop-gaps" + "Design reports
+   workspace/AGENTS.md                "No stop-gaps" + "Design reports
                                    — visuals, not code" +
                                    "Commit message style" (short)
 ```
